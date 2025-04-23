@@ -1,0 +1,69 @@
+/* 1. 사용자 정의 폰트 등록 */
+@font-face {
+  font-family: 'OMYuPretty';
+  src: url('./assets/fonts/omyu-pretty.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 2. 색상, 폰트 변수 정의 */
+:root {
+  --color-brown: #6B3E26;
+  --color-beige: #D6B98C;
+  --color-green: #3C8D40;
+  --font-omyu: 'OMYuPretty', sans-serif;
+}
+
+/* 3. 기본 스타일 */
+* {
+  font-family: var(--font-omyu) !important;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-beige);
+  color: var(--color-brown);
+}
+
+/* 4. 텍스트 요소 */
+h1,
+h2,
+h3 {
+  color: var(--color-brown);
+}
+
+a {
+  color: var(--color-green);
+  text-decoration: none;
+}
+
+/* 5. 버튼 */
+button {
+  background-color: var(--color-green);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #337438;
+}
+
+/* 6. 카드와 컨테이너 */
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+}
