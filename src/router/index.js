@@ -1,10 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import DefaultLayout from '../layouts/DefaultLayout.vue'
 import Home from '../pages/Home.vue'
 import Write from '../pages/Write.vue'
 
 const routes = [
-    { path: '/', name: 'Home', component: Home },
-    { path: '/write', name: 'Write', component: Write }
+    {
+        path: '/',
+        component: DefaultLayout,
+        children: [
+            { path: '', name: 'Home', component: Home },
+            { path: 'write', name: 'Write', component: Write }
+        ]
+    }
 ]
 
 const router = createRouter({

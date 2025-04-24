@@ -1,0 +1,51 @@
+/* 종이 레이아웃 공통 */
+.paper {
+    background: #fffefb;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 40px 32px;
+    line-height: 2;
+    font-family: var(--font-hand);
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 100% 32px;
+}
+
+/* 펼침 구조 */
+.spread {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.pages {
+    display: flex;
+    gap: 20px;
+}
+
+.left,
+.right {
+    flex: 1;
+    position: relative;
+}
+
+/* 자유 메모 필드 (우측) */
+.free-memo {
+    width: 100%;
+    height: calc(100% - 40px);
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    line-height: 2;
+    font-family: var(--font-hand);
+    resize: none;
+}
+
+.footer-note {
+    position: absolute;
+    bottom: 12px;
+    right: 20px;
+    font-size: 12px;
+    color: #999;
+    font-family: var(--font-omyu);
+}

@@ -1,3 +1,7 @@
 <template>
-    <h1>오늘의 일기 쓰기</h1>
-</template>
+    <NotebookLayout />
+  </template>
+  
+  <script setup>
+  import NotebookLayout from '../components/NotebookLayout.vue'
+  </script>
