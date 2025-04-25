@@ -7,7 +7,7 @@
             <!-- 내비게이션 -->
             <nav class="nav-links">
                 <a href="/mydiary">서랍 속 작은 일기장</a>
-                <a href="/ourdiary">알 수 없는 너의 비밀</a>
+                <a href="/shareddiary">알 수 없는 너의 비밀</a>
                 <a href="/myemotion">내 맘속에 담아</a>
                 <a href="/mypage">너 몰래</a>
             </nav>
