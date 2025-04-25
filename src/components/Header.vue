@@ -14,9 +14,25 @@
                         <router-link to="/mydiary/ours">주간</router-link>
                     </div>
                 </div>
-                <a href="/ourdiary">알 수 없는 너의 비밀</a>
-                <a href="/myemotion">내 맘속에 담아</a>
-                <a href="/mypage">너 몰래</a>
+                <div class="menu-wrapper">
+                    <span class="menu-button">알 수 없는 너의 비밀</span>
+                    <div class="submenu">
+                        <router-link to="/ourdiary">우리 일기</router-link>
+                    </div>
+                </div>
+                <div class="menu-wrapper">
+                    <span class="menu-button">내 맘속에 담아</span>
+                    <div class="submenu">
+                        <router-link to="/myemotion">감정 분석</router-link>
+                    </div>
+                </div>
+                <div class="menu-wrapper">
+                    <span class="menu-button">너 몰래</span>
+                    <div class="submenu">
+                        <router-link to="/mypage">내 정보 수정</router-link>
+                        <router-link to="/logout">로그아웃</router-link>
+                    </div>
+                </div>
             </nav>
 
             <!-- 로그인 버튼 -->
