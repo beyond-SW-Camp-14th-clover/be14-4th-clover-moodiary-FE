@@ -1,0 +1,13 @@
+.flipbook {
+    width: 800px;
+    height: 600px;
+    margin: 50px auto;
+}
+
+.page {
+    background: #fffefb;
+    border: 1px solid #ccc;
+    padding: 40px;
+    font-family: 'OMYuPretty', sans-serif;
+    font-size: 18px;
+}

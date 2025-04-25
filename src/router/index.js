@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '../layouts/DefaultLayout.vue'
 import Home from '../pages/Home.vue'
-import Write from '../pages/Write.vue'
+import MyDiary from '../modules/notebook/views/NotebookLayout.vue'
+import MyPage from '../pages/MyPage.vue'
+import LoginPage from '../pages/LoginPage.vue'
 
 const routes = [
     {
@@ -9,7 +11,19 @@ const routes = [
         component: DefaultLayout,
         children: [
             { path: '', name: 'Home', component: Home },
-            { path: 'write', name: 'Write', component: Write }
+            {
+                path: 'mydiary',
+                component: MyDiary,
+                children: [
+                    { path: '', redirect: 'mydiarymine' },
+                    { path: 'mydiarymine', name: 'MyDiary', component: () => import('../modules/notebook/views/MyDiaryMine.vue') },
+                    { path: 'ours', name: 'OurDiary', component: () => import('../modules/ourdiary/views/OurDiaryMain.vue') },
+                    { path: 'emotion', name: 'MyEmotion', component: () => import('../modules/emotion/views/MyEmotionMain.vue') },
+                    // { path: 'free', name: 'FreeNote', component: () => import('../modules/notebook/views/tabs/FreeNote.vue') }
+                ]
+            },
+            { path: 'mypage', name: 'MyPage', component: MyPage },
+            { path: 'login', name: 'Login', component: LoginPage }
         ]
     }
 ]

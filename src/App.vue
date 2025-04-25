@@ -13,7 +13,7 @@ setRealVh()
 window.addEventListener('resize', setRealVh)
 </script>
 
-<style src="./style.css">
+<style scoped>
 .container {
   height: calc(var(--vh, 1vh) * 100);
   /* padding: 2rem; */
