@@ -23,7 +23,8 @@ const routes = [
             },
             { path: 'mypage', name: 'MyPage', component: MyPage },
             { path: 'login', name: 'Login', component: LoginPage },
-            { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../modules/shareddiary/views/SharedDiaryMain.vue') }
+            { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../modules/shareddiary/views/SharedDiaryMain.vue') },
+            { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('@/pages/SharedDiaryList.vue')}
         ]
     }
 ]

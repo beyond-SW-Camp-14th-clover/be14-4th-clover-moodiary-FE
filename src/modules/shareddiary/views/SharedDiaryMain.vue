@@ -84,42 +84,65 @@
     }
   </script>
   
-  <style scoped>
-.room-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
+<style scoped>
+    .room-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    }
 
-.room-card {
-  background: #fffbe6;
-  padding: 1.5rem;
-  border-radius: 16px;
-  border-left: 8px solid #c9a063;
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
+    .room-card {
+    width: 220px;
+    height: 320px;
+    background: #fffce6;
+    border-radius: 24px;
+    border-left: 14px solid #a87746;
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.15),
+        inset 12px 0 0 #d2b48c;
+    padding: 2rem 1.2rem 1.5rem 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease;
+    }
 
-.room-card:hover {
-  transform: scale(1.02);
-}
+    .room-card:hover {
+    transform: scale(1.03);
+    }
 
-.title {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
+    .room-card::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 1.2rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff8d6;
+    box-shadow:
+        0 28px 0 #fff8d6,
+        0 56px 0 #fff8d6,
+        0 84px 0 #fff8d6;
+    }
 
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #555;
-}
+    .title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-top: 1rem;
+    }
+
+    .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #555;
+    }
 </style>
+  
   
