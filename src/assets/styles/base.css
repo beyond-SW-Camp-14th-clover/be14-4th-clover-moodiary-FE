@@ -7,8 +7,15 @@
 }
 
 @font-face {
-    font-family: 'HandwritingFont';
+    font-family: 'IMHyemin-R';
     src: url('../fonts/IM_Hyemin-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'DungGeunMo';
+    src: url('../fonts/DungGeunMo.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
@@ -20,7 +27,8 @@
     --color-green-dark: #337438;
 
     --font-omyu: 'OMYuPretty', sans-serif;
-    --font-hand: 'HandwritingFont', sans-serif;
+    --font-hyem: 'IMHyemin-R', sans-serif;
+    --font-pixel: 'DungGeunMo', sans-serif;
 }
 
 * {
@@ -46,7 +54,7 @@ a {
     color: white;
     padding: 5px 35px;
     font-size: 20px;
-    font-family: var(--font-omyu);
+    font-family: var(--font-pixel);
     font-weight: bold;
 
     box-shadow: -1px -1px 0 1px white;
