@@ -2,9 +2,12 @@
   <div>
     <router-view />
   </div>
+  <MP />
 </template>
 
 <script setup>
+import MP from './components/common/MusicPlayer.vue'
+
 function setRealVh() {
   const vh = window.innerHeight * 0.01
   document.documentElement.style.setProperty('--vh', `${vh}px`)

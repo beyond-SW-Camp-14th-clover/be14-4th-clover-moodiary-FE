@@ -12,7 +12,8 @@
     "flipbook-vue": "^1.0.0-beta.4",
     "vue": "^3.5.13",
     "vue-flipbook": "^1.0.0",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "vue3-youtube": "^0.1.9"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.2",

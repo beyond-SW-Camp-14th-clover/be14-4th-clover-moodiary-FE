@@ -20,6 +20,7 @@
 </template>
 
 <script setup>
+import MusicPlayer from './common/MusicPlayer.vue'
 </script>
 
 <style scoped>
