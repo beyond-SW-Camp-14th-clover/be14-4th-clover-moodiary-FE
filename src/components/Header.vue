@@ -2,7 +2,8 @@
     <header class="header-bg">
         <div class="header-inner">
             <!-- 로고 -->
-            <a href="/"><img src="../assets/logo.png" class="logo" /></a>
+            <!-- <a href="/"><img src="../assets/logo.png" class="logo" /></a> -->
+            <router-link to="/" class="logo">MOODI:ARY</router-link>
 
             <!-- 내비게이션 -->
             <nav class="nav-links">
@@ -13,7 +14,7 @@
             </nav>
 
             <!-- 로그인 버튼 -->
-            <router-link to="/login" class="button">로그인</router-link>
+            <router-link to="/login" class="button submit-button">로그인</router-link>
         </div>
     </header>
 </template>
@@ -47,12 +48,15 @@
 /* 로고 */
 .logo {
     width: 250px;
+    color: var(--color-beige);
+    font-size: 2rem;
+    font-weight: 800;
 }
 
 /* 네비게이션 링크 */
 .nav-links {
     display: flex;
-    gap: 20px;
+    gap: 50px;
 }
 
 .nav-links a {
