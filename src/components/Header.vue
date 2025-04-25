@@ -13,7 +13,7 @@
             </nav>
 
             <!-- 로그인 버튼 -->
-            <router-link to="/login" class="login-button">로그인</router-link>
+            <router-link to="/login" class="button">로그인</router-link>
         </div>
     </header>
 </template>
@@ -60,23 +60,5 @@
     text-decoration: none;
     font-size: 24px;
     font-family: var(--font-omyu);
-}
-
-/* 로그인 버튼 */
-.login-button {
-    background-color: var(--color-green);
-    color: white;
-    padding: 6px 24px;
-    border-radius: 16px;
-    border: 3px solid white;
-    font-size: 18px;
-    font-family: var(--font-omyu);
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.login-button:hover {
-    background-color: var(--color-green);
-    transform: scale(1.05);
 }
 </style>
