@@ -1,27 +1,32 @@
 <template>
-  <div class="write-wrapper">
-    <h2>✍️ 공유 일기 작성</h2>
+  <div class="diary-page">
+    <!-- 페이지 넘기는 애니메이션용 wrapper -->
+    <transition name="page-flip" mode="out-in">
+      <div key="diary" class="write-wrapper">
+        <h2>✍️ 공유 일기 작성</h2>
 
-    <form @submit.prevent="submitDiary" class="write-form">
-      <input
-        v-model="title"
-        type="text"
-        placeholder="제목을 입력하세요"
-        required
-        class="title-input"
-      />
+        <form @submit.prevent="submitDiary" class="write-form">
+          <input
+            v-model="title"
+            type="text"
+            placeholder="제목을 입력하세요"
+            required
+            class="title-input"
+          />
 
-      <div class="textarea-wrapper">
-        <textarea
-          v-model="content"
-          placeholder="오늘의 이야기를 써주세요"
-          required
-          class="notebook-textarea"
-        ></textarea>
+          <div class="textarea-wrapper">
+            <textarea
+              v-model="content"
+              placeholder="오늘의 이야기를 써주세요"
+              required
+              class="notebook-textarea"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">등록하기</button>
+        </form>
       </div>
-
-      <button type="submit" class="submit-btn">등록하기</button>
-    </form>
+    </transition>
   </div>
 </template>
 
@@ -63,15 +68,46 @@ const submitDiary = async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
 
+.diary-page {
+  perspective: 1500px;
+}
+
+.page-flip-enter-active,
+.page-flip-leave-active {
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+.page-flip-enter-from {
+  transform: rotateY(-90deg);
+}
+.page-flip-leave-to {
+  transform: rotateY(90deg);
+}
+
 .write-wrapper {
   max-width: 850px;
   margin: 4rem auto;
   padding: 3rem;
   background-color: #fffce6;
   border-radius: 20px;
-  border: 3px dashed #d9c7aa; /* ✨ 스티치 효과 */
+  border: 3px dashed #d9c7aa;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   font-family: 'Nanum Pen Script', cursive;
+  position: relative;
+  animation: inkFadeIn 1.2s ease;
+}
+
+@keyframes inkFadeIn {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    filter: none;
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 h2 {
@@ -101,10 +137,9 @@ h2 {
   border-radius: 10px;
   background-color: #fffce6;
   overflow: auto;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.08); /* ✨ 내부 그림자 */
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.08);
 }
 
-/* 커스텀 스크롤바 */
 .textarea-wrapper::-webkit-scrollbar {
   width: 8px;
 }
@@ -132,10 +167,9 @@ h2 {
     #d9c7aa 34px
   );
   background-size: 100% 34px;
-  background-position-y: 12px; /* 패딩과 맞춤 */
+  background-position-y: 12px;
   box-sizing: border-box;
   line-break: anywhere;
-  overflow: auto;
   outline: none;
 }
 
