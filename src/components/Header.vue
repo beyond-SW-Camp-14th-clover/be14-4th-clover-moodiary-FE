@@ -17,7 +17,7 @@
                 <div class="menu-wrapper">
                     <span class="menu-button">알 수 없는 너의 비밀</span>
                     <div class="submenu">
-                        <router-link to="/ourdiary">우리 일기</router-link>
+                        <router-link to="/shareddiary">우리 일기</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
