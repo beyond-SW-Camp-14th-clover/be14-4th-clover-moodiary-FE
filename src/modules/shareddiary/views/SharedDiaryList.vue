@@ -60,7 +60,7 @@
   
   const canWrite = computed(() => {
     if (diaries.value.length === 0) return true
-    const last = diaries.value[diaries.value.length - 1]
+    const last = diaries.value[0] // ✅ 최신순 정렬이라 [0]이 가장 최신
     return last.user_id !== loginUserId
   })
   
@@ -80,7 +80,7 @@
     users.value = resUser.data
     diaries.value = resDiary.data
       .filter(d => d.shared_diary_room_id === roomId)
-      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // ✅ 최신순
   })
   </script>
   
