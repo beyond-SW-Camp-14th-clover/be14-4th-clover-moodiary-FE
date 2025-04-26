@@ -1,5 +1,11 @@
 <template>
     <div class="outer-wrapper">
+      <!-- ✅ 왼쪽: 방 번호 -->
+      <div class="side-left">
+        <p class="room-id">방 번호: {{ roomId }}</p>
+      </div>
+  
+      <!-- ✅ 가운데: 일기 리스트 박스 -->
       <div class="diary-list">
         <div
           v-for="diary in diaries"
@@ -14,19 +20,28 @@
           </div>
         </div>
       </div>
+  
+      <!-- ✅ 오른쪽: 일기 작성 버튼 -->
+      <div class="side-right">
+        <button
+          @click="writeDiary"
+          :disabled="!canWrite"
+          class="write-btn"
+        >✍️ 일기 작성</button>
+      </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import axios from 'axios'
   import { useRoute } from 'vue-router'
   
   const route = useRoute()
-  const roomId = route.params.roomId
+  const roomId = Number(route.params.roomId)
   const diaries = ref([])
   const users = ref([])
-  const loginUserId = 1 // 임시 로그인 유저 ID
+  const loginUserId = 1
   
   const getUserName = (id) => {
     const user = users.value.find((u) => Number(u.id) === Number(id))
@@ -43,6 +58,20 @@
     return `${yyyy}.${mm}.${dd} ${hh}:${min}`
   }
   
+  const canWrite = computed(() => {
+    if (diaries.value.length === 0) return true
+    const last = diaries.value[diaries.value.length - 1]
+    return last.user_id !== loginUserId
+  })
+  
+  const writeDiary = () => {
+    if (!canWrite.value) {
+      alert('아직 내 차례가 아닙니다!')
+      return
+    }
+    alert(`✍️ 일기 작성 페이지로 이동하거나 모달을 띄울 수 있습니다.\n(roomId: ${roomId})`)
+  }
+  
   onMounted(async () => {
     const [resDiary, resUser] = await Promise.all([
       axios.get('http://localhost:3001/shared_diaries'),
@@ -50,8 +79,8 @@
     ])
     users.value = resUser.data
     diaries.value = resDiary.data
-      .filter(d => d.shared_diary_room_id === Number(roomId))
-      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)) // 시간 순 정렬
+      .filter(d => d.shared_diary_room_id === roomId)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
   })
   </script>
   
@@ -59,13 +88,56 @@
   .outer-wrapper {
     display: flex;
     justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
     padding: 3rem 1rem;
   }
   
+  /* 좌측 방 번호 */
+  .side-left {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+  
+  .room-id {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #5d3e2f;
+  }
+  
+  /* 우측 버튼 */
+  .side-right {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+  
+  .write-btn {
+    background-color: #6f9d6b;
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .write-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .write-btn:hover:enabled {
+    background-color: #5a8755;
+  }
+  
+  /* 가운데 일기 리스트 */
   .diary-list {
     width: 100%;
     max-width: 640px;
-    min-height: 80vh;
     background-color: #fdfaf5;
     border-radius: 16px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);

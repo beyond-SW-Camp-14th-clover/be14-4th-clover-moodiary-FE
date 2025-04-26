@@ -274,12 +274,12 @@
       "id": "19",
       "title": "우산 하나로 충분했던 오후",
       "content": "테스트 일기 내용: 우산 하나로 충분했던 오후",
-      "created_at": "2025-04-23T10:19:00",
+      "created_at": "2025-04-24T10:19:00",
       "is_deleted": "N",
       "fixed_state": "Y",
       "style_layer": null,
-      "shared_diary_room_id": 8,
-      "user_id": 5,
+      "shared_diary_room_id": 1,
+      "user_id": 2,
       "image_path": "/assets/images/diary19.png"
     }
   ],

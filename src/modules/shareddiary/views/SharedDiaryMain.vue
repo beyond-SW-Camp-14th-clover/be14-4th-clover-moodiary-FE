@@ -2,6 +2,7 @@
     <div>
       <div class="button-area">
         <button @click="createRoom" class="create-room-btn">일기방 생성하기</button>
+        <button @click="enterRoom" class="enter-room-btn">입장하기</button>
       </div>
   
       <div class="room-grid">
@@ -14,9 +15,7 @@
           <p class="title">{{ room.latestTitle }}</p>
           <div class="card-footer">
             <p class="author">{{ room.authorName }}</p>
-            <p class="created-at" v-if="room.createdAt">
-              {{ formatDate(room.createdAt) }}
-            </p>
+            <p class="created-at" v-if="room.createdAt">{{ formatDate(room.createdAt) }}</p>
           </div>
         </div>
       </div>
@@ -35,7 +34,7 @@
   const diaries = ref([])
   const users = ref([])
   
-  // 유저 ID → 이름 변환 함수
+  // 유저 ID → 이름 변환
   const getUserName = (id) => {
     const user = users.value.find((u) => Number(u.id) === Number(id))
     return user ? user.name : '알 수 없음'
@@ -47,12 +46,14 @@
   
     return rooms.value
       .filter(r => r.user_id1 === loginUserId || r.user_id2 === loginUserId)
-      .sort((a, b) => b.id - a.id) // 방 ID 내림차순 정렬
+      .sort((a, b) => b.id - a.id)
       .map(r => {
         const roomDiaries = diaries.value
           .filter(d => Number(d.shared_diary_room_id) === Number(r.id))
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  
         const latest = roomDiaries[0]
+  
         return {
           roomId: r.id,
           latestTitle: latest?.title ?? '아직 작성된 일기가 없어요',
@@ -62,12 +63,7 @@
       })
   })
   
-  // 방으로 이동
-  const goToRoom = (roomId) => {
-    router.push({ name: 'SharedDiaryList', params: { roomId } })
-  }
-  
-  // 방 생성 함수
+  // ✅ 방 생성
   const createRoom = async () => {
     try {
       const res = await axios.post('http://localhost:3001/shared_diary_rooms', {
@@ -76,13 +72,53 @@
       })
       const newRoom = res.data
       alert(`방이 생성되었습니다! 방 번호: ${newRoom.id}`)
-  
-      // 방 생성 후 목록 갱신
       rooms.value.push(newRoom)
     } catch (err) {
       console.error('방 생성 실패', err)
       alert('방 생성에 실패했습니다.')
     }
+  }
+  
+  // ✅ 방 입장
+  const enterRoom = async () => {
+    const input = prompt('입장할 방 번호를 입력하세요.')
+    if (!input) return
+    const roomId = Number(input)
+    if (isNaN(roomId)) {
+      alert('숫자만 입력해주세요!')
+      return
+    }
+  
+    try {
+      const res = await axios.get(`http://localhost:3001/shared_diary_rooms/${roomId}`)
+      const room = res.data
+  
+      if (!room) {
+        alert('존재하지 않는 방입니다.')
+        return
+      }
+  
+      if (room.user_id2) {
+        alert('이미 인원이 다 찬 방입니다.')
+        return
+      }
+  
+      // 조건 통과 → user_id2로 나를 등록
+      await axios.patch(`http://localhost:3001/shared_diary_rooms/${roomId}`, {
+        user_id2: loginUserId
+      })
+  
+      alert('방에 입장했습니다!')
+      router.push({ name: 'SharedDiaryList', params: { roomId } })
+    } catch (err) {
+      console.error('입장 실패', err)
+      alert('입장할 수 없습니다.')
+    }
+  }
+  
+  // 기존 방 클릭
+  const goToRoom = (roomId) => {
+    router.push({ name: 'SharedDiaryList', params: { roomId } })
   }
   
   onMounted(async () => {
@@ -94,12 +130,9 @@
     rooms.value = resRoom.data
     diaries.value = resDiary.data
     users.value = resUser.data
-  
-    console.log("✅ users loaded", users.value)
-    console.log("🧠 user ids in diaries", diaries.value.map(d => d.user_id))
   })
   
-  // 날짜 포맷 함수
+  // 날짜 포맷
   const formatDate = (isoString) => {
     const date = new Date(isoString)
     const yyyy = date.getFullYear()
@@ -115,10 +148,12 @@
   .button-area {
     display: flex;
     justify-content: center;
+    gap: 1rem;
     margin-bottom: 2rem;
   }
   
-  .create-room-btn {
+  .create-room-btn,
+  .enter-room-btn {
     background-color: #a87746;
     color: white;
     padding: 0.8rem 1.5rem;
@@ -129,7 +164,8 @@
     transition: background-color 0.2s ease;
   }
   
-  .create-room-btn:hover {
+  .create-room-btn:hover,
+  .enter-room-btn:hover {
     background-color: #8c6239;
   }
   
