@@ -24,7 +24,8 @@ const routes = [
             { path: 'mypage', name: 'MyPage', component: MyPage },
             { path: 'login', name: 'Login', component: LoginPage },
             { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../modules/shareddiary/views/SharedDiaryMain.vue') },
-            { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('../modules/shareddiary/views/SharedDiaryList.vue')}
+            { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('../modules/shareddiary/views/SharedDiaryList.vue') },
+            { path: '/shared-diary/:roomId/write', name: 'SharedDiaryWrite', component: () => import('../modules/shareddiary/views/SharedDiaryWrite.vue') }
         ]
     }
 ]

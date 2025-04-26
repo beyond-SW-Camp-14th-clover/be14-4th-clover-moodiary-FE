@@ -35,19 +35,23 @@
   <script setup>
   import { ref, computed, onMounted } from 'vue'
   import axios from 'axios'
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
   
+  const router = useRouter()
   const route = useRoute()
   const roomId = Number(route.params.roomId)
+  const loginUserId = 1 // 임시 로그인 유저
+  
   const diaries = ref([])
   const users = ref([])
-  const loginUserId = 1
   
+  // ✅ 유저 이름 변환
   const getUserName = (id) => {
-    const user = users.value.find((u) => Number(u.id) === Number(id))
+    const user = users.value.find(u => Number(u.id) === Number(id))
     return user ? user.name : '알 수 없음'
   }
   
+  // ✅ 날짜 포맷
   const formatDate = (isoString) => {
     const date = new Date(isoString)
     const yyyy = date.getFullYear()
@@ -58,20 +62,23 @@
     return `${yyyy}.${mm}.${dd} ${hh}:${min}`
   }
   
+  // ✅ 작성 가능 여부 (가장 최신 일기의 user_id와 다르면 가능)
   const canWrite = computed(() => {
     if (diaries.value.length === 0) return true
-    const last = diaries.value[0] // ✅ 최신순 정렬이라 [0]이 가장 최신
+    const last = diaries.value[0]
     return last.user_id !== loginUserId
   })
   
+  // ✅ 작성 버튼 클릭 시
   const writeDiary = () => {
     if (!canWrite.value) {
-      alert('아직 내 차례가 아닙니다!')
-      return
+        alert('아직 내 차례가 아닙니다!')
+        return
     }
-    alert(`✍️ 일기 작성 페이지로 이동하거나 모달을 띄울 수 있습니다.\n(roomId: ${roomId})`)
-  }
+    router.push({ name: 'SharedDiaryWrite', params: { roomId } })
+    }
   
+  // ✅ 데이터 불러오기
   onMounted(async () => {
     const [resDiary, resUser] = await Promise.all([
       axios.get('http://localhost:3001/shared_diaries'),
@@ -80,7 +87,7 @@
     users.value = resUser.data
     diaries.value = resDiary.data
       .filter(d => d.shared_diary_room_id === roomId)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // ✅ 최신순
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 최신순 정렬 (최신이 위에)
   })
   </script>
   
@@ -106,7 +113,7 @@
     color: #5d3e2f;
   }
   
-  /* 우측 버튼 */
+  /* 우측 작성 버튼 */
   .side-right {
     display: flex;
     align-items: flex-start;
