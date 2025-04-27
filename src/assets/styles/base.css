@@ -2,24 +2,19 @@
 @font-face {
     font-family: 'OMYuPretty';
     src: url('../fonts/omyu-pretty.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
 }
 
 @font-face {
     font-family: 'IMHyemin-R';
     src: url('../fonts/IM_Hyemin-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
 }
 
 @font-face {
     font-family: 'DungGeunMo';
     src: url('../fonts/DungGeunMo.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
 }
 
+/* 색상 & 폰트 변수 */
 :root {
     --color-brown: #6B3E26;
     --color-beige: #D6B98C;
@@ -31,12 +26,14 @@
     --font-pixel: 'DungGeunMo', sans-serif;
 }
 
+/* 전체 초기화 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* 기본 바디 설정 */
 body {
     font-family: var(--font-omyu);
     background-color: var(--color-beige);
@@ -45,24 +42,29 @@ body {
     padding-top: 60px;
 }
 
+/* 링크 스타일 */
 a {
     color: var(--color-green);
     text-decoration: none;
 }
 
+a.underline {
+    text-decoration: underline; /* 필요한 곳만 underline */
+}
+
+/* 공통 버튼 스타일 */
 .button {
-    color: white;
+    display: inline-block;
     padding: 5px 35px;
     font-size: 20px;
     font-family: var(--font-pixel);
     font-weight: bold;
-
-    box-shadow: -1px -1px 0 1px white;
-    border: var(--color-brown);
+    color: white;
     background-color: var(--color-green);
-
+    border: 1px solid var(--color-brown);
+    box-shadow: -1px -1px 0 1px white;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .button:hover {
@@ -73,6 +75,7 @@ a {
     transform: scale(0.97);
 }
 
+/* 버튼 타입별 추가 스타일 */
 .submit-button {
     background-color: var(--color-green);
 }
@@ -81,11 +84,11 @@ a {
     background-color: var(--color-green-dark);
 }
 
-.cancle-button {
+.cancel-button {
     background-color: grey;
 }
 
-.cancle-button:hover {
+.cancel-button:hover {
     background-color: dimgrey;
 }
 
@@ -97,6 +100,7 @@ a {
     background-color: crimson;
 }
 
+/* 기본 컨테이너 */
 .container {
     max-width: 1920px;
     margin: 0 auto;
