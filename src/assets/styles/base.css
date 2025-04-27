@@ -56,13 +56,15 @@ a.underline {
 .button {
     display: inline-block;
     padding: 5px 35px;
-    font-size: 20px;
+    font-size: 18px;
     font-family: var(--font-pixel);
     font-weight: bold;
     color: white;
     background-color: var(--color-green);
-    border: 1px solid var(--color-brown);
-    box-shadow: -1px -1px 0 1px white;
+    border: 2px solid var(--color-brown);
+    border-top: 1px solid white;
+    border-left: 1px solid white;
+    box-shadow: -1px -1px 0 1px var(--color-brown);
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
