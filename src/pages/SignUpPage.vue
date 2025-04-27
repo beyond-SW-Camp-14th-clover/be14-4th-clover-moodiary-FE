@@ -1,48 +1,79 @@
 <template>
-    <div class="signup-wrapper">
-        <form class="signup-form" @submit.prevent="submitForm">
-            <div class="emoji">😊</div>
-            <h2>무디어리에 오신 것을 환영합니다!</h2>
+    <form ref="formRef" class="signup-form" @submit.prevent="submitForm">
+        <div class="emoji">😊</div>
 
-            <div class="form-group">
-                <input v-model="email" type="email" placeholder="Email address" required />
+        <div class="form-contents">
+            <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
+
+            <div class="form-inputs">
+                <!-- 이메일 -->
+                <div class="form-group">
+                    <input v-model="email" @input="validateEmail" type="text" placeholder="Email address" required
+                        :class="{ 'input-error': emailError }" />
+                    <p v-if="emailError" class="error">{{ emailError }}</p>
+                </div>
+
+                <!-- 비밀번호 -->
+                <div class="form-group">
+                    <input v-model="password" :type="passwordInputType" placeholder="Password" required
+                        @mousedown="passwordInputType = 'text'" @mouseup="passwordInputType = 'password'"
+                        @mouseleave="passwordInputType = 'password'" @input="validatePassword"
+                        :class="{ 'input-error': passwordError }" />
+                    <!-- ✅ 비밀번호 조건 체크 리스트 -->
+                    <div v-if="password.length > 0" class="password-checklist">
+                        <p :class="{ success: passwordChecks.lowercaseAndNumber }">- 소문자+숫자 조합</p>
+                        <p :class="{ success: passwordChecks.specialChar }">- 특수문자 포함 가능</p>
+                        <p :class="{ success: passwordChecks.lengthValid }">- 8자 이상 16자 이하</p>
+                    </div>
+                </div>
+
+                <!-- 비밀번호 확인 -->
+                <div class="form-group">
+                    <input v-model="confirmPassword" :type="confirmPasswordInputType" placeholder="Confirm Password"
+                        required @mousedown="confirmPasswordInputType = 'text'"
+                        @mouseup="confirmPasswordInputType = 'password'"
+                        @mouseleave="confirmPasswordInputType = 'password'" @input="validateConfirmPassword"
+                        :class="{ 'input-error': confirmPasswordError }" />
+                    <p v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</p>
+                </div>
+
+                <!-- 이름 -->
+                <div class="form-group">
+                    <input v-model="name" type="text" placeholder="Name" required />
+                </div>
+
+                <!-- 휴대폰 번호 -->
+                <div class="form-group">
+                    <input v-model="phone" @input="formatPhone" type="text" placeholder="Phone Number" required
+                        :class="{ 'input-error': phoneError }" />
+                    <p v-if="phoneError" class="error">{{ phoneError }}</p>
+                </div>
+
+                <!-- 비밀번호 찾기 질문 -->
+                <div class="form-group">
+                    <input v-model="securityQuestion" type="text" placeholder="Password Recovery Question" required />
+                </div>
+
+                <!-- 비밀번호 찾기 답변 -->
+                <div class="form-group">
+                    <input v-model="securityAnswer" type="text" placeholder="Password Recovery Answer" required />
+                </div>
             </div>
+        </div>
 
-            <div class="form-group">
-                <input v-model="password" type="password" placeholder="Password" required />
-            </div>
+        <button type="submit" class="button submit-button">회원 가입</button>
 
-            <div class="form-group">
-                <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required />
-            </div>
-
-            <div class="form-group">
-                <input v-model="name" type="text" placeholder="Name" required />
-            </div>
-
-            <div class="form-group">
-                <input v-model="phone" type="text" placeholder="Phone Number" required />
-            </div>
-
-            <div class="form-group">
-                <input v-model="securityQuestion" type="text" placeholder="Password Recovery Question" required />
-            </div>
-
-            <div class="form-group">
-                <input v-model="securityAnswer" type="text" placeholder="Password Recovery Answer" required />
-            </div>
-
-            <button type="submit" class="button submit-button regist">회원가입</button>
-
-            <div class="login-link">
-                이미 계정이 있으신가요? <router-link to="/login">로그인</router-link>
-            </div>
-        </form>
-    </div>
+        <div class="login-link">
+            이미 계정이 있으신가요? <router-link to="/login" class="underline">로그인</router-link>
+        </div>
+    </form>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -52,38 +83,110 @@ const phone = ref('')
 const securityQuestion = ref('')
 const securityAnswer = ref('')
 
+const emailError = ref('')
+const passwordError = ref('')
+const confirmPasswordError = ref('')
+const phoneError = ref('')
+
+const passwordInputType = ref('password')
+const confirmPasswordInputType = ref('password')
+
+const formRef = ref(null)
+
+const passwordChecks = ref({
+    lowercaseAndNumber: false,
+    specialChar: false,
+    lengthValid: false,
+})
+
+// 이메일 검증
+const validateEmail = () => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    emailError.value = emailRegex.test(email.value) ? '' : '올바른 이메일 형식이 아닙니다.'
+}
+
+// 비밀번호 검증
+const validatePassword = () => {
+    const lowercaseAndNumberRegex = /^(?=.*[a-z])(?=.*\d)/
+    const specialCharRegex = /[^a-zA-Z0-9]/
+    const lengthValid = password.value.length >= 8 && password.value.length <= 16
+
+    passwordChecks.value.lowercaseAndNumber = lowercaseAndNumberRegex.test(password.value)
+    passwordChecks.value.specialChar = specialCharRegex.test(password.value)
+    passwordChecks.value.lengthValid = lengthValid
+
+    passwordError.value = (passwordChecks.value.lowercaseAndNumber && passwordChecks.value.lengthValid)
+        ? ''
+        : '비밀번호 조건을 만족해야 합니다.'
+}
+
+// 비밀번호 확인 검증
+const validateConfirmPassword = () => {
+    confirmPasswordError.value = (password.value === confirmPassword.value)
+        ? ''
+        : '비밀번호가 일치하지 않습니다.'
+}
+
+// 폰 번호 포맷
+const formatPhone = () => {
+    let cleaned = phone.value.replace(/\D/g, '')
+    if (!cleaned.startsWith('010')) {
+        phoneError.value = '휴대폰 번호는 010으로 시작해야 합니다.'
+        return
+    }
+    if (cleaned.length > 3 && cleaned.length <= 7) {
+        phone.value = cleaned.replace(/(\d{3})(\d+)/, '$1-$2')
+    } else if (cleaned.length > 7) {
+        phone.value = cleaned.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3')
+    }
+    phoneError.value = ''
+}
+
+// 폼 제출
 const submitForm = () => {
-    if (password.value !== confirmPassword.value) {
-        alert('비밀번호가 일치하지 않습니다.')
+    validateEmail()
+    validatePassword()
+    validateConfirmPassword()
+
+    if (emailError.value || passwordError.value || confirmPasswordError.value || phoneError.value) {
+        triggerShake()
         return
     }
 
-    const userData = {
-        email: email.value,
-        password: password.value,
-        name: name.value,
-        phone: phone.value,
-        securityQuestion: securityQuestion.value,
-        securityAnswer: securityAnswer.value,
-    }
-
-    console.log('회원가입 데이터:', userData)
     alert('회원가입이 완료되었습니다!')
 
-    // 여기서 실제 API 호출하거나, router.push('/login') 가능
+    // 초기화
+    email.value = ''
+    password.value = ''
+    confirmPassword.value = ''
+    name.value = ''
+    phone.value = ''
+    securityQuestion.value = ''
+    securityAnswer.value = ''
+
+    router.push('/login')
+}
+
+// 흔들림 효과
+const triggerShake = () => {
+    if (formRef.value) {
+        formRef.value.classList.remove('shake')
+        void formRef.value.offsetWidth
+        formRef.value.classList.add('shake')
+    }
 }
 </script>
 
 <style scoped>
-.signup-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    /* height → min-height */
-    padding: 1rem;
+* {
+    font-family: var(--font-pixel);
 }
 
+span {
+    font-size: 20px;
+}
+
+/* 폼 스타일 */
 .signup-form {
     background-color: white;
     padding: 2rem 2.5rem;
@@ -92,6 +195,7 @@ const submitForm = () => {
     width: 100%;
     max-width: 400px;
     text-align: center;
+    margin: 40px auto;
 }
 
 .emoji {
@@ -99,14 +203,19 @@ const submitForm = () => {
     margin-bottom: 1rem;
 }
 
-h2 {
-    margin-bottom: 2rem;
-    font-size: 1.5rem;
-    color: var(--color-brown);
+.form-contents {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 1rem;
 }
 
-.form-group {
-    margin-bottom: 1rem;
+.form-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
 }
 
 input {
@@ -123,12 +232,63 @@ input:focus {
     border-color: var(--color-green);
 }
 
-.login-link {
-    margin-top: 1rem;
-    font-size: 0.9rem;
+.input-error {
+    border-color: red;
 }
 
-.regist {
+.error {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    margin-left: 4px;
+}
+
+/* ✅ 체크리스트 */
+.password-checklist {
+    text-align: left;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.password-checklist p {
+    margin: 2px 0;
+    color: gray;
+}
+
+.password-checklist .success {
+    color: var(--color-green);
+}
+
+/* 흔들림 효과 */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-8px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(8px);
+    }
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+.login-link {
+    margin-top: 1rem;
     font-size: 0.8rem;
 }
 </style>

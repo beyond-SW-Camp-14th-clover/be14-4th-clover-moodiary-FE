@@ -1,4 +1,4 @@
-/* 기본 폰트 */
+/* 기본 폰트 등록 */
 @font-face {
     font-family: 'OMYuPretty';
     src: url('../fonts/omyu-pretty.ttf') format('truetype');
@@ -42,18 +42,25 @@ body {
     padding-top: 60px;
 }
 
-/* 링크 스타일 */
+.small-p {
+    font-size: 0.8rem;
+}
+
+/* 기본 링크 스타일 */
 a {
     color: var(--color-green);
     text-decoration: none;
 }
 
 a.underline {
-    text-decoration: underline; /* 필요한 곳만 underline */
+    text-decoration: underline dotted;
 }
 
-/* 공통 버튼 스타일 */
-.button {
+/* 버튼 기본 스타일 (button, a.button 둘 다 적용) */
+button,
+a.button {
+    all: unset;
+    /* 버튼 초기화 */
     display: inline-block;
     padding: 5px 35px;
     font-size: 18px;
@@ -66,14 +73,18 @@ a.underline {
     border-left: 1px solid white;
     box-shadow: -1px -1px 0 1px var(--color-brown);
     cursor: pointer;
+    text-align: center;
     transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.button:hover {
+/* 버튼 호버, 액티브 효과 */
+button:hover,
+a.button:hover {
     transform: scale(1.05);
 }
 
-.button:active {
+button:active,
+a.button:active {
     transform: scale(0.97);
 }
 
@@ -87,11 +98,11 @@ a.underline {
 }
 
 .cancel-button {
-    background-color: grey;
+    background-color: #a9a9a9;
 }
 
 .cancel-button:hover {
-    background-color: dimgrey;
+    background-color: #898989;
 }
 
 .delete-button {

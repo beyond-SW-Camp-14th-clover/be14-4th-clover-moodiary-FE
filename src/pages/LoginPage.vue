@@ -5,7 +5,7 @@
             <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
             <p class="small-p">
                 계정이 없으신가요?
-                <router-link to="/signup" class="signup-link">회원 가입</router-link>
+                <router-link to="/signup" class="signup-link underline">회원 가입</router-link>
             </p>
 
             <input v-model="email" type="email" placeholder="Email address" />
@@ -23,7 +23,7 @@
                 <input v-model="resetEmail" type="email" placeholder="가입한 이메일을 입력하세요" />
                 <div class="modal-actions">
                     <button class="submit-button" @click="submitReset">보내기</button>
-                    <button @click="showForgotModal = false">닫기</button>
+                    <button class="button cancel-button" @click="showForgotModal = false">닫기</button>
                 </div>
             </div>
         </div>
@@ -51,10 +51,6 @@ function submitReset() {
 
 span {
     font-size: 20px;
-}
-
-.small-p {
-    font-size: 0.8rem;
 }
 
 .login-page {
@@ -93,7 +89,6 @@ input {
 
 .signup-link {
     color: var(--color-green);
-    text-decoration: underline dotted;
     font-weight: bold;
 }
 
