@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '../layouts/DefaultLayout.vue'
 import Home from '../pages/Home.vue'
-import MyDiary from '../modules/myDiary/views/MyDiaryLayout.vue'
+import MonthlyDiary from '../modules/myDiary/views/MonthlyDiary.vue'
+import WeeklyDiary from '../modules/myDiary/views/WeeklyDiary.vue'
 import MyPage from '../pages/MyPage.vue'
 import LoginPage from '../pages/LoginPage.vue'
 
@@ -21,7 +22,8 @@ const routes = [
             //         // { path: 'free', name: 'FreeNote', component: () => import('../modules/notebook/views/tabs/FreeNote.vue') }
             //     ]
             // },
-            { path: 'mydiary', name: 'MyDiary', component: () => import('../modules/myDiary/views/MyDiaryLayout.vue') },
+            { path: 'monthlydiary', name: 'MonthlyDiary', component: () => import('../modules/myDiary/views/MonthlyDiary.vue') },
+            { path: 'weeklydiary', name: 'WeeklyDiary', component: () => import('../modules/myDiary/views/WeeklyDiary.vue') },
             { path: 'mypage', name: 'MyPage', component: MyPage },
             { path: 'login', name: 'Login', component: LoginPage },
             { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../modules/shareddiary/views/SharedDiaryMain.vue') },

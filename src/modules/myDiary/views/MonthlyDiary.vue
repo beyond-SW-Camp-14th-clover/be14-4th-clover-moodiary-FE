@@ -1,6 +1,6 @@
 <template>
-    <background-paper class="background-paper">
-        <my-diary-header>
+    <div class="background-paper">
+        <div class="my-diary-header">
             <div class="header-content">
                 <div class="month-navigation">
                     <button @click="changeMonth(-1)">
@@ -19,34 +19,64 @@
                     </button>
                 </div>
             </div>
-        </my-diary-header>
-        <left-section>
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <div v-for="day in weekDays" :key="day" class="calendar-header-cell">{{ day }}</div>
-                </div>
-                <div class="calendar-body">
-                    <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'empty': cell.type !== 'current' }">
-                        <span
-                            :style="{
-                                color:
-                                    cell.type === 'current'
-                                        ? (idx % 7 === 0 ? '#CA4C4C' : '#535353')
-                                        : '#C2C2C2'
-                            }"
-                        >{{ cell.day }}</span>
+        </div>
+        <div class="content-container">
+            <div class="left-section">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div v-for="day in weekDays" :key="day" class="calendar-header-cell">{{ day }}</div>
+                    </div>
+                    <div class="calendar-body">
+                        <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'empty': cell.type !== 'current' }">
+                            <span
+                                :style="{
+                                    color:
+                                        cell.type === 'current'
+                                            ? (idx % 7 === 0 ? '#CA4C4C' : '#535353')
+                                            : '#C2C2C2'
+                                }"
+                            >{{ cell.day }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </left-section>
-        <right-section>
-            
-        </right-section>
-    </background-paper>
-    </template>
+            <div class="right-section">
+                <div class="happy-section">
+                    <h3>what makes me happy</h3>
+                    <div class="section-underline2"></div>
+                </div>
+                <div class="sad-section">
+                    <h3>what makes me sad</h3>
+                    <div class="section-underline2"></div>
+                </div>
+                <div class="moodlog">
+                    <div class="moodlog-header">
+                        <h3>moodlog</h3>
+                        <button class="save-button">저장</button>
+                    </div>
+                    <div class="moodlog-content">
+                        <div class="moodlog-textbox">
+                            <textarea placeholder="이번 달 나의 기록"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats">
+                    <EmotionRates 
+                        :positive-score="emotionScores.positive"
+                        :neutral-score="emotionScores.neutral"
+                        :negative-score="emotionScores.negative"
+                    />
+                    <EmotionBarChart />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import EmotionRates from '../components/EmotionRates.vue';
+import EmotionBarChart from '../components/EmotionBarChart.vue';
 
 const currentDate = ref(new Date());
 
@@ -88,21 +118,21 @@ const calendarCells = computed(() => {
     const nextMonth = month === 11 ? 0 : month + 1;
     const nextYear = month === 11 ? year + 1 : year;
     const cells = [];
-    // 앞 빈칸: 이전 달 날짜
+
     for (let i = 0; i < firstDay; i++) {
         cells.push({
             day: prevMonthDays - firstDay + i + 1,
             type: 'prev',
         });
     }
-    // 이번 달 날짜
+
     for (let d = 1; d <= days; d++) {
         cells.push({
             day: d,
             type: 'current',
         });
     }
-    // 뒤 빈칸: 다음 달 날짜
+
     let nextDay = 1;
     while (cells.length % 7 !== 0) {
         cells.push({
@@ -112,6 +142,14 @@ const calendarCells = computed(() => {
     }
     return cells;
 });
+
+const emotionScores = computed(() => {
+    return {
+        positive: 0,
+        neutral: 0,
+        negative: 0
+    };
+});
 </script>
 
 <style scoped>
@@ -120,6 +158,7 @@ const calendarCells = computed(() => {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
+    margin-top: 20px;
 }
 
 .month-display {
@@ -168,6 +207,15 @@ const calendarCells = computed(() => {
     height: 914px;
     background-color: #FFFFFF;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex: 1;
 }
 
 .calendar-container {
@@ -184,10 +232,11 @@ const calendarCells = computed(() => {
     background: #fff;
     border-bottom: 1px solid #eee;
     height: 50px;
+    margin-top: 35px;
 }
 .calendar-header-cell {
     text-align: center;
-    font-weight: 400;
+    font-weight: 300;
     font-family: 'Akshar', sans-serif;
     color: #535353;
     padding: 0.5rem 0;
@@ -223,13 +272,94 @@ const calendarCells = computed(() => {
 .calendar-cell.empty {
     background: none;
 }
-left-section {
+.left-section {
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
-    margin-left: 60px;
+    margin-left: 80px;
+    margin-right: 60px;
 }
-right-section {
+.right-section {
     flex: 1;
+    margin-right: 70px;
+}
+.my-diary-header {
+    margin-top: 30px;
+    width: 100%;
+}
+.happy-section h3, .sad-section h3, .moodlog h3 {
+    font-family: var(--font-akshar);
+    font-weight: 200;
+    font-size: 24px;
+    color: #535353;
+}
+.section-underline2 {
+    width: 350px;
+    height: 3px;
+    background-color: #F7F2EB;
+    margin-top: -10px;
+}
+.moodlog-textbox {
+    width: 350px;
+    height: 168px;
+    background-color: rgba(247, 242, 235, 0.5);
+    border-radius: 5px;
+    padding: 30px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+
+.moodlog-textbox textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    font-family: 'Omyu Pretty', sans-serif;
+    font-size: 16px;
+    color: #535353;
+    outline: none;
+}
+
+.moodlog-textbox textarea::placeholder {
+    color: #535353;
+    opacity: 0.5;
+}
+
+.moodlog-content {
+    margin-top: 5px;
+    position: relative;
+}
+
+.moodlog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.save-button {
+    background-color: #FFE7C9;
+    color: #535353;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: var(--font-akshar);
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-right: 5px;
+}
+
+.save-button:hover {
+    background-color: #FFC985;
+}
+
+.stats {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 40px;
 }
 </style>
