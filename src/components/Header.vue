@@ -2,7 +2,7 @@
     <header class="header-bg">
         <div class="header-inner">
             <!-- 로고 -->
-            <div class="logo"><router-link to="">MOODI:ARY</router-link></div>
+            <div class="logo"><router-link to="/">MOODI:ARY</router-link></div>
 
             <!-- 내비게이션 -->
             <nav class="nav-links">
@@ -69,7 +69,7 @@ import MusicPlayer from './common/MusicPlayer.vue'
 }
 
 /* 로고 */
-.logo {
+.logo a {
     width: 250px;
     color: var(--color-beige);
     font-family: var(--font-pixel);
