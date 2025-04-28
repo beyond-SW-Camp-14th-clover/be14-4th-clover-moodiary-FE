@@ -98,4 +98,4 @@ defineEmits(['confirm', 'cancel'])
   background-color: #E9D2AF;
   color: #535353;
 }
-</style>
+</style> 

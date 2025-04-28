@@ -350,7 +350,7 @@ const handleSectionMouseLeave = () => {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    margin-top: 20px;
+    margin-top: 18px;
 }
 
 .month-display {
@@ -358,28 +358,44 @@ const handleSectionMouseLeave = () => {
     font-weight: 400;
     font-size: 24px;
     color: #535353;
-    margin-bottom: -9px;
+    margin-bottom: 0;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .month-navigation {
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    margin-top: -17px;
+    margin-top: -20px;
 }
 
 .month-navigation button {
+    all: unset !important;
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
     cursor: pointer;
-    background: none;
-    border: none;
+    background: none !important;
+    border: none !important;
     outline: none;
-    margin-top: 2px;
+    box-shadow: none !important;
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: normal !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
 .month-navigation button:hover {
-    background: none;
+    background: none !important;
+    transform: none !important;
+}
+
+.month-navigation button:active {
+    transform: none !important;
 }
 
 .month-container {
@@ -392,7 +408,9 @@ const handleSectionMouseLeave = () => {
     width: 152px;
     height: 3px;
     background-color: #F7F2EB;
-    margin-top: -1px;
+    margin-top: -3px;
+    position: relative;
+    z-index: 0;
 }
 
 .background-paper {

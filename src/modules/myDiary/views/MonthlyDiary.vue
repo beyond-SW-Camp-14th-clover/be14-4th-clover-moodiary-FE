@@ -166,7 +166,10 @@ const emotionScores = computed(() => {
     font-weight: 400;
     font-size: 24px;
     color: #535353;
-    margin-bottom: -10px;
+    margin-bottom: 0;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .month-navigation {
@@ -175,16 +178,30 @@ const emotionScores = computed(() => {
 }
 
 .month-navigation button {
+    all: unset !important;
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
     cursor: pointer;
-    background: none;
-    border: none;
+    background: none !important;
+    border: none !important;
     outline: none;
+    box-shadow: none !important;
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: normal !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
 .month-navigation button:hover {
-    background: none;
+    background: none !important;
+    transform: none !important;
+}
+
+.month-navigation button:active {
+    transform: none !important;
 }
 
 .month-container {
@@ -197,6 +214,9 @@ const emotionScores = computed(() => {
     width: 152px;
     height: 3px;
     background-color: #F7F2EB;
+    margin-top: -3px;
+    position: relative;
+    z-index: 0;
 }
 
 .background-paper {
@@ -339,21 +359,28 @@ const emotionScores = computed(() => {
 }
 
 .save-button {
-    background-color: #FFE7C9;
-    color: #535353;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 12px;
-    font-family: var(--font-akshar);
-    font-size: 12px;
-    font-weight: 400;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-right: 5px;
+    background-color: #FFE7C9 !important;
+    color: #535353 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 4px 12px !important;
+    font-family: var(--font-akshar) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s !important;
+    margin-right: 30px !important;
+    outline: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    line-height: normal !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
 .save-button:hover {
-    background-color: #FFC985;
+    background-color: #FFC985 !important;
 }
 
 .stats {

@@ -6,18 +6,13 @@
 
             <!-- 내비게이션 -->
             <nav class="nav-links">
-<<<<<<< HEAD
-                <a href="/monthlydiary">서랍 속 작은 일기장</a>
-                <a href="/shareddiary">알 수 없는 너의 비밀</a>
-                <a href="/myemotion">내 맘속에 담아</a>
-                <a href="/mypage">너 몰래</a>
-=======
+
                 <div class="menu-wrapper">
                     <span class="menu-button">서랍 속 작은 일기장</span>
                     <div class="submenu">
-                        <router-link to="/mydiary/mydiarymine">내 일기</router-link>
-                        <router-link to="/mydiary/mydiarymine">월간</router-link>
-                        <router-link to="/mydiary/mydiarymine">주간</router-link>
+                        <router-link to="/registmydiary">일기 작성</router-link>
+                        <router-link to="/monthlydiary">월간 일기</router-link>
+                        <router-link to="/weeklydiary">주간 일기</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
@@ -39,7 +34,6 @@
                         <router-link to="/logout">로그아웃</router-link>
                     </div>
                 </div>
->>>>>>> f452018627c9bc7409f4f267df0fd17aaf5083fd
             </nav>
 
             <!-- 로그인 버튼 -->

@@ -1,5 +1,48 @@
 /* 리셋 */
 * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* -------------------------------
+   폰트 등록
+--------------------------------- */
+@font-face {
+    font-family: 'Akshar';
+    src: url('../fonts/Akshar-Regular.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Akshar';
+    src: url('../fonts/Akshar-Medium.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Akshar';
+    src: url('../fonts/Akshar-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'OMYuPretty';
+    src: url('../fonts/omyu-pretty.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'HandwritingFont';
+    src: url('../fonts/IM_Hyemin-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* -------------------------------
    기본 설정
 --------------------------------- */
@@ -20,31 +63,6 @@ body {
     flex-direction: column;
 }
 
-/* 전체 초기화 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* -------------------------------
-   폰트 등록
---------------------------------- */
-@font-face {
-    font-family: 'OMYuPretty';
-    src: url('@/assets/fonts/omyu-pretty.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'IMHyemin-R';
-    src: url('@/assets/fonts/IM_Hyemin-Regular.otf') format('opentype');
-}
-
-@font-face {
-    font-family: 'DungGeunMo';
-    src: url('@/assets/fonts/DungGeunMo.ttf') format('truetype');
-}
-
 /* -------------------------------
    색상, 폰트 변수
 --------------------------------- */
@@ -55,8 +73,8 @@ body {
     --color-green-dark: #337438;
 
     --font-omyu: 'OMYuPretty', sans-serif;
-    --font-hyem: 'IMHyemin-R', sans-serif;
-    --font-pixel: 'DungGeunMo', sans-serif;
+    --font-hand: 'HandwritingFont', sans-serif;
+    --font-akshar: 'Akshar', sans-serif;
 }
 
 /* -------------------------------
@@ -169,52 +187,4 @@ main.content {
 /* MP 음악플레이어 기본 숨김 */
 .music-player {
     display: none;
-}
-
-@font-face {
-    font-family: 'Akshar';
-    src: url('../fonts/Akshar-Regular.ttf') format('truetype');
-    font-weight: 300;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Akshar';
-    src: url('../fonts/Akshar-Medium.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Akshar';
-    src: url('../fonts/Akshar-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'OMYuPretty';
-    src: url('../fonts/omyu-pretty.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'HandwritingFont';
-    src: url('../fonts/IM_Hyemin-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-:root {
-    --color-brown: #6B3E26;
-    --color-beige: #D6B98C;
-    --color-green: #3C8D40;
-    --color-green-dark: #337438;
-
-    --font-omyu: 'OMYuPretty', sans-serif;
-    --font-hand: 'HandwritingFont', sans-serif;
-    --font-akshar: 'Akshar', sans-serif;
-}
-
 }
