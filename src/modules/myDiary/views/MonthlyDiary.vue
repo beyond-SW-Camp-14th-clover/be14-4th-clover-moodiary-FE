@@ -28,14 +28,22 @@
                     </div>
                     <div class="calendar-body">
                         <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'empty': cell.type !== 'current' }">
-                            <span
-                                :style="{
-                                    color:
-                                        cell.type === 'current'
-                                            ? (idx % 7 === 0 ? '#CA4C4C' : '#535353')
-                                            : '#C2C2C2'
-                                }"
-                            >{{ cell.day }}</span>
+                            <div class="cell-header">
+                                <span
+                                    :style="{
+                                        color:
+                                            cell.type === 'current'
+                                                ? (idx % 7 === 0 ? '#CA4C4C' : '#535353')
+                                                : '#C2C2C2'
+                                    }"
+                                >{{ cell.day }}</span>
+                                <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)" class="score-circle">
+                                    <span class="score-text" :style="{ color: getScoreColor(getDiaryForDay(cell.day).totalScore) }">{{ getDiaryForDay(cell.day).totalScore }}</span>
+                                </div>
+                            </div>
+                            <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)">
+                                <span class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -44,10 +52,24 @@
                 <div class="happy-section">
                     <h3>what makes me happy</h3>
                     <div class="section-underline2"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
                 </div>
                 <div class="sad-section">
                     <h3>what makes me sad</h3>
                     <div class="section-underline2"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
+                    <div class="score-box">00</div>
+                    <div class="section-underline2 section-underline2-margin"></div>
                 </div>
                 <div class="moodlog">
                     <div class="moodlog-header">
@@ -74,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
 
@@ -150,6 +172,39 @@ const emotionScores = computed(() => {
         negative: 0
     };
 });
+
+const diaryEntries = ref([]);
+
+const fetchMonthlyDiary = async (targetMonth, userId) => {
+    try {
+        const response = await fetch(`http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
+        if (!response.ok) {
+            throw new Error('서버 쪽에서 리스폰스 객체가 넘어오는데 문제가 생김');
+        }
+        const data = await response.json();
+        diaryEntries.value = data; // 데이터를 상태에 저장
+    } catch (error) {
+        console.error('Fetch error:', error);
+    }
+};
+
+const getDiaryForDay = (day) => {
+    return diaryEntries.value.find(entry => new Date(entry.createdAt).getDate() === day);
+};
+
+const getScoreColor = (score) => {
+    if (score <= 33) return '#A60303';
+    if (score <= 66) return '#DA930E';
+    return '#346FD2';
+};
+
+onMounted(() => {
+    const year = selectedDate.value.getFullYear();
+    const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
+    const targetMonth = `${year}-${month}`;
+    const userId = 1; // 예시로 고정된 값 사용
+    fetchMonthlyDiary(targetMonth, userId);
+});
 </script>
 
 <style scoped>
@@ -158,7 +213,7 @@ const emotionScores = computed(() => {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .month-display {
@@ -279,13 +334,15 @@ const emotionScores = computed(() => {
     height: calc(100% - 50px);
 }
 .calendar-cell {
+    position: relative;
     border: 1px solid #F7F2EB;
-    text-align: right;
+    text-align: left;
     padding: 0.5rem;
     font-size: 1rem;
     background: #fff;
     box-sizing: border-box;
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
 }
@@ -312,12 +369,22 @@ const emotionScores = computed(() => {
     font-weight: 200;
     font-size: 24px;
     color: #535353;
+    margin-top: -20px;
 }
 .section-underline2 {
     width: 350px;
     height: 3px;
     background-color: #F7F2EB;
     margin-top: -10px;
+}
+.section-underline2-margin {
+    margin-top: 30px;
+}
+.sad-section {
+    margin-top: 50px;
+}
+.moodlog {
+    margin-top: 50px;
 }
 .moodlog-textbox {
     width: 350px;
@@ -388,5 +455,61 @@ const emotionScores = computed(() => {
     align-items: flex-start;
     justify-content: flex-start;
     gap: 40px;
+}
+
+.score-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.score-box {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Akshar', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    color: #535353;
+    margin-bottom: -15px;
+}
+
+.score-circle {
+    background-color: #FFFFFF;
+    z-index: 1;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.score-text {
+    font-family: 'Akshar', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    color: inherit;
+}
+
+.cell-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.title-text {
+    display: block;
+    margin-top: 5px;
+    font-family: 'Ownglyph PDH', sans-serif;
+    font-size: 16px;
+    color: #535353;
+    margin-left: 5px;
 }
 </style>

@@ -350,7 +350,7 @@ const handleSectionMouseLeave = () => {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    margin-top: 18px;
+    margin-top: 8px;
 }
 
 .month-display {
