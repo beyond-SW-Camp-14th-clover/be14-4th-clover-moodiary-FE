@@ -441,15 +441,16 @@
   .emotion-tag {
     background-color: #E2EFFF;
     color: #535353;
-    padding: 0;
+    padding: 0 12px;
     border-radius: 0px;
     font-size: 14px;
     font-family: 'Ownglyph PDH', sans-serif;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 62px;
     height: 28px;
+    min-width: 62px;
+    width: fit-content;
     cursor: pointer;
     transition: background-color 0.2s;
   }
