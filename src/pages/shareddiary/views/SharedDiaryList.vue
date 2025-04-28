@@ -15,10 +15,12 @@
         @click="goToDetail(diary.id)"
         style="cursor: pointer;"
       >
-        <p class="title">{{ diary.title }}</p>
-        <div class="footer">
-          <span class="author">{{ getUserName(diary.user_id) }}</span>
-          <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+        <div class="bubble-inner">
+          <p class="title">{{ diary.title }}</p>
+          <div class="footer">
+            <span class="author">{{ getUserName(diary.user_id) }}</span>
+            <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -93,81 +95,101 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* (다전은 기존와 같은 스테일) */
 .outer-wrapper {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 2rem;
-  padding: 3rem 1rem;
+  gap: 3rem;
 }
+
 .side-left, .side-right {
+  width: 120px;
   display: flex;
+  justify-content: center;
   align-items: flex-start;
-  margin-top: 1rem;
 }
+
 .room-id {
-  font-size: 1rem;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #5d3e2f;
+  text-align: center;
 }
+
 .write-btn {
   background-color: #6f9d6b;
   color: white;
-  padding: 0.5rem 1.2rem;
+  padding: 1rem 1.6rem;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
+
 .write-btn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
+
 .write-btn:hover:enabled {
   background-color: #5a8755;
 }
+
 .diary-list {
-  width: 100%;
-  max-width: 640px;
+  flex: 1;
+  max-width: 720px;
   background-color: #fdfaf5;
   border-radius: 16px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.8rem; /* ✅ gap 줄임 */
 }
+
 .diary-bubble {
-  max-width: 75%;
-  padding: 1.2rem;
+  max-width: 90%;
+  padding: 1rem; /* ✅ padding 살짝 줄임 */
   border-radius: 18px;
   background-color: #fffce6;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   word-break: break-word;
+  min-height: 100px; /* ✅ min-height 낮춤 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
+
+.bubble-inner {
+  display: flex;
+  flex-direction: column;
+}
+
 .mine {
   margin-left: auto;
-  background-color: #d8f5dc;
-  text-align: right;
+  background-color: #dcf8c6; /* 카카오 채팅에서 보는 마지막자 버블 형상 */
 }
+
 .theirs {
   margin-right: auto;
-  background-color: #fef4d6;
-  text-align: left;
+  background-color: #ffffff;
 }
+
 .title {
   font-weight: bold;
-  font-size: 1.05rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
 }
+
 .footer {
-  display: flex;
-  justify-content: space-between;
+  margin-top: 0.5rem;
   font-size: 0.75rem;
   color: #555;
-  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
 }
 </style>
