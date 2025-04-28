@@ -236,6 +236,23 @@ const cancelDiary = () => {
 const removeHashtag = (index) => {
   hashtags.value.splice(index, 1)
 }
+
+defineProps({
+  show: {
+    type: Boolean,
+    required: true
+  },
+  title: {
+    type: String,
+    default: '확인'
+  },
+  message: {
+    type: String,
+    required: true
+  }
+})
+
+defineEmits(['confirm', 'cancel'])
 </script>
 
 <style scoped>

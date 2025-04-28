@@ -287,24 +287,9 @@
   }
   
   const submitDiary = async () => {
-    try {
-      await axios.post('http://localhost:3001/shared_diaries', {
-        title: title.value,
-        content: content.value,
-        created_at: new Date().toISOString(),
-        is_deleted: 'N',
-        fixed_state: 'Y',
-        shared_diary_room_id: roomId,
-        user_id: loginUserId,
-        style_layer: JSON.stringify(stickers.value),
-        hashtags: hashtags.value
-      })
-      alert('일기 등록 완료!')
-      router.push({ name: 'MonthlyDiary' })
-    } catch (error) {
-      console.error('등록 실패', error)
-      alert('등록 실패')
-    }
+    showRegistModal.value = false
+    alert('일기 등록 완료!')
+    router.push({ name: 'MonthlyDiary' })
   }
   
   const confirmDiary = () => {
