@@ -1,7 +1,7 @@
 <template>
     <div class="page-wrapper">
         <form ref="formRef" class="findid-form" @submit.prevent="submitForm">
-            <div class="emoji">😊</div>
+            <div class="logo"><router-link to="/">MOODI:ARY</router-link></div>
 
             <div class="form-contents">
                 <p><span>무디어리</span>에서 아이디 찾기</p>
@@ -113,6 +113,16 @@ span {
     font-size: 20px;
 }
 
+.logo a {
+    width: 250px;
+    color: #A17C59;
+    font-family: var(--font-pixel);
+    font-size: 2rem;
+    font-weight: 800;
+    text-decoration: none;
+    text-shadow: -1px -1px 0 var(--color-beige);
+}
+
 .page-wrapper {
     height: 100vh;
     display: flex;
@@ -129,11 +139,6 @@ span {
     max-width: 400px;
     text-align: center;
     margin: 40px auto;
-}
-
-.emoji {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
 }
 
 .form-contents {

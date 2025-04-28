@@ -81,7 +81,8 @@ const fileInput = ref(null)
 const stickerOptions = [
   '/src/assets/stickers/heart.png',
   '/src/assets/stickers/star.png',
-  '/src/assets/stickers/rabbit.png'
+  '/src/assets/stickers/rabbit.png',
+  '/src/assets/stickers/smpet.png'
 ]
 
 const triggerFileInput = () => {
