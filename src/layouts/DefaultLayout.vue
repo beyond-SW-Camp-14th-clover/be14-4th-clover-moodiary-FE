@@ -1,7 +1,7 @@
 <template>
-    <div class="layout">
+    <div class="layout-wrapper">
         <Header />
-        <main class="container">
+        <main>
             <router-view />
         </main>
         <Footer />
@@ -9,6 +9,21 @@
 </template>
 
 <script setup>
-import Header from '../components/Header.vue'
-import Footer from '../components/Footer.vue'
+import Header from '@/components/Header.vue'
+import Footer from '@/components/Footer.vue'
 </script>
+
+<style scoped>
+.layout-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+</style>

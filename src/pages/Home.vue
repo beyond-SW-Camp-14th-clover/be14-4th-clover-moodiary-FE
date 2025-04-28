@@ -1,14 +1,19 @@
 <template>
-    <div>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/0ezXHhUK5Zg?si=SLFYELOlmjRAR0Cl"
-            title="YouTube video player" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="home-wrapper">
+        <h1>무디어리에 오신 걸 환영합니다!</h1>
     </div>
 </template>
 
 <script setup>
-
 </script>
 
-<style scoped></style>
+<style scoped>
+.home-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--color-brown);
+}
+</style>

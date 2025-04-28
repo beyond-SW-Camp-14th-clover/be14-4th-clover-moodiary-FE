@@ -1,34 +1,12 @@
-/* 기본 폰트 */
-@font-face {
-    font-family: 'OMYuPretty';
-    src: url('../fonts/omyu-pretty.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'HandwritingFont';
-    src: url('../fonts/IM_Hyemin-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-/* 변수 정의 */
-:root {
-    --color-brown: #6B3E26;
-    --color-beige: #D6B98C;
-    --color-green: #3C8D40;
-    --color-green-dark: #337438;
-
-    --font-omyu: 'OMYuPretty', sans-serif;
-    --font-hand: 'HandwritingFont', sans-serif;
-}
-
-/* 리셋 */
-* {
+/* -------------------------------
+   기본 설정
+--------------------------------- */
+html,
+body,
+#app {
+    height: 100%;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -36,31 +14,157 @@ body {
     background-color: var(--color-beige);
     color: var(--color-brown);
     line-height: 1.6;
-    padding-top: 60px;
+    display: flex;
+    flex-direction: column;
 }
 
+/* 전체 초기화 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* -------------------------------
+   폰트 등록
+--------------------------------- */
+@font-face {
+    font-family: 'OMYuPretty';
+    src: url('@/assets/fonts/omyu-pretty.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'IMHyemin-R';
+    src: url('@/assets/fonts/IM_Hyemin-Regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DungGeunMo';
+    src: url('@/assets/fonts/DungGeunMo.ttf') format('truetype');
+}
+
+/* -------------------------------
+   색상, 폰트 변수
+--------------------------------- */
+:root {
+    --color-brown: #6B3E26;
+    --color-beige: #D6B98C;
+    --color-green: #3C8D40;
+    --color-green-dark: #337438;
+
+    --font-omyu: 'OMYuPretty', sans-serif;
+    --font-hyem: 'IMHyemin-R', sans-serif;
+    --font-pixel: 'DungGeunMo', sans-serif;
+}
+
+/* -------------------------------
+   링크
+--------------------------------- */
 a {
     color: var(--color-green);
     text-decoration: none;
 }
 
-button {
-    background-color: var(--color-green);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-family: var(--font-omyu);
-    cursor: pointer;
+a.underline {
+    text-decoration: underline dotted;
 }
 
-button:hover {
+/* -------------------------------
+   버튼 스타일
+--------------------------------- */
+button,
+a.button {
+    all: unset;
+    display: inline-block;
+    padding: 5px 35px;
+    font-size: 18px;
+    font-family: var(--font-pixel);
+    font-weight: bold;
+    color: white;
+    background-color: var(--color-green);
+    border: 2px solid var(--color-brown);
+    border-top: 1px solid white;
+    border-left: 1px solid white;
+    box-shadow: -1px -1px 0 1px var(--color-brown);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover,
+a.button:hover {
+    transform: scale(1.05);
+}
+
+button:active,
+a.button:active {
+    transform: scale(0.97);
+}
+
+/* 버튼 타입별 색상 */
+.submit-button {
+    background-color: var(--color-green);
+}
+
+.submit-button:hover {
     background-color: var(--color-green-dark);
 }
 
-/* 컨테이너 (공통 레이아웃용) */
-.container {
-    max-width: 1920px;
-    margin: 0 auto;
-    padding: 2rem;
+.cancel-button {
+    background-color: #a9a9a9;
+}
+
+.cancel-button:hover {
+    background-color: #898989;
+}
+
+.delete-button {
+    background-color: red;
+}
+
+.delete-button:hover {
+    background-color: crimson;
+}
+
+/* -------------------------------
+   레이아웃 구조
+--------------------------------- */
+/* app 전체 영역 */
+#app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 메인 콘텐츠 영역 (헤더 제외) */
+main,
+main.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 80px;
+    /* header 높이 고려 */
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+/* 페이지 내부 wrapper */
+.page-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* -------------------------------
+   기타
+--------------------------------- */
+/* 작은 글씨 */
+.small-p {
+    font-size: 0.8rem;
+}
+
+/* MP 음악플레이어 기본 숨김 */
+.music-player {
+    display: none;
 }
