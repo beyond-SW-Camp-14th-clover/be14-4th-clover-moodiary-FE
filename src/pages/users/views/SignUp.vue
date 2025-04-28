@@ -9,7 +9,7 @@
                 <div class="form-inputs">
                     <!-- 이메일 -->
                     <div class="form-group">
-                        <input ref="emailRef" v-model="email" @input="validateEmail; moveCursorToEnd"
+                        <input ref="emailRef" v-model="email" @input="(e) => { validateEmail(); moveCursorToEnd(e) }"
                             @keydown.enter="handleEnter(passwordRef)" type="text" placeholder="Email address" required
                             :class="{ 'input-error': emailError }" />
                         <p v-if="emailError" class="error">{{ emailError }}</p>
@@ -47,7 +47,7 @@
 
                     <!-- 휴대폰 번호 -->
                     <div class="form-group">
-                        <input ref="phoneRef" v-model="phone" @input="formatPhone; moveCursorToEnd"
+                        <input ref="phoneRef" v-model="phone" @input="handlePhoneInput"
                             @keydown.enter="handleEnter(securityAnswerRef)" type="text" placeholder="Phone Number"
                             required :class="{ 'input-error': phoneError }" />
                         <p v-if="phoneError" class="error">{{ phoneError }}</p>
@@ -141,40 +141,27 @@ const handleEnter = (nextFieldRef) => {
 }
 
 // 커서 맨 뒤로 이동
-const moveCursorToEnd = (e) => {
-    const input = e.target
+const moveCursorToEnd = () => {
     nextTick(() => {
-        const length = input.value.length
-        input.setSelectionRange(length, length)
-    })
-}
-
-// 비밀번호 input 포커스 시 커서 맨 뒤
-const focusPasswordInput = (e) => {
-    const input = e.target
-    input.type = 'text'
-    nextTick(() => {
-        const length = input.value.length
-        input.setSelectionRange(length, length)
-        input.type = 'password'
-    })
-}
-
-// 비밀번호 확인 input 포커스 시 커서 맨 뒤
-const focusConfirmPasswordInput = (e) => {
-    const input = e.target
-    input.type = 'text'
-    nextTick(() => {
-        const length = input.value.length
-        input.setSelectionRange(length, length)
-        input.type = 'password'
+        const input = phoneRef.value
+        if (input) {
+            const length = input.value.length
+            input.setSelectionRange(length, length)
+        }
     })
 }
 
 // 이메일 검증
 const validateEmail = () => {
+    const value = email.value.trim()
+
+    if (value === '') {
+        emailError.value = '이메일을 입력해 주세요.'
+        return
+    }
+
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    emailError.value = emailRegex.test(email.value) ? '' : '올바른 이메일 형식이 아닙니다.'
+    emailError.value = emailRegex.test(value) ? '' : '올바른 이메일 형식이 아닙니다.'
 }
 
 // 비밀번호 검증
@@ -231,22 +218,58 @@ const hideConfirmPassword = (e) => {
     moveCursorToEnd(e)
 }
 
+// 휴대폰 번호 포맷 + validate 같이 처리
+const handlePhoneInput = (e) => {
+    formatPhone()        // 이벤트 기반으로 포맷
+    validatePhone()       // 포맷 이후에 검증
+    moveCursorToEnd()    // 커서 맨 뒤로 이동
+}
+
 // 휴대폰 번호 포맷
 const formatPhone = () => {
-    let cleaned = phone.value.replace(/\D/g, '')
+    let cleaned = phone.value.replace(/\D/g, '') // phone.value를 직접 정제
+
+    if (cleaned.length > 11) {
+        cleaned = cleaned.slice(0, 11)
+    }
+
+    let formatted = ''
+
+    if (cleaned.length > 3 && cleaned.length <= 7) {
+        formatted = cleaned.replace(/(\d{3})(\d+)/, '$1-$2')
+    } else if (cleaned.length > 7) {
+        formatted = cleaned.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3')
+    } else {
+        formatted = cleaned
+    }
+
+    phone.value = formatted // 이 결과를 덮어쓰기
+}
+
+// 휴대폰 번호 검증
+const validatePhone = () => {
+    const cleaned = phone.value.replace(/-/g, '')
+
+    if (cleaned.length !== 11) {
+        phoneError.value = '휴대폰 번호는 11자리여야 합니다.'
+        return
+    }
+
     if (!cleaned.startsWith('010')) {
         phoneError.value = '휴대폰 번호는 010으로 시작해야 합니다.'
         return
     }
-    if (cleaned.length > 3 && cleaned.length <= 7) {
-        phone.value = cleaned.replace(/(\d{3})(\d+)/, '$1-$2')
-    } else if (cleaned.length > 7) {
-        phone.value = cleaned.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3')
-    }
+
+    // const phoneFormatRegex = /^010-\d{4}-\d{4}$/
+    // if (!phoneFormatRegex.test(phone.value)) {
+    //     phoneError.value = '휴대폰 번호는 010-1234-5678 형식이어야 합니다.'
+    //     return
+    // }
+
     phoneError.value = ''
 }
 
-// 질문 선택 검증
+// 아이디 질문 선택 검증
 const validateQuestion = () => {
     questionError.value = selectedQuestion.value ? '' : '아이디 찾기 질문을 선택해 주세요.'
 }
@@ -256,6 +279,7 @@ const submitForm = () => {
     validateEmail()
     validatePassword()
     validateConfirmPassword()
+    validatePhone()
     validateQuestion()
 
     if (emailError.value || passwordError.value || confirmPasswordError.value || phoneError.value || questionError.value) {
