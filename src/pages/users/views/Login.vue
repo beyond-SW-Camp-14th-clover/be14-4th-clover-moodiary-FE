@@ -1,7 +1,7 @@
 <template>
     <div class="login-page">
         <div class="login-container">
-            <div class="emoji">😊</div>
+            <div class="logo"><router-link to="/">MOODI:ARY</router-link></div>
             <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
             <p class="small-p">
                 계정이 없으신가요?
@@ -66,6 +66,16 @@ span {
     font-size: 20px;
 }
 
+.logo a {
+    width: 250px;
+    color: #A17C59;
+    font-family: var(--font-pixel);
+    font-size: 2rem;
+    font-weight: 800;
+    text-decoration: none;
+    text-shadow: -1px -1px 0 var(--color-beige);
+}
+
 .login-page {
     background-color: var(--color-beige);
     height: calc(100vh - 80px);
@@ -95,10 +105,6 @@ span {
 /* p 태그 기본 마진 없애기 */
 .login-container p {
     margin: 0;
-}
-
-.emoji {
-    font-size: 40px;
 }
 
 input {

@@ -99,7 +99,8 @@ const showRegistModal = ref(false)
 const stickerOptions = [
   '/src/assets/stickers/heart.png',
   '/src/assets/stickers/star.png',
-  '/src/assets/stickers/rabbit.png'
+  '/src/assets/stickers/rabbit.png',
+  '/src/assets/stickers/smpet.png'
 ]
 
 const todayString = computed(() => {

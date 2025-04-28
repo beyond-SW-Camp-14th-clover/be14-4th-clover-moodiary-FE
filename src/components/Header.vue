@@ -75,7 +75,7 @@
     font-size: 2rem;
     font-weight: 800;
     text-decoration: none;
-    text-shadow: 1px 1px 3px var(--color-beige);
+    text-shadow: -1px -1px 0 #A17C59;
 }
 
 /* 네비게이션 */
