@@ -80,7 +80,6 @@
                               />
                             </svg>
                             <div class="chart-area">
-                                <!-- 차트 또는 내용 영역 -->
                             </div>
                         </div>
                     </div>
@@ -106,10 +105,11 @@
                     </div>
                 </div>
             </div>
-            <div class="right-section">
+            <div class="right-section" 
+                 @mouseleave="handleSectionMouseLeave">
                 <div class="weekly-card sunday" 
                      @mouseenter="handleMouseEnter('sunday')"
-                     @mouseleave="handleMouseLeave('sunday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('sunday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[0] }}</div>
                         <div class="day-label">일</div>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="weekly-card monday"
                      @mouseenter="handleMouseEnter('monday')"
-                     @mouseleave="handleMouseLeave('monday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('monday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[1] }}</div>
                         <div class="day-label">월</div>
@@ -143,7 +143,7 @@
                 </div>
                 <div class="weekly-card tuesday"
                      @mouseenter="handleMouseEnter('tuesday')"
-                     @mouseleave="handleMouseLeave('tuesday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('tuesday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[2] }}</div>
                         <div class="day-label">화</div>
@@ -160,7 +160,7 @@
                 </div>
                 <div class="weekly-card wednesday"
                      @mouseenter="handleMouseEnter('wednesday')"
-                     @mouseleave="handleMouseLeave('wednesday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('wednesday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[3] }}</div>
                         <div class="day-label">수</div>
@@ -177,7 +177,7 @@
                 </div>
                 <div class="weekly-card thursday"
                      @mouseenter="handleMouseEnter('thursday')"
-                     @mouseleave="handleMouseLeave('thursday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('thursday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[4] }}</div>
                         <div class="day-label">목</div>
@@ -194,7 +194,7 @@
                 </div>
                 <div class="weekly-card friday"
                      @mouseenter="handleMouseEnter('friday')"
-                     @mouseleave="handleMouseLeave('friday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('friday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[5] }}</div>
                         <div class="day-label">금</div>
@@ -211,7 +211,7 @@
                 </div>
                 <div class="weekly-card saturday"
                      @mouseenter="handleMouseEnter('saturday')"
-                     @mouseleave="handleMouseLeave('saturday')">
+                     :style="{ zIndex: weeklyDiaryStore.getCardZIndex('saturday') }">
                     <div class="card-content">
                         <div class="date-label">{{ getCurrentWeekDates[6] }}</div>
                         <div class="day-label">토</div>
@@ -233,8 +233,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useWeeklyDiaryStore } from '../../../stores/weeklyDiaryStore';
 
-const currentDate = ref(new Date());
+const weeklyDiaryStore = useWeeklyDiaryStore();
+const selectedDate = ref(new Date());
 const selectedWeek = ref('1');
 const score = ref(0);
 
@@ -244,19 +246,19 @@ const monthNames = [
 ];
 
 const selectedMonth = computed(() => {
-    const month = monthNames[currentDate.value.getMonth()];
-    const year = currentDate.value.getFullYear();
+    const month = monthNames[selectedDate.value.getMonth()];
+    const year = selectedDate.value.getFullYear();
     return `${month} ${year}`;
 });
 
 const changeMonth = (change) => {
-    const newDate = new Date(currentDate.value);
+    const newDate = new Date(selectedDate.value);
     newDate.setMonth(newDate.getMonth() + change);
-    currentDate.value = newDate;
+    selectedDate.value = newDate;
 };
 
 const getWeekInfo = computed(() => {
-    const date = new Date(currentDate.value);
+    const date = new Date(selectedDate.value);
     const year = date.getFullYear();
     const month = date.getMonth();
     
@@ -333,13 +335,12 @@ const getBottomTextColor = (value) => {
     return '#A60303';
 };
 
-// 마우스 이벤트 핸들러 추가
 const handleMouseEnter = (day) => {
-    // 마우스 진입 시 처리
+    weeklyDiaryStore.addHoveredCard(day);
 };
 
-const handleMouseLeave = (day) => {
-    // 마우스 이탈 시 처리
+const handleSectionMouseLeave = () => {
+    weeklyDiaryStore.resetHoveredCards();
 };
 </script>
 
@@ -686,70 +687,34 @@ const handleMouseLeave = (day) => {
     box-shadow: none;
     position: absolute;
     transition: all 0.3s ease;
-    z-index: 1;
 }
 
 .sunday {
     left: 0;
-    z-index: 7;
-}
-
-.sunday:hover {
-    z-index: 10;
 }
 
 .monday {
     left: 90px;
-    z-index: 6;
-}
-
-.monday:hover {
-    z-index: 10;
 }
 
 .tuesday {
     left: 180px;
-    z-index: 5;
-}
-
-.tuesday:hover {
-    z-index: 10;
 }
 
 .wednesday {
     left: 270px;
-    z-index: 4;
-}
-
-.wednesday:hover {
-    z-index: 10;
 }
 
 .thursday {
     left: 360px;
-    z-index: 3;
-}
-
-.thursday:hover {
-    z-index: 10;
 }
 
 .friday {
     left: 450px;
-    z-index: 2;
-}
-
-.friday:hover {
-    z-index: 10;
 }
 
 .saturday {
     left: 540px;
-    z-index: 1;
-}
-
-.saturday:hover {
-    z-index: 10;
 }
 
 .date-label {

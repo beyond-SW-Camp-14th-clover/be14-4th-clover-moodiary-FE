@@ -78,7 +78,7 @@ import { ref, computed } from 'vue';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
 
-const currentDate = ref(new Date());
+const selectedDate = ref(new Date());
 
 const monthNames = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -86,15 +86,15 @@ const monthNames = [
 ];
 
 const selectedMonth = computed(() => {
-    const month = monthNames[currentDate.value.getMonth()];
-    const year = currentDate.value.getFullYear();
+    const month = monthNames[selectedDate.value.getMonth()];
+    const year = selectedDate.value.getFullYear();
     return `${month} ${year}`;
 });
 
 const changeMonth = (change) => {
-    const newDate = new Date(currentDate.value);
+    const newDate = new Date(selectedDate.value);
     newDate.setMonth(newDate.getMonth() + change);
-    currentDate.value = newDate;
+    selectedDate.value = newDate;
 };
 
 const weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -108,8 +108,8 @@ const getFirstDayOfWeek = (year, month) => {
 };
 
 const calendarCells = computed(() => {
-    const year = currentDate.value.getFullYear();
-    const month = currentDate.value.getMonth();
+    const year = selectedDate.value.getFullYear();
+    const month = selectedDate.value.getMonth();
     const days = daysInMonth(year, month);
     const firstDay = getFirstDayOfWeek(year, month);
     const prevMonth = month === 0 ? 11 : month - 1;
