@@ -5,8 +5,6 @@ import router from './router'
 import './assets/styles/base.css'
 import './assets/styles/fonts.css'
 
-
-
 const app = createApp(App);
 const pinia = createPinia()
 
