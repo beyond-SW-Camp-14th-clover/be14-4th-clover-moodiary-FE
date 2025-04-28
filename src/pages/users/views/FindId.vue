@@ -1,36 +1,50 @@
 <template>
-    <form ref="formRef" class="findid-form" @submit.prevent="submitForm">
-        <div class="emoji">😊</div>
+    <div class="page-wrapper">
+        <form ref="formRef" class="findid-form" @submit.prevent="submitForm">
+            <div class="emoji">😊</div>
 
-        <div class="form-contents">
-            <p><span>무디여리</span>에서 아이디 찾기</p>
+            <div class="form-contents">
+                <p><span>무디어리</span>에서 아이디 찾기</p>
 
-            <div class="form-inputs">
-                <!-- 질문 선택 -->
-                <div class="form-group">
-                    <select v-model="selectedQuestion" @change="validateQuestion" required class="select-box"
-                        :class="{ 'input-error': questionError }">
-                        <option value="" disabled>비밀번호 찾기 질문을 선택하세요</option>
-                        <option v-for="question in securityQuestions" :key="question" :value="question">
-                            {{ question }}
-                        </option>
-                    </select>
-                    <p v-if="questionError" class="error">{{ questionError }}</p>
-                </div>
+                <div class="form-inputs">
+                    <!-- 이름 입력 -->
+                    <div class="form-group">
+                        <input v-model="name" type="text" placeholder="이름" required />
+                    </div>
 
-                <!-- 답변 입력 -->
-                <div class="form-group">
-                    <input v-model="answer" type="text" placeholder="답변" required />
+                    <!-- 전화번호 입력 -->
+                    <div class="form-group">
+                        <input v-model="phone" type="tel" placeholder="휴대폰 번호(010-xxxx-xxxx)" required />
+                    </div>
+
+                    <!-- 질문 선택 -->
+                    <div class="form-group">
+                        <select v-model="selectedQuestion" @change="validateQuestion" required class="select-box"
+                            :class="{ 'input-error': questionError }">
+                            <option value="" disabled>아이디 찾기 질문을 선택하세요</option>
+                            <option v-for="question in securityQuestions" :key="question" :value="question">
+                                {{ question }}
+                            </option>
+                        </select>
+                        <p v-if="questionError" class="error">{{ questionError }}</p>
+                    </div>
+
+                    <!-- 답변 입력 -->
+                    <div class="form-group">
+                        <input v-model="answer" type="text" placeholder="답변" required
+                            :class="{ 'input-error': answerError }" />
+                        <p v-if="answerError" class="error">{{ answerError }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <button type="submit" class="button submit-button">아이디 찾기</button>
+            <button type="submit" class="button submit-button">아이디 찾기</button>
 
-        <div class="login-link">
-            기억나어서 로그인하기? <router-link to="/login" class="underline">로그인</router-link>
-        </div>
-    </form>
+            <div class="login-link">
+                기억나서 로그인하기? <router-link to="/login" class="underline">로그인</router-link>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup>
@@ -40,36 +54,44 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const formRef = ref(null)
+const name = ref('')
+const phone = ref('')
 const selectedQuestion = ref('')
 const answer = ref('')
 const questionError = ref('')
+const answerError = ref('')
 
 const securityQuestions = [
-    '당신의 어린 적 별명은 무엇입니까?',
-    '어마니의 성함은 무엇입니까?',
-    '당신이 태어난 동아 이름은 무엇입니까?',
-    '첫 번째로 키우던 반려동물의 이름은 무엇입니까?',
-    '당신이 조료한 천부학교 이름은 무엇입니까?',
-    '교천 고등학교 이름은 무엇입니까?',
-    '첫 근무 했던 회사 이름은 무엇입니까?',
+    '당신의 어릴 적 별명은 무엇입니까?',
+    '어머니의 성함은 무엇입니까?',
+    '당신이 태어난 도시 이름은 무엇입니까?',
+    '첫 번째로 키운 반려동물의 이름은 무엇입니까?',
+    '당신이 졸업한 초등학교 이름은 무엇입니까?',
+    '졸업한 고등학교 이름은 무엇입니까?',
+    '처음 근무했던 회사 이름은 무엇입니까?',
     '기억에 남는 선생님의 이름은 무엇입니까?',
-    '인상에서 첫 번째로 보은 영화는 무엇입니까?',
-    '나의 꿔어진 지역은 무엇입니까?',
+    '인생에서 처음 본 영화는 무엇입니까?',
+    '나의 꿈의 직업은 무엇입니까?'
 ]
 
 const validateQuestion = () => {
-    questionError.value = selectedQuestion.value ? '' : '질문을 선택해주세요.'
+    questionError.value = selectedQuestion.value ? '' : '질문을 선택해 주세요.'
+}
+
+const validateAnswer = () => {
+    answerError.value = answer.value.trim() ? '' : '답변을 입력해 주세요.'
 }
 
 const submitForm = () => {
     validateQuestion()
+    validateAnswer()
 
-    if (questionError.value) {
+    if (questionError.value || answerError.value) {
         triggerShake()
         return
     }
 
-    alert('\uac80색\uacb0과!')
+    alert(`입력한 이름: ${name.value}, 번호: ${phone.value}, 질문: ${selectedQuestion.value}, 답변: ${answer.value}`)
     router.push('/login')
 }
 
@@ -89,6 +111,13 @@ const triggerShake = () => {
 
 span {
     font-size: 20px;
+}
+
+.page-wrapper {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .findid-form {
@@ -176,7 +205,8 @@ select:focus {
     animation: shake 0.5s;
 }
 
-.login-link {
+.login-link,
+.findpw-link {
     margin-top: 1rem;
     font-size: 0.8rem;
 }

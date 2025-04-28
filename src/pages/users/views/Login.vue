@@ -11,6 +11,10 @@
             <input v-model="email" type="email" placeholder="Email address" />
             <input v-model="password" type="password" placeholder="Password" />
 
+            <!-- ✅ 아이디 찾기 추가 -->
+            <p class="forgot small-p" @click="goToFindId">아이디를 잊으셨나요?</p>
+
+            <!-- 기존 비밀번호 찾기 -->
             <p class="forgot small-p" @click="showForgotModal = true">비밀번호를 잊으셨나요?</p>
 
             <router-link to="/" class="button submit-button">로그인</router-link>
@@ -32,19 +36,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const email = ref('')
 const password = ref('')
 const showForgotModal = ref(false)
 const resetEmail = ref('')
 
+const router = useRouter()
+
 function submitReset() {
     alert(`비밀번호 재설정 링크를 ${resetEmail.value}로 보냈습니다.`)
     showForgotModal.value = false
 }
+
+// ✅ 아이디 찾기 화면으로 이동
+function goToFindId() {
+    router.push('/findid') // '/findid' 경로로 이동 (FindId.vue 연결)
+}
 </script>
 
 <style scoped>
+/* 기존 스타일 그대로 */
 * {
     font-family: var(--font-pixel);
 }
@@ -55,7 +68,7 @@ span {
 
 .login-page {
     background-color: var(--color-beige);
-    min-height: 100vh;
+    height: calc(100vh - 80px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -68,11 +81,20 @@ span {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     font-family: var(--font-omyu);
     width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
     align-items: center;
     text-align: center;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* p 태그 기본 마진 없애기 */
+.login-container p {
+    margin: 0;
 }
 
 .emoji {

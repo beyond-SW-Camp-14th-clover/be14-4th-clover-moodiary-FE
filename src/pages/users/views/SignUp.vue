@@ -1,78 +1,80 @@
 <template>
-    <form ref="formRef" class="signup-form" @submit.prevent="submitForm">
-        <div class="emoji">😊</div>
+    <div class="page-wrapper">
+        <form ref="formRef" class="signup-form" @submit.prevent="submitForm">
+            <div class="emoji">😊</div>
 
-        <div class="form-contents">
-            <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
+            <div class="form-contents">
+                <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
 
-            <div class="form-inputs">
-                <!-- 이메일 -->
-                <div class="form-group">
-                    <input v-model="email" @input="validateEmail" type="text" placeholder="Email address" required
-                        :class="{ 'input-error': emailError }" />
-                    <p v-if="emailError" class="error">{{ emailError }}</p>
-                </div>
+                <div class="form-inputs">
+                    <!-- 이메일 -->
+                    <div class="form-group">
+                        <input v-model="email" @input="validateEmail" type="text" placeholder="Email address" required
+                            :class="{ 'input-error': emailError }" />
+                        <p v-if="emailError" class="error">{{ emailError }}</p>
+                    </div>
 
-                <!-- 비밀번호 -->
-                <div class="form-group">
-                    <input v-model="password" :type="passwordInputType" placeholder="Password" required
-                        @mousedown="passwordInputType = 'text'" @mouseup="passwordInputType = 'password'"
-                        @mouseleave="passwordInputType = 'password'" @input="validatePassword"
-                        :class="{ 'input-error': passwordError }" />
-                    <div v-if="password.length > 0" class="password-checklist">
-                        <p :class="{ success: passwordChecks.lowercaseAndNumber }">- 소문자+숫자 조합</p>
-                        <p :class="{ success: passwordChecks.specialChar }">- 특수문자 포함 가능</p>
-                        <p :class="{ success: passwordChecks.lengthValid }">- 8자 이상 16자 이하</p>
+                    <!-- 비밀번호 -->
+                    <div class="form-group">
+                        <input v-model="password" :type="passwordInputType" placeholder="Password" required
+                            @mousedown="passwordInputType = 'text'" @mouseup="passwordInputType = 'password'"
+                            @mouseleave="passwordInputType = 'password'" @input="validatePassword"
+                            :class="{ 'input-error': passwordError }" />
+                        <div v-if="password.length > 0" class="password-checklist">
+                            <p :class="{ success: passwordChecks.lowercaseAndNumber }">- 소문자+숫자 조합</p>
+                            <p :class="{ success: passwordChecks.specialChar }">- 특수문자 포함 가능</p>
+                            <p :class="{ success: passwordChecks.lengthValid }">- 8자 이상 16자 이하</p>
+                        </div>
+                    </div>
+
+                    <!-- 비밀번호 확인 -->
+                    <div class="form-group">
+                        <input v-model="confirmPassword" :type="confirmPasswordInputType" placeholder="Confirm Password"
+                            required @mousedown="confirmPasswordInputType = 'text'"
+                            @mouseup="confirmPasswordInputType = 'password'"
+                            @mouseleave="confirmPasswordInputType = 'password'" @input="validateConfirmPassword"
+                            :class="{ 'input-error': confirmPasswordError }" />
+                        <p v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</p>
+                    </div>
+
+                    <!-- 이름 -->
+                    <div class="form-group">
+                        <input v-model="name" type="text" placeholder="Name" required />
+                    </div>
+
+                    <!-- 휴대폰 번호 -->
+                    <div class="form-group">
+                        <input v-model="phone" @input="formatPhone" type="text" placeholder="Phone Number" required
+                            :class="{ 'input-error': phoneError }" />
+                        <p v-if="phoneError" class="error">{{ phoneError }}</p>
+                    </div>
+
+                    <!-- 아이디 찾기 질문 -->
+                    <div class="form-group">
+                        <select v-model="selectedQuestion" @change="validateQuestion" required class="select-box"
+                            :class="{ 'input-error': questionError }">
+                            <option value="" disabled>아이디 찾기 질문을 선택하세요</option>
+                            <option v-for="question in securityQuestions" :key="question" :value="question">
+                                {{ question }}
+                            </option>
+                        </select>
+                        <p v-if="questionError" class="error">{{ questionError }}</p>
+                    </div>
+
+                    <!-- 아이디 찾기 답변 -->
+                    <div class="form-group">
+                        <input v-model="securityAnswer" type="text" placeholder="아이디 찾기 답변" required />
                     </div>
                 </div>
-
-                <!-- 비밀번호 확인 -->
-                <div class="form-group">
-                    <input v-model="confirmPassword" :type="confirmPasswordInputType" placeholder="Confirm Password"
-                        required @mousedown="confirmPasswordInputType = 'text'"
-                        @mouseup="confirmPasswordInputType = 'password'"
-                        @mouseleave="confirmPasswordInputType = 'password'" @input="validateConfirmPassword"
-                        :class="{ 'input-error': confirmPasswordError }" />
-                    <p v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</p>
-                </div>
-
-                <!-- 이름 -->
-                <div class="form-group">
-                    <input v-model="name" type="text" placeholder="Name" required />
-                </div>
-
-                <!-- 휴대폰 번호 -->
-                <div class="form-group">
-                    <input v-model="phone" @input="formatPhone" type="text" placeholder="Phone Number" required
-                        :class="{ 'input-error': phoneError }" />
-                    <p v-if="phoneError" class="error">{{ phoneError }}</p>
-                </div>
-
-                <!-- 아이디 찾기 질문 -->
-                <div class="form-group">
-                    <select v-model="selectedQuestion" @change="validateQuestion" required class="select-box"
-                        :class="{ 'input-error': questionError }">
-                        <option value="" disabled>아이디 찾기 질문을 선택하세요</option>
-                        <option v-for="question in securityQuestions" :key="question" :value="question">
-                            {{ question }}
-                        </option>
-                    </select>
-                    <p v-if="questionError" class="error">{{ questionError }}</p>
-                </div>
-
-                <!-- 아이디 찾기 답변 -->
-                <div class="form-group">
-                    <input v-model="securityAnswer" type="text" placeholder="아이디 찾기 답변" required />
-                </div>
             </div>
-        </div>
 
-        <button type="submit" class="button submit-button">회원 가입</button>
+            <button type="submit" class="button submit-button">회원 가입</button>
 
-        <div class="login-link">
-            이미 계정이 있으신가요? <router-link to="/login" class="underline">로그인</router-link>
-        </div>
-    </form>
+            <div class="login-link">
+                이미 계정이 있으신가요? <router-link to="/login" class="underline">로그인</router-link>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup>
@@ -210,6 +212,13 @@ const triggerShake = () => {
 
 span {
     font-size: 20px;
+}
+
+.page-wrapper {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .signup-form {

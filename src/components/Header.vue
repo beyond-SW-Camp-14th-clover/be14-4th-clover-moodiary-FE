@@ -10,8 +10,8 @@
                     <span class="menu-button">서랍 속 작은 일기장</span>
                     <div class="submenu">
                         <router-link to="/mydiary/mydiarymine">내 일기</router-link>
-                        <router-link to="/mydiary/emotion">월간</router-link>
-                        <router-link to="/mydiary/ours">주간</router-link>
+                        <router-link to="/mydiary/mydiarymine">월간</router-link>
+                        <router-link to="/mydiary/mydiarymine">주간</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
@@ -23,7 +23,7 @@
                 <div class="menu-wrapper">
                     <span class="menu-button">내 맘속에 담아</span>
                     <div class="submenu">
-                        <router-link to="/myemotion">감정 분석</router-link>
+                        <router-link to="/">감정 분석</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
@@ -42,7 +42,6 @@
 </template>
 
 <script setup>
-import MusicPlayer from './common/MusicPlayer.vue'
 </script>
 
 <style scoped>
