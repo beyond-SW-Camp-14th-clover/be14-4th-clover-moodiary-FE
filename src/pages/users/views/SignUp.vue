@@ -2,14 +2,12 @@
     <div class="page-wrapper">
         <form ref="formRef" class="signup-form" @submit.prevent="submitForm">
             <div class="emoji">😊</div>
-
             <div class="form-contents">
                 <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
-
                 <div class="form-inputs">
                     <!-- 이메일 -->
                     <div class="form-group">
-                        <input ref="emailRef" v-model="email" @input="(e) => { validateEmail(); moveCursorToEnd(e) }"
+                        <input ref="emailRef" v-model="email" @input="handleEmailInput"
                             @keydown.enter="handleEnter(passwordRef)" type="text" placeholder="Email address" required
                             :class="{ 'input-error': emailError }" />
                         <p v-if="emailError" class="error">{{ emailError }}</p>
@@ -18,7 +16,7 @@
                     <!-- 비밀번호 -->
                     <div class="form-group">
                         <input ref="passwordRef" v-model="password" :type="passwordInputType" placeholder="Password"
-                            required @input="handlePasswordInput" @focus="focusPasswordInput"
+                            required @input="handlePasswordInput" @focus="moveCursorToEnd(passwordRef)"
                             @keydown.enter="handleEnter(confirmPasswordRef)" @mousedown="showPassword"
                             @mouseup="hidePassword" @mouseleave="hidePassword"
                             :class="{ 'input-error': passwordError }" />
@@ -33,7 +31,7 @@
                     <div class="form-group">
                         <input ref="confirmPasswordRef" v-model="confirmPassword" :type="confirmPasswordInputType"
                             placeholder="Confirm Password" required @input="handleConfirmPasswordInput"
-                            @focus="focusConfirmPasswordInput" @keydown.enter="handleEnter(nameRef)"
+                            @focus="moveCursorToEnd(confirmPasswordRef)" @keydown.enter="handleEnter(nameRef)"
                             @mousedown="showConfirmPassword" @mouseup="hideConfirmPassword"
                             @mouseleave="hideConfirmPassword" :class="{ 'input-error': confirmPasswordError }" />
                         <p v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</p>
@@ -42,7 +40,7 @@
                     <!-- 이름 -->
                     <div class="form-group">
                         <input ref="nameRef" v-model="name" type="text" placeholder="Name" required
-                            @input="moveCursorToEnd" @keydown.enter="handleEnter(phoneRef)" />
+                            @input="moveCursorToEnd(nameRef)" @keydown.enter="handleEnter(phoneRef)" />
                     </div>
 
                     <!-- 휴대폰 번호 -->
@@ -58,9 +56,8 @@
                         <select v-model="selectedQuestion" @change="validateQuestion" required class="select-box"
                             :class="{ 'input-error': questionError }">
                             <option value="" disabled>아이디 찾기 질문을 선택하세요</option>
-                            <option v-for="question in securityQuestions" :key="question" :value="question">
-                                {{ question }}
-                            </option>
+                            <option v-for="question in securityQuestions" :key="question" :value="question">{{ question
+                            }}</option>
                         </select>
                         <p v-if="questionError" class="error">{{ questionError }}</p>
                     </div>
@@ -68,7 +65,7 @@
                     <!-- 아이디 찾기 답변 -->
                     <div class="form-group">
                         <input ref="securityAnswerRef" v-model="securityAnswer" type="text" placeholder="아이디 찾기 답변"
-                            required @input="moveCursorToEnd" @keydown.enter="submitForm" />
+                            required @input="moveCursorToEnd(securityAnswerRef)" @keydown.enter="submitForm" />
                     </div>
                 </div>
             </div>
@@ -133,17 +130,15 @@ const securityQuestions = [
     '나의 꿈의 직업은 무엇입니까?',
 ]
 
-// 엔터 입력 시 다음 input으로 포커스 이동
 const handleEnter = (nextFieldRef) => {
     nextTick(() => {
         nextFieldRef?.value?.focus()
     })
 }
 
-// 커서 맨 뒤로 이동
-const moveCursorToEnd = () => {
+const moveCursorToEnd = (refEl) => {
     nextTick(() => {
-        const input = phoneRef.value
+        const input = refEl?.value
         if (input) {
             const length = input.value.length
             input.setSelectionRange(length, length)
@@ -151,20 +146,21 @@ const moveCursorToEnd = () => {
     })
 }
 
-// 이메일 검증
+const handleEmailInput = () => {
+    validateEmail()
+    moveCursorToEnd(emailRef)
+}
+
 const validateEmail = () => {
     const value = email.value.trim()
-
     if (value === '') {
         emailError.value = '이메일을 입력해 주세요.'
         return
     }
-
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     emailError.value = emailRegex.test(value) ? '' : '올바른 이메일 형식이 아닙니다.'
 }
 
-// 비밀번호 검증
 const validatePassword = () => {
     const lowercaseAndNumberRegex = /^(?=.*[a-z])(?=.*\d)/
     const specialCharRegex = /[^a-zA-Z0-9]/
@@ -174,67 +170,39 @@ const validatePassword = () => {
     passwordChecks.value.specialChar = specialCharRegex.test(password.value)
     passwordChecks.value.lengthValid = lengthValid
 
-    passwordError.value = (passwordChecks.value.lowercaseAndNumber && passwordChecks.value.lengthValid)
-        ? ''
-        : '비밀번호 조건을 만족해야 합니다.'
+    passwordError.value = (passwordChecks.value.lowercaseAndNumber && passwordChecks.value.lengthValid) ? '' : '비밀번호 조건을 만족해야 합니다.'
 }
 
-// 비밀번호 확인 검증
 const validateConfirmPassword = () => {
-    confirmPasswordError.value = (password.value === confirmPassword.value)
-        ? ''
-        : '비밀번호가 일치하지 않습니다.'
+    confirmPasswordError.value = (password.value === confirmPassword.value) ? '' : '비밀번호가 일치하지 않습니다.'
 }
 
-// 비밀번호 입력 핸들러
-const handlePasswordInput = (e) => {
-    password.value = e.target.value
+const handlePasswordInput = () => {
     validatePassword()
-    moveCursorToEnd(e)
+    moveCursorToEnd(passwordRef)
 }
 
-// 비밀번호 확인 입력 핸들러
-const handleConfirmPasswordInput = (e) => {
-    confirmPassword.value = e.target.value
+const handleConfirmPasswordInput = () => {
     validateConfirmPassword()
-    moveCursorToEnd(e)
+    moveCursorToEnd(confirmPasswordRef)
 }
 
-// 비밀번호 보기/숨기기
-const showPassword = (e) => {
-    passwordInputType.value = 'text'
-    moveCursorToEnd(e)
-}
-const hidePassword = (e) => {
-    passwordInputType.value = 'password'
-    moveCursorToEnd(e)
-}
-const showConfirmPassword = (e) => {
-    confirmPasswordInputType.value = 'text'
-    moveCursorToEnd(e)
-}
-const hideConfirmPassword = (e) => {
-    confirmPasswordInputType.value = 'password'
-    moveCursorToEnd(e)
+const showPassword = () => { passwordInputType.value = 'text' }
+const hidePassword = () => { passwordInputType.value = 'password' }
+const showConfirmPassword = () => { confirmPasswordInputType.value = 'text' }
+const hideConfirmPassword = () => { confirmPasswordInputType.value = 'password' }
+
+const handlePhoneInput = () => {
+    formatPhone()
+    validatePhone()
+    moveCursorToEnd(phoneRef)
 }
 
-// 휴대폰 번호 포맷 + validate 같이 처리
-const handlePhoneInput = (e) => {
-    formatPhone()        // 이벤트 기반으로 포맷
-    validatePhone()       // 포맷 이후에 검증
-    moveCursorToEnd()    // 커서 맨 뒤로 이동
-}
-
-// 휴대폰 번호 포맷
 const formatPhone = () => {
-    let cleaned = phone.value.replace(/\D/g, '') // phone.value를 직접 정제
-
-    if (cleaned.length > 11) {
-        cleaned = cleaned.slice(0, 11)
-    }
+    let cleaned = phone.value.replace(/\D/g, '')
+    if (cleaned.length > 11) cleaned = cleaned.slice(0, 11)
 
     let formatted = ''
-
     if (cleaned.length > 3 && cleaned.length <= 7) {
         formatted = cleaned.replace(/(\d{3})(\d+)/, '$1-$2')
     } else if (cleaned.length > 7) {
@@ -243,10 +211,9 @@ const formatPhone = () => {
         formatted = cleaned
     }
 
-    phone.value = formatted // 이 결과를 덮어쓰기
+    phone.value = formatted
 }
 
-// 휴대폰 번호 검증
 const validatePhone = () => {
     const cleaned = phone.value.replace(/-/g, '')
 
@@ -260,21 +227,13 @@ const validatePhone = () => {
         return
     }
 
-    // const phoneFormatRegex = /^010-\d{4}-\d{4}$/
-    // if (!phoneFormatRegex.test(phone.value)) {
-    //     phoneError.value = '휴대폰 번호는 010-1234-5678 형식이어야 합니다.'
-    //     return
-    // }
-
     phoneError.value = ''
 }
 
-// 아이디 질문 선택 검증
 const validateQuestion = () => {
     questionError.value = selectedQuestion.value ? '' : '아이디 찾기 질문을 선택해 주세요.'
 }
 
-// 폼 제출
 const submitForm = () => {
     validateEmail()
     validatePassword()
@@ -300,7 +259,6 @@ const submitForm = () => {
     router.push('/login')
 }
 
-// 흔들림 효과
 const triggerShake = () => {
     if (formRef.value) {
         formRef.value.classList.remove('shake')
