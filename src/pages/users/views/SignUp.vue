@@ -9,15 +9,17 @@
                 <div class="form-inputs">
                     <!-- 이메일 -->
                     <div class="form-group">
-                        <input v-model="email" @input="validateEmail; moveCursorToEnd" type="text"
-                            placeholder="Email address" required :class="{ 'input-error': emailError }" />
+                        <input ref="emailRef" v-model="email" @input="validateEmail; moveCursorToEnd"
+                            @keydown.enter="handleEnter(passwordRef)" type="text" placeholder="Email address" required
+                            :class="{ 'input-error': emailError }" />
                         <p v-if="emailError" class="error">{{ emailError }}</p>
                     </div>
 
                     <!-- 비밀번호 -->
                     <div class="form-group">
-                        <input v-model="password" :type="passwordInputType" placeholder="Password" required
-                            @input="handlePasswordInput" @focus="focusPasswordInput" @mousedown="showPassword"
+                        <input ref="passwordRef" v-model="password" :type="passwordInputType" placeholder="Password"
+                            required @input="handlePasswordInput" @focus="focusPasswordInput"
+                            @keydown.enter="handleEnter(confirmPasswordRef)" @mousedown="showPassword"
                             @mouseup="hidePassword" @mouseleave="hidePassword"
                             :class="{ 'input-error': passwordError }" />
                         <div v-if="password.length > 0" class="password-checklist">
@@ -29,8 +31,9 @@
 
                     <!-- 비밀번호 확인 -->
                     <div class="form-group">
-                        <input v-model="confirmPassword" :type="confirmPasswordInputType" placeholder="Confirm Password"
-                            required @input="handleConfirmPasswordInput" @focus="focusConfirmPasswordInput"
+                        <input ref="confirmPasswordRef" v-model="confirmPassword" :type="confirmPasswordInputType"
+                            placeholder="Confirm Password" required @input="handleConfirmPasswordInput"
+                            @focus="focusConfirmPasswordInput" @keydown.enter="handleEnter(nameRef)"
                             @mousedown="showConfirmPassword" @mouseup="hideConfirmPassword"
                             @mouseleave="hideConfirmPassword" :class="{ 'input-error': confirmPasswordError }" />
                         <p v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</p>
@@ -38,13 +41,15 @@
 
                     <!-- 이름 -->
                     <div class="form-group">
-                        <input v-model="name" type="text" placeholder="Name" required @input="moveCursorToEnd" />
+                        <input ref="nameRef" v-model="name" type="text" placeholder="Name" required
+                            @input="moveCursorToEnd" @keydown.enter="handleEnter(phoneRef)" />
                     </div>
 
                     <!-- 휴대폰 번호 -->
                     <div class="form-group">
-                        <input v-model="phone" @input="formatPhone; moveCursorToEnd" type="text"
-                            placeholder="Phone Number" required :class="{ 'input-error': phoneError }" />
+                        <input ref="phoneRef" v-model="phone" @input="formatPhone; moveCursorToEnd"
+                            @keydown.enter="handleEnter(securityAnswerRef)" type="text" placeholder="Phone Number"
+                            required :class="{ 'input-error': phoneError }" />
                         <p v-if="phoneError" class="error">{{ phoneError }}</p>
                     </div>
 
@@ -62,8 +67,8 @@
 
                     <!-- 아이디 찾기 답변 -->
                     <div class="form-group">
-                        <input v-model="securityAnswer" type="text" placeholder="아이디 찾기 답변" required
-                            @input="moveCursorToEnd" />
+                        <input ref="securityAnswerRef" v-model="securityAnswer" type="text" placeholder="아이디 찾기 답변"
+                            required @input="moveCursorToEnd" @keydown.enter="submitForm" />
                     </div>
                 </div>
             </div>
@@ -102,6 +107,13 @@ const questionError = ref('')
 const passwordInputType = ref('password')
 const confirmPasswordInputType = ref('password')
 
+const emailRef = ref(null)
+const passwordRef = ref(null)
+const confirmPasswordRef = ref(null)
+const nameRef = ref(null)
+const phoneRef = ref(null)
+const securityAnswerRef = ref(null)
+
 const passwordChecks = ref({
     lowercaseAndNumber: false,
     specialChar: false,
@@ -121,6 +133,13 @@ const securityQuestions = [
     '나의 꿈의 직업은 무엇입니까?',
 ]
 
+// 엔터 입력 시 다음 input으로 포커스 이동
+const handleEnter = (nextFieldRef) => {
+    nextTick(() => {
+        nextFieldRef?.value?.focus()
+    })
+}
+
 // 커서 맨 뒤로 이동
 const moveCursorToEnd = (e) => {
     const input = e.target
@@ -130,7 +149,7 @@ const moveCursorToEnd = (e) => {
     })
 }
 
-// 비밀번호 input에 포커스 시 커서 맨 뒤
+// 비밀번호 input 포커스 시 커서 맨 뒤
 const focusPasswordInput = (e) => {
     const input = e.target
     input.type = 'text'
@@ -141,7 +160,7 @@ const focusPasswordInput = (e) => {
     })
 }
 
-// 비밀번호 확인 input에 포커스 시 커서 맨 뒤
+// 비밀번호 확인 input 포커스 시 커서 맨 뒤
 const focusConfirmPasswordInput = (e) => {
     const input = e.target
     input.type = 'text'
@@ -184,23 +203,17 @@ const validateConfirmPassword = () => {
 const handlePasswordInput = (e) => {
     password.value = e.target.value
     validatePassword()
-    nextTick(() => {
-        const length = e.target.value.length
-        e.target.setSelectionRange(length, length)
-    })
+    moveCursorToEnd(e)
 }
 
 // 비밀번호 확인 입력 핸들러
 const handleConfirmPasswordInput = (e) => {
     confirmPassword.value = e.target.value
     validateConfirmPassword()
-    nextTick(() => {
-        const length = e.target.value.length
-        e.target.setSelectionRange(length, length)
-    })
+    moveCursorToEnd(e)
 }
 
-// 비밀번호 보여주기/숨기기
+// 비밀번호 보기/숨기기
 const showPassword = (e) => {
     passwordInputType.value = 'text'
     moveCursorToEnd(e)
@@ -218,7 +231,7 @@ const hideConfirmPassword = (e) => {
     moveCursorToEnd(e)
 }
 
-// 폰 번호 포맷
+// 휴대폰 번호 포맷
 const formatPhone = () => {
     let cleaned = phone.value.replace(/\D/g, '')
     if (!cleaned.startsWith('010')) {
@@ -252,7 +265,6 @@ const submitForm = () => {
 
     alert('회원 가입이 완료되었습니다!')
 
-    // 초기화
     email.value = ''
     password.value = ''
     confirmPassword.value = ''
