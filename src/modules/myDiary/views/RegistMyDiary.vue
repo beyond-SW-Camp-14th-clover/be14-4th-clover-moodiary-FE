@@ -15,11 +15,27 @@
             </div>
   
             <div class="textarea-wrapper">
+              <div class="emotion-tag-header">
+                <h3>감정 태그: </h3>
+                <div class="emotion-tags">
+                  <span 
+                    v-for="(tag, index) in hashtags" 
+                    :key="index" 
+                    class="emotion-tag"
+                    @click="removeHashtag(index)"
+                  >
+                    #{{ tag }}
+                  </span>
+                </div>
+              </div>
               <textarea
                 v-model="content"
                 placeholder="오늘의 이야기를 써주세요"
                 required
                 class="notebook-textarea"
+                @input="handleContentInput"
+                @compositionstart="handleCompositionStart"
+                @compositionend="handleCompositionEnd"
               ></textarea>
   
               <div class="sticker-layer">
@@ -88,7 +104,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, computed } from 'vue'
+  import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import axios from 'axios'
   import ConfirmCheck from '../components/ConfirmCheck.vue'
@@ -109,6 +125,8 @@
   const showConfirmModal = ref(false)
   const isConfirmed = ref(false)
   const showRegistModal = ref(false)
+  const hashtags = ref([])
+  const isComposing = ref(false)
   
   const stickerOptions = [
     '/src/assets/stickers/heart.png',
@@ -207,8 +225,16 @@
     const deltaX = event.clientX - startX
     const deltaY = event.clientY - startY
   
-    stickers.value[index].width = Math.max(30, origWidth + deltaX)
-    stickers.value[index].height = Math.max(30, origHeight + deltaY)
+    if (event.shiftKey) {
+      const ratio = origWidth / origHeight
+      const newWidth = Math.max(30, origWidth + deltaX)
+      const newHeight = Math.max(30, newWidth / ratio)
+      stickers.value[index].width = newWidth
+      stickers.value[index].height = newHeight
+    } else {
+      stickers.value[index].width = Math.max(30, origWidth + deltaX)
+      stickers.value[index].height = Math.max(30, origHeight + deltaY)
+    }
   }
   
   const deleteSelected = () => {
@@ -227,6 +253,39 @@
     })
   })
   
+  const handleContentInput = (e) => {
+    content.value = e.target.value
+    if (!isComposing.value) {
+      checkHashtag(e.target.value)
+    }
+  }
+
+  const handleCompositionStart = () => {
+    isComposing.value = true
+  }
+
+  const handleCompositionEnd = (e) => {
+    isComposing.value = false
+    checkHashtag(e.target.value)
+  }
+
+  const checkHashtag = (text) => {
+    if (isComposing.value) return
+
+    const words = text.split(/\s+/)
+    if (words.length > 1) {
+      const lastWord = words[words.length - 2]
+      if (lastWord && lastWord.startsWith('#')) {
+        const hashtag = lastWord.slice(1)
+        if (hashtag && !hashtags.value.includes(hashtag)) {
+          hashtags.value.push(hashtag)
+          const updatedWords = words.slice(0, words.length - 2).concat(words.slice(words.length - 1))
+          content.value = updatedWords.join(' ') + ' '
+        }
+      }
+    }
+  }
+  
   const submitDiary = async () => {
     try {
       await axios.post('http://localhost:3001/shared_diaries', {
@@ -237,7 +296,8 @@
         fixed_state: 'Y',
         shared_diary_room_id: roomId,
         user_id: loginUserId,
-        style_layer: JSON.stringify(stickers.value)
+        style_layer: JSON.stringify(stickers.value),
+        hashtags: hashtags.value
       })
       alert('일기 등록 완료!')
       router.push({ name: 'MonthlyDiary' })
@@ -265,9 +325,12 @@
       router.push({ name: 'MonthlyDiary' })
     }
   }
+  
+  const removeHashtag = (index) => {
+    hashtags.value.splice(index, 1)
+  }
   </script>
-  
-  
+    
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
   
@@ -335,13 +398,82 @@
     font-weight: 400;
   }
   
-  .textarea-wrapper { position: relative; border: 1px solid #d9c7aa; border-radius: 10px; background-color: #fffce6; overflow: auto; box-shadow: inset 0 0 8px rgba(0,0,0,0.08); }
+  .textarea-wrapper {
+    position: relative; 
+    border: 1px solid #d9c7aa; 
+    border-radius: 10px; 
+    background-color: #fffce6; 
+    overflow: auto; 
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.08); 
+  }
+  
+  .emotion-tag-header {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 18px;
+    min-height: 34px;
+    background: #fffce6;
+    border-bottom: 1px solid #d9c7aa;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .emotion-tag-header h3 {
+    margin: 0;
+    font-family: 'Ownglyph PDH', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #535353;
+    line-height: 34px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .emotion-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    flex: 1;
+    min-height: 34px;
+  }
+  
+  .emotion-tag {
+    background-color: #E2EFFF;
+    color: #535353;
+    padding: 0;
+    border-radius: 0px;
+    font-size: 14px;
+    font-family: 'Ownglyph PDH', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 28px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .emotion-tag:hover {
+    background-color: #b3d6ff;
+  }
   
   .notebook-textarea {
-    font-family: 'Ownglyph PDH', sans-serif; font-size: 18px; font-weight: 400; color: #535353;
-    line-height: 34px; padding: 12px 18px; min-height: 500px; width: 100%;
+    font-family: 'Ownglyph PDH', sans-serif; 
+    font-size: 18px; 
+    font-weight: 400; 
+    color: #535353;
+    line-height: 34px; 
+    padding: 0 18px 12px 18px; 
+    min-height: 500px; 
+    width: 100%;
     background: repeating-linear-gradient(to bottom, #fffce6 0px, #fffce6 33px, #d9c7aa 34px);
-    background-size: 100% 34px; background-position-y: 12px; box-sizing: border-box; border: none; resize: vertical; outline: none;
+    background-size: 100% 34px; 
+    background-position-y: 0; 
+    box-sizing: border-box; 
+    border: none; 
+    resize: vertical; 
+    outline: none;
   }
   
   .sticker-layer { position: absolute; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; }
