@@ -7,6 +7,7 @@ import MyPage from '@/pages/users/views/MyPage.vue'
 import LoginPage from '@/pages/users/views/Login.vue'
 import SignUp from '@/pages/users/views/SignUp.vue'
 import FindId from '@/pages/users/views/FindId.vue'
+import SentimentAnalysis from '@/pages/sa/views/SentimentAnalysis.vue'
 
 const routes = [
     {
@@ -30,7 +31,8 @@ const routes = [
                     { path: ':roomId/diary/:diaryId', name: 'SharedDiaryDetail', component: () => import('@/pages/shareddiary/views/SharedDiaryDetail.vue') }
                 ]
             },
-            { path: 'mypage', name: 'MyPage', component: MyPage }
+            { path: 'mypage', name: 'MyPage', component: MyPage },
+            { path: 'sa', name: 'SentimentAnalysis', component: SentimentAnalysis }
         ]
     },
     { path: '/login', name: 'Login', component: LoginPage },

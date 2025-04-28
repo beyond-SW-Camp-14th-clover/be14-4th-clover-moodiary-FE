@@ -23,7 +23,7 @@
                 <div class="menu-wrapper">
                     <span class="menu-button">내 맘속에 담아</span>
                     <div class="submenu">
-                        <router-link to="/">감정 분석</router-link>
+                        <router-link to="/sa">감정 분석</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
