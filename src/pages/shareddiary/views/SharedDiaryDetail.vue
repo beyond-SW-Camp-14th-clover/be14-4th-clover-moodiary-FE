@@ -1,39 +1,58 @@
 <template>
-  <div class="detail-wrapper">
-    
-    <!-- ✅ 상단 제목 + 날짜 -->
-    <div class="header">
-      <h2 class="detail-title">{{ diary?.title }}</h2>
-      <p class="detail-date">{{ formattedDate }}</p>
-    </div>
+  <div class="diary-page">
+    <transition name="page-flip" mode="out-in">
+      <div v-if="diary" key="diary" class="write-wrapper">
+        
+        <!-- 제목 + 날짜 -->
+        <div class="header-section">
+          <h2 class="today-title">✍️ {{ todayString }} 일기</h2>
 
-    <!-- ✅ 본문 영역 -->
-    <div class="textarea-wrapper">
-      <div class="notebook-textarea">
-        <p v-for="line in contentLines" :key="line" class="diary-line">{{ line }}</p>
-        <div class="sticker-layer">
-          <img
-            v-for="(sticker, i) in stickers"
-            :key="i"
-            :src="sticker.url"
-            class="sticker"
-            :style="{
-              left: sticker.x + 'px',
-              top: sticker.y + 'px',
-              width: sticker.width + 'px',
-              height: sticker.height + 'px'
-            }"
-            draggable="false"
-          />
+          <div class="title-section">
+            <input type="text" :value="diary.title" class="title-input" disabled />
+          </div>
         </div>
+
+        <!-- 본문 + 스티커 -->
+        <div class="textarea-wrapper">
+          <div class="notebook-textarea">
+            <div class="diary-content">
+              {{ diary.content }}
+            </div>
+
+            <div class="sticker-layer">
+              <div
+                v-for="(sticker, i) in stickers"
+                :key="i"
+                class="sticker-wrapper"
+                :style="{
+                  left: sticker.x + 'px',
+                  top: sticker.y + 'px',
+                  width: sticker.width + 'px',
+                  height: sticker.height + 'px',
+                  zIndex: i
+                }"
+              >
+                <img :src="sticker.url" class="sticker" draggable="false" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="sticker-toolbar">
+          <button type="button" class="submit-btn" @click="goBack">← 돌아가기</button>
+          <button
+            v-if="diary.user_id === loginUserId"
+            type="button"
+            class="submit-btn"
+            @click="goEdit"
+          >
+            ✏️ 수정하기
+          </button>
+        </div>
+
       </div>
-    </div>
-
-    <div class="button-wrapper">
-      <button class="back-button" @click="goBack">← 돌아가기</button>
-      <button class="edit-button" @click="goEdit">✏️ 수정하기</button>
-    </div>
-
+    </transition>
   </div>
 </template>
 
@@ -47,77 +66,82 @@ import { ko } from 'date-fns/locale'
 const route = useRoute()
 const router = useRouter()
 
-const diaryId = Number(route.params.diaryId)
+const diaryId = route.params.diaryId  // ✅ 문자열로 그대로 받아야 함
+const loginUserId = 1  // 로그인 유저 ID (예시)
 
 const diary = ref(null)
 const stickers = ref([])
-const contentLines = ref([])
 
 onMounted(async () => {
-  const res = await axios.get(`http://localhost:3001/shared_diaries/${diaryId}`)
-  diary.value = res.data
+  try {
+    const res = await axios.get(`http://localhost:3001/shared_diaries/${diaryId}`)
+    diary.value = res.data
 
-  if (diary.value?.style_layer) {
-    try {
+    if (diary.value?.style_layer) {
       stickers.value = JSON.parse(diary.value.style_layer)
-    } catch (e) {
-      console.error('스티커 레이어 파싱 실패', e)
     }
-  }
-
-  if (diary.value?.content) {
-    contentLines.value = diary.value.content.split('\n')
+  } catch (e) {
+    console.error('일기 불러오기 실패', e)
+    alert('일기를 불러올 수 없습니다.')
+    router.push('/shareddiary/room')
   }
 })
 
-// ✅ 작성일자 포맷팅
-const formattedDate = computed(() => {
+const todayString = computed(() => {
   if (!diary.value?.created_at) return ''
-  return format(new Date(diary.value.created_at), 'yyyy년 M월 d일', { locale: ko })
+  const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+  const date = new Date(diary.value.created_at)
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${days[date.getDay()]}`
 })
 
-// ✅ 돌아가기
 const goBack = () => {
   if (diary.value?.shared_diary_room_id) {
-    router.push(`/shareddiary/${diary.value.shared_diary_room_id}`);
+    router.push({ name: 'SharedDiaryList', params: { roomId: diary.value.shared_diary_room_id } })
   } else {
-    router.push('/mydiary/shareddiary');
+    router.push('/mydiary/shareddiary')
   }
 }
 
 const goEdit = () => {
-  if (diary.value?.shared_diary_room_id) {
-    router.push(`/shareddiary/${diary.value.shared_diary_room_id}/edit/${diaryId}`);
-  }
+  router.push({ name: 'SharedDiaryEdit', params: { roomId: diary.value.shared_diary_room_id, diaryId } })
 }
 </script>
 
 <style scoped>
-/* ✅ 전체 포근한 스타일 */
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
 
-.detail-wrapper {
+.diary-page { perspective: 1500px; }
+.page-flip-enter-active, .page-flip-leave-active { transition: transform 0.6s ease; transform-style: preserve-3d; }
+.page-flip-enter-from { transform: rotateY(-90deg); }
+.page-flip-leave-to { transform: rotateY(90deg); }
+
+.write-wrapper {
   max-width: 850px;
   margin: 4rem auto;
   padding: 3rem;
-  background-color: #fffbe6;
+  background-color: #fffce6;
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  font-family: 'Nanum Pen Script', cursive;
-  animation: fadeIn 1s ease;
+  border: 3px dashed #d9c7aa;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-size: 18px;
+  color: #535353;
+  position: relative;
+  animation: inkFadeIn 1.2s ease;
+}
+@keyframes inkFadeIn {
+  from { filter: blur(3px); opacity: 0; transform: scale(1.02); }
+  to { filter: none; opacity: 1; transform: scale(1); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.write-form { display: flex; flex-direction: column; gap: 1.5rem; }
 
-.header {
+.header-section {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.detail-title {
-  font-size: 2.5rem;
+.today-title {
+  font-size: 2rem;
   font-weight: bold;
   color: #5d3e2f;
   border-bottom: 2px dashed #d9c7aa;
@@ -125,27 +149,39 @@ const goEdit = () => {
   padding-bottom: 0.5rem;
 }
 
-.detail-date {
-  font-size: 1.2rem; /* ✅ 더 크게 */
-  color: #7a5c44;     /* ✅ 더 진하게 */
-  margin-top: 0.5rem;
-  font-family: 'Nanum Pen Script', cursive;
+.title-section {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title-input {
+  flex: 1;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #535353;
+  border: none;
+  border-bottom: 2px dashed #c5b496;
+  background-color: #fffce6;
+  padding: 0.8rem 0.5rem;
 }
 
 .textarea-wrapper {
   position: relative;
   border: 1px solid #d9c7aa;
-  border-radius: 12px;
+  border-radius: 10px;
   background-color: #fffce6;
-  overflow: hidden;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+  overflow: auto;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
 }
 
 .notebook-textarea {
   position: relative;
-  padding: 2rem;
+  padding: 12px 18px;
   min-height: 500px;
-  background-image: repeating-linear-gradient(
+  background: repeating-linear-gradient(
     to bottom,
     #fffce6 0px,
     #fffce6 33px,
@@ -153,54 +189,66 @@ const goEdit = () => {
   );
   background-size: 100% 34px;
   background-position-y: 12px;
-  font-size: 1.4rem;
-  line-height: 38px; /* ✅ 줄 간격 더 부드럽게 */
-  color: #6b4c3b;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #535353;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
 }
 
-.diary-line {
-  margin: 0;
+.diary-content {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .sticker-layer {
   position: absolute;
   top: 0;
   left: 0;
-  pointer-events: none;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+}
+
+.sticker-wrapper {
+  position: absolute;
+  pointer-events: auto;
 }
 
 .sticker {
-  position: absolute;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
   user-select: none;
+  touch-action: none;
 }
 
-.button-wrapper {
-  margin-top: 2.5rem;
-  text-align: center;
+.sticker-toolbar {
   display: flex;
   justify-content: center;
-  gap: 1.2rem; /* ✅ 버튼 간격 추가 */
+  gap: 1.2rem;
+  margin-top: 2rem;
 }
 
-
-/* 돌아가기 버튼 */
-.back-button, .edit-button {
-  padding: 0.8rem 1.8rem;
-  font-size: 1.4rem;
-  background-color: #f5eccc;
-  color: #5d3e2f;
-  border: 2px solid #d9c7aa;
-  border-radius: 12px;
-  font-family: 'Nanum Pen Script', cursive;
+.submit-btn {
+  all: unset;
+  width: 122px;
+  height: 46px;
+  background-color: #E9D2AF;
+  color: #535353;
+  border-radius: 10px;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
   cursor: pointer;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
-.back-button:hover, .edit-button:hover {
-  background-color: #eedfa3;
-  transform: translateY(-3px);
+.submit-btn:hover {
+  background-color: #d1b07a;
 }
 </style>

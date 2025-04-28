@@ -1,39 +1,71 @@
 <template>
-    <div class="edit-wrapper">
-      <h2 class="edit-title">✏️ 공유 일기 수정하기</h2>
+    <div class="diary-page">
+      <transition name="page-flip" mode="out-in">
+        <div key="edit" class="write-wrapper">
+          <h2 class="today-title">✍️ 일기 수정</h2>
   
-      <form @submit.prevent="updateDiary" class="edit-form">
-        <input v-model="title" type="text" placeholder="제목을 입력하세요" required class="title-input" />
+          <form class="write-form">
+            <div class="title-section">
+              <input v-model="title" type="text" placeholder="제목을 입력하세요" required class="title-input" />
+              <div class="title-buttons">
+                <button type="button" class="upload-btn" @click="showStickerModal = true">🧸 스티커 추가</button>
+                <button type="button" class="upload-btn" @click="triggerFileInput">📷 사진 추가</button>
+                <input type="file" ref="fileInput" accept="image/*" @change="handlePhotoUpload" hidden />
+              </div>
+            </div>
   
-        <div class="textarea-wrapper">
-          <textarea
-            v-model="content"
-            placeholder="내용을 입력하세요"
-            required
-            class="notebook-textarea"
-          ></textarea>
+            <div class="textarea-wrapper">
+              <textarea
+                v-model="content"
+                placeholder="오늘의 이야기를 써주세요"
+                required
+                class="notebook-textarea"
+              ></textarea>
   
-          <div class="sticker-layer">
-            <div
-              v-for="(sticker, i) in stickers"
-              :key="i"
-              class="sticker-wrapper"
-              :style="{ left: sticker.x + 'px', top: sticker.y + 'px', width: sticker.width + 'px', height: sticker.height + 'px' }"
-            >
-              <img
-                :src="sticker.url"
-                class="sticker"
-                draggable="false"
-              />
+              <div class="sticker-layer">
+                <div
+                  v-for="(sticker, i) in stickers"
+                  :key="i"
+                  class="sticker-wrapper"
+                  :style="{ left: sticker.x + 'px', top: sticker.y + 'px', width: sticker.width + 'px', height: sticker.height + 'px', zIndex: i }"
+                >
+                  <img
+                    :src="sticker.url"
+                    draggable="false"
+                    class="sticker"
+                    :class="{ selected: selectedIndex === i }"
+                    @mousedown="(e) => startDrag(i, e)"
+                    @click.stop="selectSticker(i)"
+                  />
+                  <div v-if="selectedIndex === i" class="resize-handle" @mousedown.stop="startResize(i, $event)"></div>
+                </div>
+              </div>
+            </div>
+  
+            <div class="sticker-toolbar">
+              <button type="button" class="submit-btn" @click="confirmEdit">수정 완료</button>
+              <button type="button" class="submit-btn" @click="cancelEdit">취소</button>
+            </div>
+          </form>
+  
+          <div v-if="showStickerModal" class="sticker-modal">
+            <div class="sticker-modal-inner">
+              <div class="sticker-option" v-for="src in stickerOptions" :key="src">
+                <img :src="src" @click="addSticker(src); showStickerModal = false" />
+              </div>
+              <button @click="showStickerModal = false" class="close-btn">닫기</button>
             </div>
           </div>
-        </div>
   
-        <div class="submit-wrapper">
-          <button type="submit" class="submit-btn">수정 완료</button>
-          <button type="button" class="cancel-btn" @click="goBack">취소</button>
+          <RegistCheck
+            :show="showRegistModal"
+            title="일기 수정"
+            message="정말로 수정하시겠습니까?"
+            @confirm="submitEdit"
+            @cancel="showRegistModal = false"
+          />
         </div>
-      </form>
+      </transition>
     </div>
   </template>
   
@@ -51,40 +83,115 @@
   const title = ref('')
   const content = ref('')
   const stickers = ref([])
+  const selectedIndex = ref(null)
+  const showStickerModal = ref(false)
+  const fileInput = ref(null)
+  const showRegistModal = ref(false)
   
-  // ✅ 기존 데이터 불러오기
+  const stickerOptions = [
+    '/src/assets/stickers/heart.png',
+    '/src/assets/stickers/star.png',
+    '/src/assets/stickers/rabbit.png'
+  ]
+  
   onMounted(async () => {
-    try {
-      const res = await axios.get(`http://localhost:3001/shared_diaries/${diaryId}`)
-      title.value = res.data.title
-      content.value = res.data.content
-      stickers.value = res.data.style_layer ? JSON.parse(res.data.style_layer) : []
-    } catch (error) {
-      console.error('기존 일기 불러오기 실패', error)
-      alert('일기 데이터를 불러오는데 실패했습니다.')
-      router.push(`/shareddiary/${roomId}`)
+    const res = await axios.get(`http://localhost:3001/shared_diaries/${diaryId}`)
+    title.value = res.data.title
+    content.value = res.data.content
+    if (res.data.style_layer) {
+      stickers.value = JSON.parse(res.data.style_layer)
     }
   })
   
-  // ✅ 수정 요청
-  const updateDiary = async () => {
-    try {
-      await axios.put(`http://localhost:3001/shared_diaries/${diaryId}`, {
-        title: title.value,
-        content: content.value,
-        style_layer: JSON.stringify(stickers.value),
-      })
-      alert('수정 완료!')
-      router.push(`/shareddiary/${roomId}/detail/${diaryId}`)
-    } catch (error) {
-      console.error('수정 실패', error)
-      alert('수정에 실패했습니다.')
+  const triggerFileInput = () => { fileInput.value?.click() }
+  const addSticker = (url) => { stickers.value.push({ url, x: 100, y: 100, width: 80, height: 80, type: 'sticker' }) }
+  
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      stickers.value.push({ url: reader.result, x: 100, y: 100, width: 140, height: 140, type: 'photo' })
+    }
+    reader.readAsDataURL(file)
+  }
+  
+  let dragging = ref(null)
+  let resizing = ref(null)
+  
+  const startDrag = (index, event) => {
+    event.preventDefault()
+    dragging.value = { index, startX: event.clientX, startY: event.clientY, origX: stickers.value[index].x, origY: stickers.value[index].y }
+    document.addEventListener('mousemove', onDrag)
+    document.addEventListener('mouseup', stopDrag)
+  }
+  
+  const onDrag = (event) => {
+    if (!dragging.value) return
+    const { index, startX, startY, origX, origY } = dragging.value
+    const deltaX = event.clientX - startX
+    const deltaY = event.clientY - startY
+    const wrapper = document.querySelector('.textarea-wrapper')
+    const maxX = wrapper.offsetWidth - stickers.value[index].width
+    const maxY = wrapper.offsetHeight - stickers.value[index].height
+  
+    stickers.value[index].x = Math.min(Math.max(0, origX + deltaX), maxX)
+    stickers.value[index].y = Math.min(Math.max(0, origY + deltaY), maxY)
+  }
+  
+  const stopDrag = () => {
+    dragging.value = null
+    resizing.value = null
+    document.removeEventListener('mousemove', onDrag)
+    document.removeEventListener('mousemove', onResize)
+    document.removeEventListener('mouseup', stopDrag)
+  }
+  
+  const selectSticker = (index) => {
+    if (selectedIndex.value !== index) {
+      const target = stickers.value.splice(index, 1)[0]
+      stickers.value.push(target)
+      selectedIndex.value = stickers.value.length - 1
     }
   }
   
-  // ✅ 취소하기
-  const goBack = () => {
-    router.push(`/shareddiary/${roomId}/detail/${diaryId}`)
+  const startResize = (index, event) => {
+    event.preventDefault()
+    resizing.value = { index, startX: event.clientX, startY: event.clientY, origWidth: stickers.value[index].width, origHeight: stickers.value[index].height }
+    document.addEventListener('mousemove', onResize)
+    document.addEventListener('mouseup', stopDrag)
+  }
+  
+  const onResize = (event) => {
+    if (!resizing.value) return
+    const { index, startX, startY, origWidth, origHeight } = resizing.value
+    const deltaX = event.clientX - startX
+    const deltaY = event.clientY - startY
+    stickers.value[index].width = Math.max(30, origWidth + deltaX)
+    stickers.value[index].height = Math.max(30, origHeight + deltaY)
+  }
+  
+  const confirmEdit = () => { showRegistModal.value = true }
+  
+  const submitEdit = async () => {
+    try {
+      await axios.patch(`http://localhost:3001/shared_diaries/${diaryId}`, {
+        title: title.value,
+        content: content.value,
+        style_layer: JSON.stringify(stickers.value)
+      })
+      alert('수정 완료!')
+      router.push({ name: 'SharedDiaryDetail', params: { roomId, diaryId } })
+    } catch (error) {
+      console.error(error)
+      alert('수정 실패')
+    }
+  }
+  
+  const cancelEdit = () => {
+    if (confirm('수정을 취소하시겠습니까?')) {
+      router.push({ name: 'SharedDiaryDetail', params: { roomId, diaryId } })
+    }
   }
   </script>
   
