@@ -1,35 +1,35 @@
 <template>
   <div class="outer-wrapper">
-    <!-- ⭐️ 좌측: 방 번호 -->
-    <div class="side-left">
-      <p class="room-id">방 번호: {{ roomId }}</p>
-    </div>
+    <div class="diary-container">
+      <!-- 상단: 방 번호 + 작성 버튼 -->
+      <div class="top-bar">
+        <p class="room-id">방 번호: {{ roomId }}</p>
+        <button
+          @click="writeDiary"
+          :disabled="!canWrite"
+          class="write-btn"
+        >✍️ 일기 작성</button>
+      </div>
 
-    <!-- ⭐️ 가운데: 일기 리스트 -->
-    <div class="diary-list">
-      <div
-        v-for="diary in diaries"
-        :key="diary.id"
-        class="diary-bubble"
-        :class="{ mine: diary.user_id === loginUserId, theirs: diary.user_id !== loginUserId }"
-        @click="goToDetail(diary.id)"
-        style="cursor: pointer;"
-      >
-        <p class="title">{{ diary.title }}</p>
-        <div class="footer">
-          <span class="author">{{ getUserName(diary.user_id) }}</span>
-          <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+      <!-- 가운데: 일기 리스트 -->
+      <div class="diary-list">
+        <div
+          v-for="diary in diaries"
+          :key="diary.id"
+          class="diary-bubble"
+          :class="{ mine: diary.user_id === loginUserId, theirs: diary.user_id !== loginUserId }"
+          @click="goToDetail(diary.id)"
+          style="cursor: pointer;"
+        >
+          <div class="bubble-inner">
+            <p class="title">{{ diary.title }}</p>
+            <div class="footer">
+              <span class="author">{{ getUserName(diary.user_id) }}</span>
+              <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- ⭐️ 우측: 일기 작성 버튼 -->
-    <div class="side-right">
-      <button
-        @click="writeDiary"
-        :disabled="!canWrite"
-        class="write-btn"
-      >✍️ 일기 작성</button>
     </div>
   </div>
 </template>
@@ -93,34 +93,47 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* (다전은 기존와 같은 스테일) */
 .outer-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 2rem;
-  padding: 3rem 1rem;
 }
-.side-left, .side-right {
+
+/* 전체를 감싸는 박스 */
+.diary-container {
   display: flex;
-  align-items: flex-start;
-  margin-top: 1rem;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 720px;
 }
+
+/* 방 번호 + 버튼 */
+.top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
 .room-id {
-  font-size: 1rem;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #5d3e2f;
 }
+
 .write-btn {
   background-color: #6f9d6b;
   color: white;
-  padding: 0.5rem 1.2rem;
+  padding: 1rem 1.6rem;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 .write-btn:disabled {
   background-color: #cccccc;
@@ -129,45 +142,59 @@ onMounted(async () => {
 .write-btn:hover:enabled {
   background-color: #5a8755;
 }
+
+/* 일기 리스트 */
 .diary-list {
   width: 100%;
-  max-width: 640px;
   background-color: #fdfaf5;
   border-radius: 16px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.8rem;
 }
+
 .diary-bubble {
-  max-width: 75%;
-  padding: 1.2rem;
+  max-width: 90%;
+  padding: 1rem;
   border-radius: 18px;
   background-color: #fffce6;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   word-break: break-word;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
+
+.bubble-inner {
+  display: flex;
+  flex-direction: column;
+}
+
 .mine {
   margin-left: auto;
-  background-color: #d8f5dc;
-  text-align: right;
+  background-color: #dcf8c6;
 }
+
 .theirs {
   margin-right: auto;
-  background-color: #fef4d6;
-  text-align: left;
+  background-color: #ffffff;
 }
+
 .title {
   font-weight: bold;
-  font-size: 1.05rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
 }
+
 .footer {
-  display: flex;
-  justify-content: space-between;
+  margin-top: 0.5rem;
   font-size: 0.75rem;
   color: #555;
-  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="emotion-bar-chart">
-    <h4>이번 주 나의 감정</h4>
+    <h4>이번 달 나의 감정</h4>
     <div class="bar-bg">
       <canvas ref="barChart" width="183" height="110"></canvas>
     </div>
@@ -8,33 +8,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-const dummyEmotions = [
-  { label: '슬픔', count: 8 },
-  { label: '행복', count: 5 },
-  { label: '지침', count: 2 }
-];
+const props = defineProps({
+  diaryData: {
+    type: Array,
+    required: true
+  }
+});
 
 const barChart = ref(null);
 let chart = null;
 
-const top3 = [...dummyEmotions]
-  .sort((a, b) => b.count - a.count)
-  .slice(0, 3);
+const processEmotionData = (data) => {
+  const emotionCounts = {};
+  
+  data.forEach(diary => {
+    [diary.emotionSummary1, diary.emotionSummary2, diary.emotionSummary3].forEach(emotion => {
+      if (emotion) {
+        emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+      }
+    });
+  });
 
-const createChart = () => {
+  return Object.entries(emotionCounts)
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+};
+
+const createChart = (emotionData) => {
   if (chart) chart.destroy();
   chart = new Chart(barChart.value.getContext('2d'), {
     type: 'bar',
     data: {
-      labels: top3.map(e => e.label),
+      labels: emotionData.map(e => e.label),
       datasets: [{
-        data: top3.map(e => e.count),
+        data: emotionData.map(e => e.count),
         backgroundColor: ['#F77C7C', '#FFE082', '#90CAF9'],
-        barThickness: 18
+        barThickness: 15
       }]
     },
     options: {
@@ -66,11 +80,12 @@ const createChart = () => {
             color: '#222',
             padding: 6
           },
-          border: { display: false }
+          border: { display: false },
+          categoryPercentage: 0.95
         },
         y: {
           beginAtZero: true,
-          max: 9,
+          max: Math.max(...emotionData.map(e => e.count)) + 1,
           grid: { display: false, drawBorder: false },
           ticks: { display: false },
           border: { display: false }
@@ -81,7 +96,19 @@ const createChart = () => {
   });
 };
 
-onMounted(createChart);
+watch(() => props.diaryData, (newData) => {
+  if (newData && newData.length > 0) {
+    const topEmotions = processEmotionData(newData);
+    createChart(topEmotions);
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  if (props.diaryData && props.diaryData.length > 0) {
+    const topEmotions = processEmotionData(props.diaryData);
+    createChart(topEmotions);
+  }
+});
 </script>
 
 <style scoped>
