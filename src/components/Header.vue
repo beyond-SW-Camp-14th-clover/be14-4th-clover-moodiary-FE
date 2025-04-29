@@ -2,7 +2,7 @@
     <header class="header-bg">
         <div class="header-inner">
             <!-- 로고 -->
-            <div class="logo"><router-link to="/">MOODI:ARY</router-link></div>
+            <div class="logo"><router-link to="/app/home">MOODI:ARY</router-link></div>
 
             <!-- 내비게이션 -->
             <nav class="nav-links">
@@ -10,28 +10,28 @@
                 <div class="menu-wrapper">
                     <span class="menu-button">서랍 속 작은 일기장</span>
                     <div class="submenu">
-                        <router-link to="/registmydiary">일기 작성</router-link>
-                        <router-link to="/monthlydiary">월간 일기</router-link>
-                        <router-link to="/weeklydiary">주간 일기</router-link>
+                        <router-link to="/app/registmydiary">일기 작성</router-link>
+                        <router-link to="/app/monthlydiary">월간 일기</router-link>
+                        <router-link to="/app/weeklydiary">주간 일기</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
                     <span class="menu-button">알 수 없는 너의 비밀</span>
                     <div class="submenu">
-                        <router-link to="/shareddiary">우리 일기</router-link>
+                        <router-link to="/app/shareddiary">우리 일기</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
                     <span class="menu-button">내 맘속에 담아</span>
                     <div class="submenu">
-                        <router-link to="/">감정 분석</router-link>
+                        <router-link to="/app">감정 분석</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
                     <span class="menu-button">너 몰래</span>
                     <div class="submenu">
-                        <router-link to="/mypage">내 정보 수정</router-link>
-                        <router-link to="/logout">로그아웃</router-link>
+                        <router-link to="/app/mypage">내 정보 수정</router-link>
+                        <router-link to="/app/logout">로그아웃</router-link>
                     </div>
                 </div>
             </nav>
