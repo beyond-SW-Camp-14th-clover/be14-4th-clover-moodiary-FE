@@ -6,12 +6,13 @@
 
             <!-- 내비게이션 -->
             <nav class="nav-links">
+
                 <div class="menu-wrapper">
                     <span class="menu-button">서랍 속 작은 일기장</span>
                     <div class="submenu">
-                        <router-link to="/mydiary/mydiarymine">내 일기</router-link>
-                        <router-link to="/mydiary/mydiarymine">월간</router-link>
-                        <router-link to="/mydiary/mydiarymine">주간</router-link>
+                        <router-link to="/registmydiary">일기 작성</router-link>
+                        <router-link to="/monthlydiary">월간 일기</router-link>
+                        <router-link to="/weeklydiary">주간 일기</router-link>
                     </div>
                 </div>
                 <div class="menu-wrapper">
