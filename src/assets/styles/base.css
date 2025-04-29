@@ -188,3 +188,13 @@ main.content {
 .music-player {
     display: none;
 }
+
+.logo a {
+    width: 250px;
+    color: var(--color-beige);
+    font-family: var(--font-pixel);
+    font-size: 2rem;
+    font-weight: 800;
+    text-decoration: none;
+    text-shadow: -1px -1px 0 #A17C59;
+}
