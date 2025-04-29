@@ -1,37 +1,35 @@
 <template>
   <div class="outer-wrapper">
-    <!-- ⭐️ 좌측: 방 번호 -->
-    <div class="side-left">
-      <p class="room-id">방 번호: {{ roomId }}</p>
-    </div>
+    <div class="diary-container">
+      <!-- 상단: 방 번호 + 작성 버튼 -->
+      <div class="top-bar">
+        <p class="room-id">방 번호: {{ roomId }}</p>
+        <button
+          @click="writeDiary"
+          :disabled="!canWrite"
+          class="write-btn"
+        >✍️ 일기 작성</button>
+      </div>
 
-    <!-- ⭐️ 가운데: 일기 리스트 -->
-    <div class="diary-list">
-      <div
-        v-for="diary in diaries"
-        :key="diary.id"
-        class="diary-bubble"
-        :class="{ mine: diary.user_id === loginUserId, theirs: diary.user_id !== loginUserId }"
-        @click="goToDetail(diary.id)"
-        style="cursor: pointer;"
-      >
-        <div class="bubble-inner">
-          <p class="title">{{ diary.title }}</p>
-          <div class="footer">
-            <span class="author">{{ getUserName(diary.user_id) }}</span>
-            <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+      <!-- 가운데: 일기 리스트 -->
+      <div class="diary-list">
+        <div
+          v-for="diary in diaries"
+          :key="diary.id"
+          class="diary-bubble"
+          :class="{ mine: diary.user_id === loginUserId, theirs: diary.user_id !== loginUserId }"
+          @click="goToDetail(diary.id)"
+          style="cursor: pointer;"
+        >
+          <div class="bubble-inner">
+            <p class="title">{{ diary.title }}</p>
+            <div class="footer">
+              <span class="author">{{ getUserName(diary.user_id) }}</span>
+              <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- ⭐️ 우측: 일기 작성 버튼 -->
-    <div class="side-right">
-      <button
-        @click="writeDiary"
-        :disabled="!canWrite"
-        class="write-btn"
-      >✍️ 일기 작성</button>
     </div>
   </div>
 </template>
@@ -98,22 +96,31 @@ onMounted(async () => {
 .outer-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 3rem;
 }
 
-.side-left, .side-right {
-  width: 120px;
+/* 전체를 감싸는 박스 */
+.diary-container {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 720px;
+}
+
+/* 방 번호 + 버튼 */
+.top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
 }
 
 .room-id {
   font-size: 1.4rem;
   font-weight: bold;
   color: #5d3e2f;
-  text-align: center;
 }
 
 .write-btn {
@@ -128,36 +135,34 @@ onMounted(async () => {
   transition: background-color 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
-
 .write-btn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
-
 .write-btn:hover:enabled {
   background-color: #5a8755;
 }
 
+/* 일기 리스트 */
 .diary-list {
-  flex: 1;
-  max-width: 720px;
+  width: 100%;
   background-color: #fdfaf5;
   border-radius: 16px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem; /* ✅ gap 줄임 */
+  gap: 0.8rem;
 }
 
 .diary-bubble {
   max-width: 90%;
-  padding: 1rem; /* ✅ padding 살짝 줄임 */
+  padding: 1rem;
   border-radius: 18px;
   background-color: #fffce6;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   word-break: break-word;
-  min-height: 100px; /* ✅ min-height 낮춤 */
+  min-height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -170,7 +175,7 @@ onMounted(async () => {
 
 .mine {
   margin-left: auto;
-  background-color: #dcf8c6; /* 카카오 채팅에서 보는 마지막자 버블 형상 */
+  background-color: #dcf8c6;
 }
 
 .theirs {
