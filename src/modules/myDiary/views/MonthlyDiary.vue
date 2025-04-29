@@ -117,6 +117,13 @@ const changeMonth = (change) => {
     const newDate = new Date(selectedDate.value);
     newDate.setMonth(newDate.getMonth() + change);
     selectedDate.value = newDate;
+
+    diaryEntries.value = [];
+    const year = newDate.getFullYear();
+    const month = (newDate.getMonth() + 1).toString().padStart(2, '0');
+    const targetMonth = `${year}-${month}`;
+    const userId = 1;
+    fetchMonthlyDiary(targetMonth, userId);
 };
 
 const weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -345,6 +352,7 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
+    height: 121px;
 }
 .calendar-cell.empty {
     background: none;
@@ -485,9 +493,8 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    top: 5px;
-    right: 5px;
+    position: relative;
+    transform: translate(2px, -1px);
 }
 
 .score-text {
@@ -502,6 +509,8 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    position: relative;
+    top: -2px;
 }
 
 .title-text {

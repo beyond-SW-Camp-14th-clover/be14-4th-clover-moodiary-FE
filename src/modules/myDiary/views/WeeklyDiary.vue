@@ -51,7 +51,7 @@
                     <div class="inner-white-box">
                         <span class="score-text" :style="{ color: getScoreColor(score) }">{{ score.toString().padStart(2, '0') }}</span>
                     </div>
-                    <span class="analysis-text">이번 주 감정 분석 데이터가 없습니다.</span>
+                    <span class="analysis-text">{{ analysisText }}</span>
                 </div>
                 <div class="analysis-container">
                     <div class="analysis-row">
@@ -63,21 +63,21 @@
                         <div class="analysis-box">
                             <div class="analysis-divider" style="top: 33.33%"></div>
                             <div class="analysis-divider" style="top: 66.66%"></div>
-                            <svg :width="347" :height="231" style="position:absolute; left:0; top:0; pointer-events:none; z-index:1;">
-                              <polyline
-                                :points="polylinePoints"
-                                fill="none"
-                                stroke="#6B3E26"
-                                stroke-width="1"
-                              />
-                              <circle
-                                v-for="(x, i) in xCoords"
-                                :key="i"
-                                :cx="x"
-                                :cy="230"
-                                r="1.5"
-                                fill="#000"
-                              />
+                            <svg :width="347" :height="231" style="position:absolute; left:0; top:0; pointer-events:none; z-index:2;">
+                                <polyline
+                                    :points="polylinePoints"
+                                    fill="none"
+                                    stroke="#6B3E26"
+                                    stroke-width="1"
+                                />
+                                <circle
+                                    v-for="(point, i) in circlePoints"
+                                    :key="i"
+                                    :cx="point.x"
+                                    :cy="point.y"
+                                    r="1.5"
+                                    fill="#000"
+                                />
                             </svg>
                             <div class="chart-area">
                             </div>
@@ -116,11 +116,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[0]?.totalScore || 0) }">
+                            {{ weeklyData[0]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[0]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[0]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[0]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -133,11 +136,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[1]?.totalScore || 0) }">
+                            {{ weeklyData[1]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[1]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[1]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[1]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -150,11 +156,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[2]?.totalScore || 0) }">
+                            {{ weeklyData[2]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[2]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[2]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[2]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -167,11 +176,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[3]?.totalScore || 0) }">
+                            {{ weeklyData[3]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[3]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[3]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[3]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -184,11 +196,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[4]?.totalScore || 0) }">
+                            {{ weeklyData[4]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[4]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[4]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[4]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -201,11 +216,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[5]?.totalScore || 0) }">
+                            {{ weeklyData[5]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[5]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[5]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[5]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -218,11 +236,14 @@
                         <div class="image-container">
                             <!-- 이미지가 들어갈 공간 -->
                         </div>
-                        <div class="image-bottom-text" :style="{ color: getBottomTextColor(0) }">
-                            00
+                        <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[6]?.totalScore || 0) }">
+                            {{ weeklyData[6]?.totalScore?.toString().padStart(2, '0') || '00' }}
                         </div>
-                        <div class="image-bottom-desc">
-                            해당 날짜의 일기가 없습니다.
+                        <div class="image-bottom-title" :style="{ color: weeklyData[6]?.title ? '#535353' : '#B9B9B9' }">
+                            {{ weeklyData[6]?.title || '해당 날짜의 일기가 없습니다.' }}
+                        </div>
+                        <div class="image-bottom-content">
+                            {{ weeklyData[6]?.content || '' }}
                         </div>
                     </div>
                 </div>
@@ -232,13 +253,23 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useWeeklyDiaryStore } from '../../../stores/weeklyDiaryStore';
 
 const weeklyDiaryStore = useWeeklyDiaryStore();
 const selectedDate = ref(new Date());
 const selectedWeek = ref('1');
-const score = ref(0);
+const score = computed(() => {
+    const validScores = weeklyData.value
+        .filter(data => data?.totalScore !== undefined && data?.totalScore !== null)
+        .map(data => data.totalScore);
+    
+    if (validScores.length === 0) return 0;
+    
+    const sum = validScores.reduce((acc, curr) => acc + curr, 0);
+    return Math.round(sum / validScores.length);
+});
+const weeklyData = ref([]);
 
 const monthNames = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -262,20 +293,17 @@ const getWeekInfo = computed(() => {
     const year = date.getFullYear();
     const month = date.getMonth();
     
-    // 해당 월의 1일
+
     const firstDay = new Date(year, month, 1);
-    // 해당 월의 마지막 날
+
     const lastDay = new Date(year, month + 1, 0);
-    
-    // 1일이 속한 주의 일요일 날짜
+
     const firstWeekSunday = new Date(firstDay);
     firstWeekSunday.setDate(firstDay.getDate() - firstDay.getDay());
     
-    // 마지막 날이 속한 주의 일요일 날짜
     const lastWeekSunday = new Date(lastDay);
     lastWeekSunday.setDate(lastDay.getDate() - lastDay.getDay());
     
-    // 전체 주 수 계산
     const totalWeeks = Math.ceil((lastWeekSunday - firstWeekSunday) / (7 * 24 * 60 * 60 * 1000)) + 1;
     
     return {
@@ -289,19 +317,21 @@ const getCurrentWeekDates = computed(() => {
     const weekInfo = getWeekInfo.value;
     const selectedWeekNum = parseInt(selectedWeek.value);
     
-    // 선택된 주의 시작일 (일요일)
     const weekStart = new Date(weekInfo.firstWeekSunday);
     weekStart.setDate(weekStart.getDate() + (selectedWeekNum - 1) * 7);
     
-    // 선택된 주의 날짜들 계산
     const dates = [];
     for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
-        dates.push(date.getDate());
+        dates.push({
+            date: date.getDate(),
+            day: date.getDay(),
+            fullDate: date.toLocaleDateString()
+        });
     }
     
-    return dates;
+    return dates.map(d => d.date);
 });
 
 const hasFifthWeek = computed(() => {
@@ -319,13 +349,38 @@ const getScoreColor = (score) => {
     if (score >= 0 && score <= 33) return '#A60303';
     if (score >= 34 && score <= 66) return '#DA930E';
     if (score >= 67 && score <= 100) return '#346FD2';
-    return '#A60303'; // 기본 색상
+    return '#A60303';
 };
 
-const boxWidth = 347;
-const xCoords = Array.from({ length: 7 }, (_, i) => (boxWidth / 7) * (i + 0.5));
-const yCoord = 230;
-const polylinePoints = xCoords.map(x => `${x},${yCoord}`).join(' ');
+const getYCoordinate = (score) => {
+    const boxHeight = 231;
+    return boxHeight - (score / 100) * boxHeight;
+};
+
+const polylinePoints = computed(() => {
+    const points = weeklyData.value.map((data, index) => {
+        // 일요일 점은 27px로 고정
+        const firstX = 27;
+        // 점 사이 간격 49px로 고정
+        const spacing = 49;
+        const x = firstX + (spacing * index);
+        const y = getYCoordinate(data?.totalScore || 0);
+        return `${x},${y}`;
+    });
+    return points.join(' ');
+});
+
+const circlePoints = computed(() => {
+    return weeklyData.value.map((data, index) => {
+        // 일요일 점은 27px로 고정
+        const firstX = 27;
+        // 점 사이 간격 49px로 고정
+        const spacing = 49;
+        const x = firstX + (spacing * index);
+        const y = getYCoordinate(data?.totalScore || 0);
+        return { x, y, score: data?.totalScore || 0 };
+    });
+});
 
 // 이미지 하단 텍스트 색상 반환 함수
 const getBottomTextColor = (value) => {
@@ -342,6 +397,120 @@ const handleMouseEnter = (day) => {
 const handleSectionMouseLeave = () => {
     weeklyDiaryStore.resetHoveredCards();
 };
+
+const calculateCurrentWeekFromServer = async () => {
+    const today = new Date();
+    selectedDate.value = today;
+
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const firstSunday = new Date(firstDayOfMonth);
+    firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
+
+    const diffDays = Math.floor((today - firstSunday) / (1000 * 60 * 60 * 24));
+    const weekNumber = Math.floor(diffDays / 7) + 1;
+
+    selectedWeek.value = weekNumber > getWeekInfo.value.totalWeeks ? getWeekInfo.value.totalWeeks.toString() : weekNumber.toString();
+    highlightCurrentWeek();
+};
+
+const highlightCurrentWeek = () => {
+    const weekItems = document.querySelectorAll('.week-item');
+    weekItems.forEach(item => item.classList.remove('active'));
+
+    const targetIndex = parseInt(selectedWeek.value);
+    const weekItemList = Array.from(weekItems).filter((item, index) => index !== 0);
+
+    if (weekItemList[targetIndex - 1]) {
+        weekItemList[targetIndex - 1].classList.add('active');
+    }
+};
+
+watch(selectedWeek, () => {
+    highlightCurrentWeek();
+    fetchWeeklyData();
+});
+
+const fetchWeeklyData = async () => {
+    const weekInfo = getWeekInfo.value;
+    const selectedWeekNum = parseInt(selectedWeek.value);
+    
+    const weekStart = new Date(weekInfo.firstWeekSunday);
+    weekStart.setDate(weekStart.getDate() + (selectedWeekNum - 1) * 7);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const startDate = new Date(weekStart);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(weekEnd);
+    endDate.setHours(23, 59, 59, 999);
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+    const userId = 1;
+
+    try {
+        const response = await fetch(`http://localhost:8080/mydiary/weekly?startDate=${startDateStr}&endDate=${endDateStr}&userId=${userId}`);
+        if (!response.ok) {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+        }
+        const data = await response.json();
+        
+        const sortedData = [];
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(weekStart);
+            currentDate.setDate(weekStart.getDate() + i);
+            const dateStr = currentDate.toISOString().split('T')[0];
+            
+            const matchingData = data.find(d => d.createdAt.startsWith(dateStr));
+            sortedData[i] = matchingData || null;
+        }
+        
+        weeklyData.value = sortedData;
+    } catch (error) {
+        console.error('데이터를 가져오는 중 오류가 발생했습니다:', error);
+    }
+};
+
+const calculateCurrentWeek = () => {
+    const today = new Date();
+    const firstWeekSunday = getWeekInfo.value.firstWeekSunday;
+    const weekNumber = Math.floor((today - firstWeekSunday) / (7 * 24 * 60 * 60 * 1000)) + 1;
+    return weekNumber;
+};
+
+const hasEmotionalData = computed(() => {
+    return weeklyData.value.some(data => data?.totalScore !== undefined && data?.totalScore !== null);
+});
+
+const hasLargeEmotionalChange = computed(() => {
+    const validScores = weeklyData.value
+        .filter(data => data?.totalScore !== undefined && data?.totalScore !== null)
+        .map(data => data.totalScore);
+    
+    if (validScores.length < 2) return false;
+    
+    for (let i = 0; i < validScores.length - 1; i++) {
+        if (Math.abs(validScores[i] - validScores[i + 1]) >= 34) {
+            return true;
+        }
+    }
+    return false;
+});
+
+const analysisText = computed(() => {
+    if (!hasEmotionalData.value) {
+        return '이번 주 감정 분석 데이터가 없습니다.';
+    }
+    return hasLargeEmotionalChange.value 
+        ? '이번 주는 감정 변화가 큰 주입니다.'
+        : '이번 주는 감정 변화가 크지 않은 주입니다.';
+});
+
+onMounted(() => {
+    calculateCurrentWeekFromServer();
+    fetchWeeklyData();
+});
 </script>
 
 <style scoped>
@@ -481,7 +650,7 @@ const handleSectionMouseLeave = () => {
 }
 
 .analysis-container {
-    width: 345px;
+    width: 347px;
     height: 262px;
     margin-top: 20px;
 }
@@ -538,13 +707,13 @@ const handleSectionMouseLeave = () => {
     width: 100%;
     height: 1.5px;
     background-color: rgba(230, 221, 221, 0.7);
-    z-index: 10;
+    z-index: 1;
 }
 
 .chart-area {
     flex: 1;
     height: 100%;
-    /* 차트나 내용이 들어갈 영역 */
+    position: relative;
 }
 
 .x-axis-labels {
@@ -636,6 +805,7 @@ const handleSectionMouseLeave = () => {
 }
 
 .save-button {
+    all: unset;
     background-color: #FFE7C9;
     color: #535353;
     border: none;
@@ -647,10 +817,27 @@ const handleSectionMouseLeave = () => {
     cursor: pointer;
     transition: background-color 0.3s;
     margin-right: 5px;
+    box-shadow: none;
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+    line-height: normal;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .save-button:hover {
     background-color: #FFC985;
+}
+
+.save-button:active {
+    background-color: #FFC985;
+    transform: none;
 }
 
 .moodlog-content {
@@ -766,7 +953,7 @@ const handleSectionMouseLeave = () => {
     z-index: 0;
 }
 
-.image-bottom-text {
+.image-bottom-score {
     width: 40px;
     height: 40px;
     display: flex;
@@ -782,7 +969,7 @@ const handleSectionMouseLeave = () => {
     z-index: 2;
 }
 
-.image-bottom-desc {
+.image-bottom-title {
     height: 40px;
     min-width: 180px;
     display: flex;
@@ -793,8 +980,33 @@ const handleSectionMouseLeave = () => {
     font-family: 'Ownglyph PDH', sans-serif;
     font-weight: 400;
     font-size: 18px;
-    color: #B9B9B9;
+    color: v-bind('weeklyData[index]?.title ? "#535353" : "#B9B9B9"');
     z-index: 2;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.image-bottom-content {
+    width: 256px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    top: 551px;
+    font-family: 'Ownglyph PDH', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    color: #535353;
+    z-index: 2;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 20px;
+    box-sizing: border-box;
+    word-break: break-all;
+    line-height: 1.2;
 }
 </style>
