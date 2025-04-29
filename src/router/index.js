@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import LandingPage from '@/components/LandingPage.vue'
 import Home from '@/pages/Home.vue'
 import MyDiaryMine from '@/pages/mydiary/views/MyDiaryMine.vue'
 import SharedDiaryMain from '@/pages/shareddiary/views/SharedDiaryMain.vue'
@@ -15,10 +16,14 @@ import RegistMyDiary from '../modules/myDiary/views/RegistMyDiary.vue'
 const routes = [
     {
         path: '/',
+        name: 'Landing',
+        component: LandingPage,
+      },
+    {
+        path: '/app',
         component: DefaultLayout,
         children: [
-            { path: '', name: 'Home', component: Home },
-
+            { path: 'home', name: 'Home', component: Home },
             { path: 'monthlydiary', name: 'MonthlyDiary', component: () => import('../modules/myDiary/views/MonthlyDiary.vue') },
             { path: 'weeklydiary', name: 'WeeklyDiary', component: () => import('../modules/myDiary/views/WeeklyDiary.vue') },
             { path: 'registmydiary', name: 'RegistMyDiary', component: () => import('../modules/myDiary/views/RegistMyDiary.vue') },
@@ -44,6 +49,7 @@ const routes = [
 
         ]
     },
+
     { path: '/login', name: 'Login', component: LoginPage },
     { path: '/signup', name: 'SignUp', component: SignUp },
     { path: '/findid', name: 'FindId', component: FindId }
