@@ -52,43 +52,37 @@
                 <div class="happy-section">
                     <h3>what makes me happy</h3>
                     <div class="section-underline2"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
+                    <div v-for="(entry, index) in topThreeEntries" :key="index" class="entry-container">
+                        <div class="happy-entry">
+                            <div class="score-box">
+                                <span class="score-text" :style="{ color: getScoreColor(entry.totalScore) }">{{ entry.totalScore }}</span>
+                            </div>
+                            <div class="entry-title">{{ entry.title }}</div>
+                        </div>
+                        <div class="section-underline2 section-underline2-margin"></div>
+                    </div>
                 </div>
                 <div class="sad-section">
                     <h3>what makes me sad</h3>
                     <div class="section-underline2"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
-                    <div class="score-box">00</div>
-                    <div class="section-underline2 section-underline2-margin"></div>
-                </div>
-                <div class="moodlog">
-                    <div class="moodlog-header">
-                        <h3>moodlog</h3>
-                        <button class="save-button">저장</button>
-                    </div>
-                    <div class="moodlog-content">
-                        <div class="moodlog-textbox">
-                            <textarea placeholder="이번 달 나의 기록"></textarea>
+                    <div v-for="(entry, index) in bottomThreeEntries" :key="index" class="entry-container">
+                        <div class="sad-entry">
+                            <div class="score-box">
+                                <span class="score-text" :style="{ color: getScoreColor(entry.totalScore) }">{{ entry.totalScore }}</span>
+                            </div>
+                            <div class="entry-title">{{ entry.title }}</div>
                         </div>
+                        <div class="section-underline2 section-underline2-margin"></div>
                     </div>
                 </div>
+                <Moodlog />
                 <div class="stats">
                     <EmotionRates 
                         :positive-score="emotionScores.positive"
                         :neutral-score="emotionScores.neutral"
                         :negative-score="emotionScores.negative"
                     />
-                    <EmotionBarChart />
+                    <EmotionBarChart :diary-data="diaryEntries" />
                 </div>
             </div>
         </div>
@@ -99,6 +93,7 @@
 import { ref, computed, onMounted } from 'vue';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
+import Moodlog from '../components/Moodlog.vue';
 
 const selectedDate = ref(new Date());
 
@@ -173,11 +168,23 @@ const calendarCells = computed(() => {
 });
 
 const emotionScores = computed(() => {
-    return {
+    const scores = {
         positive: 0,
         neutral: 0,
         negative: 0
     };
+
+    diaryEntries.value.forEach(entry => {
+        if (entry.totalScore <= 33) {
+            scores.negative += 1;
+        } else if (entry.totalScore <= 66) {
+            scores.neutral += 1;
+        } else {
+            scores.positive += 1;
+        }
+    });
+
+    return scores;
 });
 
 const diaryEntries = ref([]);
@@ -189,6 +196,7 @@ const fetchMonthlyDiary = async (targetMonth, userId) => {
             throw new Error('서버 쪽에서 리스폰스 객체가 넘어오는데 문제가 생김');
         }
         const data = await response.json();
+        console.log('백엔드 응답 데이터:', data);
         diaryEntries.value = data; // 데이터를 상태에 저장
     } catch (error) {
         console.error('Fetch error:', error);
@@ -204,6 +212,18 @@ const getScoreColor = (score) => {
     if (score <= 66) return '#DA930E';
     return '#346FD2';
 };
+
+const topThreeEntries = computed(() => {
+    return [...diaryEntries.value]
+        .sort((a, b) => b.totalScore - a.totalScore)
+        .slice(0, 3);
+});
+
+const bottomThreeEntries = computed(() => {
+    return [...diaryEntries.value]
+        .sort((a, b) => a.totalScore - b.totalScore)
+        .slice(0, 3);
+});
 
 onMounted(() => {
     const year = selectedDate.value.getFullYear();
@@ -481,7 +501,6 @@ onMounted(() => {
     font-weight: 400;
     font-size: 12px;
     color: #535353;
-    margin-bottom: -15px;
 }
 
 .score-circle {
@@ -520,5 +539,34 @@ onMounted(() => {
     font-size: 16px;
     color: #535353;
     margin-left: 5px;
+}
+
+.entry-container {
+    margin-bottom: 15px;
+}
+
+.happy-entry, .sad-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 20px;
+    margin-top: 15px;
+}
+
+.section-underline2-margin {
+    margin-top: 0px;
+}
+
+.entry-title {
+    font-family: 'Akshar', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    color: #525252;
+    line-height: 20px;
+    height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
 }
 </style>

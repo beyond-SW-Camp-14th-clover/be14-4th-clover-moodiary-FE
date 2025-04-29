@@ -1,11 +1,6 @@
 <template>
     <div class="emotion-rates">
       <canvas ref="chartCanvas"></canvas>
-      <!-- 테스트 버튼 추가 -->
-      <div class="test-controls" v-if="showTestControls">
-        <button @click="loadTestData">테스트 데이터 로드</button>
-        <button @click="resetData">초기화</button>
-      </div>
     </div>
   </template>
   
@@ -27,41 +22,18 @@
     }
   });
   
-  // 내부 상태 추가 (테스트용)
-  const internalPositive = ref(props.positiveScore);
-  const internalNeutral = ref(props.neutralScore);
-  const internalNegative = ref(props.negativeScore);
-  const showTestControls = ref(true);
-  
   const chartCanvas = ref(null);
   let chartInstance = null;
   
   const totalScore = computed(() => {
-    return internalPositive.value + internalNeutral.value + internalNegative.value;
+    return props.positiveScore + props.neutralScore + props.negativeScore;
   });
   
   const hasData = computed(() => {
     return totalScore.value > 0;
   });
   
-
-  const loadTestData = () => {
-    internalPositive.value = 45;
-    internalNeutral.value = 33;
-    internalNegative.value = 22;
-    drawChart();
-  };
-  
-
-  const resetData = () => {
-    internalPositive.value = 0;
-    internalNeutral.value = 0;
-    internalNegative.value = 0;
-    drawChart();
-  };
-  
   onMounted(() => {
-
     const loadChartJs = () => {
       return new Promise((resolve) => {
         if (window.Chart) {
@@ -91,12 +63,8 @@
     });
   });
   
-  // props 값 변경 시 내부 상태 업데이트
   watch([() => props.positiveScore, () => props.neutralScore, () => props.negativeScore], 
-    ([newPositive, newNeutral, newNegative]) => {
-      internalPositive.value = newPositive;
-      internalNeutral.value = newNeutral; 
-      internalNegative.value = newNegative;
+    () => {
       if (chartInstance) {
         drawChart();
       }
@@ -113,7 +81,6 @@
         const ctx = chartCanvas.value.getContext('2d');
         
         if (!hasData.value) {
-            // 데이터가 없는 경우 회색 원만 표시
             chartInstance = new window.Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -136,8 +103,7 @@
             return;
         }
         
-        // 데이터가 있는 경우
-        const data = [internalPositive.value, internalNeutral.value, internalNegative.value];
+        const data = [props.positiveScore, props.neutralScore, props.negativeScore];
         const colors = ['#C3E3FF', '#BBE7AD', '#FFB3B3'];
         const labels = ['긍정', '보통', '부정'];
         
@@ -189,25 +155,4 @@
     margin-left: 0;
     position: relative;
   }
-  
-  .test-controls {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-  
-  .test-controls button {
-    padding: 5px 10px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  
-  .test-controls button:hover {
-    background-color: #e0e0e0;
-  }
-
   </style>
