@@ -36,7 +36,8 @@ const routes = [
                     { path: 'room', name: 'SharedDiaryRoom', component: SharedDiaryMain },
                     { path: ':roomId', name: 'SharedDiaryList', component: () => import('@/pages/shareddiary/views/SharedDiaryList.vue') },
                     { path: ':roomId/write', name: 'SharedDiaryWrite', component: () => import('@/pages/shareddiary/views/SharedDiaryWrite.vue') },
-                    { path: ':roomId/diary/:diaryId', name: 'SharedDiaryDetail', component: () => import('@/pages/shareddiary/views/SharedDiaryDetail.vue') }
+                    { path: ':roomId/diary/:diaryId', name: 'SharedDiaryDetail', component: () => import('@/pages/shareddiary/views/SharedDiaryDetail.vue') },
+                    { path: ':roomId/edit/:diaryId', name: 'SharedDiaryEdit', component: () => import('@/pages/shareddiary/views/SharedDiaryEdit.vue') }
                 ]
             },
             { path: 'mypage', name: 'MyPage', component: MyPage }
