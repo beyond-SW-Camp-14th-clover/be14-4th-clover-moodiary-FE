@@ -17,7 +17,7 @@
             <!-- 기존 비밀번호 찾기 -->
             <p class="forgot small-p" @click="showForgotModal = true">비밀번호를 잊으셨나요?</p>
 
-            <router-link to="/" class="button submit-button">로그인</router-link>
+            <router-link to="/app/home" class="button submit-button">로그인</router-link>
         </div>
 
         <!-- 비밀번호 찾기 모달 -->

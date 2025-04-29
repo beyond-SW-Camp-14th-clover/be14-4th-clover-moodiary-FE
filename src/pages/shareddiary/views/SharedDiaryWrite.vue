@@ -2,10 +2,17 @@
   <div class="diary-page">
     <transition name="page-flip" mode="out-in">
       <div key="diary" class="write-wrapper">
-        <h2>✍️ 공유 일기 작성</h2>
+        <h2 class="today-title">✍️ {{ todayString }} 오늘의 일기</h2>
 
-        <form @submit.prevent="submitDiary" class="write-form">
-          <input v-model="title" type="text" placeholder="제목을 입력하세요" required class="title-input" />
+        <form class="write-form"> <!-- ✅ 여기 수정: @submit.prevent 삭제 -->
+          <div class="title-section">
+            <input v-model="title" type="text" placeholder="제목을 입력하세요" required class="title-input" />
+            <div class="title-buttons">
+              <button type="button" class="upload-btn" @click="showStickerModal = true">🧸 스티커 추가</button>
+              <button type="button" class="upload-btn" @click="triggerFileInput">📷 사진 추가</button>
+              <input type="file" ref="fileInput" accept="image/*" @change="handlePhotoUpload" hidden />
+            </div>
+          </div>
 
           <div class="textarea-wrapper">
             <textarea
@@ -40,34 +47,43 @@
           </div>
 
           <div class="sticker-toolbar">
-            <button type="button" class="upload-btn" @click="showStickerModal = true">🧸 스티커 추가</button>
-            <button type="button" class="upload-btn" @click="triggerFileInput">📷 사진 추가</button>
-            <input type="file" ref="fileInput" accept="image/*" @change="handlePhotoUpload" hidden />
+            <button type="button" class="submit-btn" @click="confirmDiary">등록</button>
+            <button type="button" class="submit-btn" @click="cancelDiary">취소</button>
           </div>
-
-          <div v-if="showStickerModal" class="sticker-modal">
-            <div class="sticker-modal-inner">
-              <div class="sticker-option" v-for="src in stickerOptions" :key="src">
-                <img :src="src" @click="addSticker(src); showStickerModal = false" />
-              </div>
-              <button @click="showStickerModal = false" class="close-btn">닫기</button>
-            </div>
-          </div>
-
-          <button type="submit" class="submit-btn">등록하기</button>
         </form>
+
+        <div v-if="showStickerModal" class="sticker-modal">
+          <div class="sticker-modal-inner">
+            <div class="sticker-option" v-for="src in stickerOptions" :key="src">
+              <img :src="src" @click="addSticker(src); showStickerModal = false" />
+            </div>
+            <button @click="showStickerModal = false" class="close-btn">닫기</button>
+          </div>
+        </div>
+
+        <RegistCheck
+          :show="showRegistModal"
+          title="일기 등록"
+          message="정말로 등록하시겠습니까?"
+          @confirm="submitDiary"
+          @cancel="showRegistModal = false"
+        />
       </div>
     </transition>
   </div>
 </template>
 
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
+import RegistCheck from '@/pages/shareddiary/components/RegistCheck.vue'
+
 const route = useRoute()
 const router = useRouter()
+
 const roomId = Number(route.params.roomId)
 const loginUserId = 1
 
@@ -77,6 +93,8 @@ const stickers = ref([])
 const selectedIndex = ref(null)
 const showStickerModal = ref(false)
 const fileInput = ref(null)
+const selectedDate = ref(new Date())
+const showRegistModal = ref(false)
 
 const stickerOptions = [
   '/src/assets/stickers/heart.png',
@@ -84,6 +102,15 @@ const stickerOptions = [
   '/src/assets/stickers/rabbit.png',
   '/src/assets/stickers/smpet.png'
 ]
+
+const todayString = computed(() => {
+  const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+  const year = selectedDate.value.getFullYear()
+  const month = selectedDate.value.getMonth() + 1
+  const date = selectedDate.value.getDate()
+  const day = days[selectedDate.value.getDay()]
+  return `${year}년 ${month}월 ${date}일 ${day}`
+})
 
 const triggerFileInput = () => {
   fileInput.value?.click()
@@ -116,13 +143,7 @@ let resizing = ref(null)
 
 const startDrag = (index, event) => {
   event.preventDefault()
-  dragging.value = {
-    index,
-    startX: event.clientX,
-    startY: event.clientY,
-    origX: stickers.value[index].x,
-    origY: stickers.value[index].y
-  }
+  dragging.value = { index, startX: event.clientX, startY: event.clientY, origX: stickers.value[index].x, origY: stickers.value[index].y }
   document.addEventListener('mousemove', onDrag)
   document.addEventListener('mouseup', stopDrag)
 }
@@ -159,13 +180,7 @@ const selectSticker = (index) => {
 
 const startResize = (index, event) => {
   event.preventDefault()
-  resizing.value = {
-    index,
-    startX: event.clientX,
-    startY: event.clientY,
-    origWidth: stickers.value[index].width,
-    origHeight: stickers.value[index].height
-  }
+  resizing.value = { index, startX: event.clientX, startY: event.clientY, origWidth: stickers.value[index].width, origHeight: stickers.value[index].height }
   document.addEventListener('mousemove', onResize)
   document.addEventListener('mouseup', stopDrag)
 }
@@ -196,6 +211,14 @@ onMounted(() => {
   })
 })
 
+const confirmDiary = () => {
+  if (!title.value || !content.value) {
+    alert('제목과 내용을 모두 입력해주세요.')
+    return
+  }
+  showRegistModal.value = true
+}
+
 const submitDiary = async () => {
   try {
     await axios.post('http://localhost:3001/shared_diaries', {
@@ -209,14 +232,19 @@ const submitDiary = async () => {
       style_layer: JSON.stringify(stickers.value)
     })
     alert('일기 등록 완료!')
-    router.push({ name: 'SharedDiaryList', params: { roomId } })
+    router.push({ name: 'SharedDiaryList', params: { roomId } }) // ✅ 여기 수정
   } catch (error) {
     console.error('등록 실패', error)
     alert('등록 실패')
   }
 }
-</script>
 
+const cancelDiary = () => {
+  if (confirm('작성 중인 일기를 취소하시겠습니까?')) {
+    router.push({ name: 'SharedDiaryList', params: { roomId } }) // ✅ 여기 수정
+  }
+}
+</script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
@@ -233,7 +261,7 @@ const submitDiary = async () => {
   background-color: #fffce6;
   border-radius: 20px;
   border: 3px dashed #d9c7aa;
-  font-family: 'Nanum Pen Script', cursive;
+  font-family: 'Ownglyph PDH', sans-serif; font-size: 18px; font-weight: 200; color: #535353;
   position: relative;
   animation: inkFadeIn 1.2s ease;
 }
@@ -243,11 +271,52 @@ const submitDiary = async () => {
 }
 
 .write-form { display: flex; flex-direction: column; gap: 1.5rem; }
-.title-input { font-family: 'Nanum Pen Script'; font-size: 1.4rem; border: none; border-bottom: 2px dashed #c5b496; background-color: #fffce6; padding: 0.8rem 0.5rem; }
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title-input {
+  flex: 1;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #535353;
+  border: none;
+  border-bottom: 2px dashed #c5b496;
+  background-color: #fffce6;
+  padding: 0.8rem 0.5rem;
+  outline: none;
+}
+
+.title-input:focus {
+  outline: none;
+  border-bottom: 2px dashed #c5b496;
+}
+
+.title-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.upload-btn {
+  background-color: #f5eccc;
+  border-radius: 10px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  min-width: 90px;
+  color: #7a5c3d;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-weight: 400;
+}
+
 .textarea-wrapper { position: relative; border: 1px solid #d9c7aa; border-radius: 10px; background-color: #fffce6; overflow: auto; box-shadow: inset 0 0 8px rgba(0,0,0,0.08); }
 
 .notebook-textarea {
-  font-family: 'Nanum Pen Script'; font-size: 1.3rem;
+  font-family: 'Ownglyph PDH', sans-serif; font-size: 18px; font-weight: 400; color: #535353;
   line-height: 34px; padding: 12px 18px; min-height: 500px; width: 100%;
   background: repeating-linear-gradient(to bottom, #fffce6 0px, #fffce6 33px, #d9c7aa 34px);
   background-size: 100% 34px; background-position-y: 12px; box-sizing: border-box; border: none; resize: vertical; outline: none;
@@ -267,16 +336,46 @@ const submitDiary = async () => {
 }
 
 .sticker.selected { outline: 2px dashed #f06292; }
-.sticker-toolbar { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center; }
-.upload-btn { background-color: #f5eccc; border-radius: 10px; padding: 0.5rem 1rem; cursor: pointer; }
-.upload-btn:hover { background-color: #eedfa3; }
-.submit-btn { align-self: flex-end; background-color: #6f9d6b; color: white; border: none; padding: 0.8rem 1.8rem; border-radius: 10px; }
-.submit-btn:hover { background-color: #5a8755; }
+.sticker-toolbar { 
+  display: flex; 
+  gap: 1rem; 
+  margin-top: 1.5rem; 
+  justify-content: center;
+  width: 100%;
+}
+.submit-btn {
+  all: unset;
+  width: 122px;
+  height: 46px;
+  background-color: #E9D2AF;
+  color: #535353;
+  border-radius: 10px;
+  font-family: 'Ownglyph PDH', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  align-self: flex-end;
+}
+.submit-btn:hover {
+  background-color: #d1b07a;
+}
 
 .sticker-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #fffce6; border: 2px solid #d9c7aa; border-radius: 12px; padding: 2rem; z-index: 100; }
 .sticker-modal-inner { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center; }
 .sticker-option img { width: 60px; height: 60px; cursor: pointer; }
 .sticker-option img:hover { transform: scale(1.1); }
 .close-btn { margin-top: 1rem; background-color: #c9a36b; color: white; border-radius: 8px; padding: 0.5rem 1.2rem; }
+
+.confirm-btn {
+  background-color: #EFEFED !important;
+}
+
+.confirm-btn.confirmed {
+  background-color: #E9D2AF !important;
+}
 </style>
 
