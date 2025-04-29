@@ -36,7 +36,7 @@ const routes = [
 
             {
                 path: 'shareddiary',
-                redirect: '/shareddiary/room', // ✅ 클릭하면 자동으로 /room으로 이동
+                redirect: 'shareddiary/room', // ✅ 클릭하면 자동으로 /room으로 이동
                 children: [
                     { path: 'room', name: 'SharedDiaryRoom', component: SharedDiaryMain },
                     { path: ':roomId', name: 'SharedDiaryList', component: () => import('@/pages/shareddiary/views/SharedDiaryList.vue') },
@@ -60,4 +60,4 @@ const router = createRouter({
     routes
 })
 
-export default router
+export default router 
