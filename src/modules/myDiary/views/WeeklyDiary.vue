@@ -100,7 +100,7 @@
                     </div>
                     <div class="moodlog-content">
                         <div class="moodlog-textbox">
-                            <textarea placeholder="이번 달 나의 기록"></textarea>
+                            <textarea v-model="moodlogContent" placeholder="이번 달 나의 기록"></textarea>
                         </div>
                     </div>
                 </div>
@@ -286,6 +286,13 @@ const changeMonth = (change) => {
     const newDate = new Date(selectedDate.value);
     newDate.setMonth(newDate.getMonth() + change);
     selectedDate.value = newDate;
+    
+    // 월이 변경되면 데이터 초기화
+    weeklyData.value = [];
+    // 첫 번째 주로 초기화
+    selectedWeek.value = '1';
+    // 새로운 데이터 가져오기
+    fetchWeeklyData();
 };
 
 const getWeekInfo = computed(() => {
@@ -359,9 +366,7 @@ const getYCoordinate = (score) => {
 
 const polylinePoints = computed(() => {
     const points = weeklyData.value.map((data, index) => {
-        // 일요일 점은 27px로 고정
         const firstX = 27;
-        // 점 사이 간격 49px로 고정
         const spacing = 49;
         const x = firstX + (spacing * index);
         const y = getYCoordinate(data?.totalScore || 0);
@@ -372,9 +377,8 @@ const polylinePoints = computed(() => {
 
 const circlePoints = computed(() => {
     return weeklyData.value.map((data, index) => {
-        // 일요일 점은 27px로 고정
         const firstX = 27;
-        // 점 사이 간격 49px로 고정
+
         const spacing = 49;
         const x = firstX + (spacing * index);
         const y = getYCoordinate(data?.totalScore || 0);
@@ -507,9 +511,36 @@ const analysisText = computed(() => {
         : '이번 주는 감정 변화가 크지 않은 주입니다.';
 });
 
+const moodlogContent = ref('');
+
+const fetchMoodlogContent = async () => {
+    const year = selectedDate.value.getFullYear();
+    const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
+    const targetMonth = `${year}-${month}-01`;
+    const userId = 1;
+
+    try {
+        const response = await fetch(`http://localhost:8080/mydiary/moodlog?targetMonth=${targetMonth}&userId=${userId}`);
+        if (!response.ok) {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+        }
+        const data = await response.json();
+        moodlogContent.value = data.content || '';
+    } catch (error) {
+        console.error('moodlog 데이터를 가져오는 중 오류가 발생했습니다:', error);
+        moodlogContent.value = '';
+    }
+};
+
+// 월이 변경될 때 moodlog 내용도 업데이트
+watch(selectedDate, () => {
+    fetchMoodlogContent();
+});
+
 onMounted(() => {
     calculateCurrentWeekFromServer();
     fetchWeeklyData();
+    fetchMoodlogContent();
 });
 </script>
 
@@ -802,6 +833,9 @@ onMounted(() => {
     font-weight: 200;
     font-size: 24px;
     color: #535353;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
 }
 
 .save-button {
@@ -810,7 +844,7 @@ onMounted(() => {
     color: #535353;
     border: none;
     border-radius: 4px;
-    padding: 4px 12px;
+    padding: 6px 12px;
     font-family: var(--font-akshar);
     font-size: 12px;
     font-weight: 400;
@@ -820,10 +854,9 @@ onMounted(() => {
     box-shadow: none;
     outline: none;
     text-decoration: none;
-    display: inline-block;
-    line-height: normal;
-    text-align: center;
-    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
     user-select: none;
     -webkit-user-select: none;
