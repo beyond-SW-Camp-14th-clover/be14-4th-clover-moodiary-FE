@@ -43,6 +43,12 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'DungGeunMo';
+    src: url('../fonts/DungGeunMo.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 /* -------------------------------
    기본 설정
 --------------------------------- */
@@ -75,6 +81,7 @@ body {
     --font-omyu: 'OMYuPretty', sans-serif;
     --font-hand: 'HandwritingFont', sans-serif;
     --font-akshar: 'Akshar', sans-serif;
+    --font-pixel: 'DungGeunMo', sans-serif;
 }
 
 /* -------------------------------

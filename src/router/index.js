@@ -24,14 +24,14 @@ const routes = [
             { path: 'registmydiary', name: 'RegistMyDiary', component: () => import('../modules/myDiary/views/RegistMyDiary.vue') },
             { path: 'mypage', name: 'MyPage', component: MyPage },
             { path: 'login', name: 'Login', component: LoginPage },
-            { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../pages/shareddiary/views/SharedDiaryMain.vue') },
+            { path: 'shareddiary/room', name: 'SharedDiaryRoom', component: () => import('../pages/shareddiary/views/SharedDiaryMain.vue') },
             { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('../pages/shareddiary/views/SharedDiaryList.vue') },
             { path: '/shared-diary/:roomId/write', name: 'SharedDiaryWrite', component: () => import('../pages/shareddiary/views/SharedDiaryWrite.vue') },
             { path: '/shared-diary/:roomId/diary/:diaryId', name: 'SharedDiaryDetail', component: () => import('../pages/shareddiary/views/SharedDiaryDetail.vue') },
-            { path: '/sa', name: 'SentimentAnalysis', component: () => import('../pages/sa/views/SentimentAnalysis.vue') }
+            { path: '/sa', name: 'SentimentAnalysis', component: () => import('../pages/sa/views/SentimentAnalysis.vue') },
+            { path: 'mypage', name: 'MyPage', component: MyPage }
         ]
     },
-
     { path: '/login', name: 'Login', component: LoginPage },
     { path: '/signup', name: 'SignUp', component: SignUp },
     { path: '/findid', name: 'FindId', component: FindId }
@@ -42,4 +42,4 @@ const router = createRouter({
     routes
 })
 
-export default router
+export default router 
