@@ -75,7 +75,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, computed } from 'vue'
+  import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import axios from 'axios'
   
@@ -107,7 +107,14 @@
     const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
     return `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 ${days[today.getDay()]}`
   })
-  
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Delete' && selectedIndex.value !== null) {
+        stickers.value.splice(selectedIndex.value, 1)
+        selectedIndex.value = null
+    }
+    }
+    
   // 기존 일기 데이터 불러오기
   onMounted(async () => {
     try {
@@ -121,6 +128,8 @@
       }
   
       loaded.value = true
+
+      window.addEventListener('keydown', handleKeyDown)
     } catch (e) {
       console.error('일기 불러오기 실패', e)
       alert('일기를 불러올 수 없습니다.')
@@ -233,6 +242,10 @@
   const goBack = () => {
     router.back()
   }
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeyDown)
+    })
   </script>
   
   <style scoped>
