@@ -80,23 +80,47 @@
                     
                     <div class="write-form">
                         <div class="title-section">
-                            <div class="title-input">{{ diary.title || '제목 없음' }}</div>
+                            <div class="title-input" v-if="!isEditing">{{ diary.title || '제목 없음' }}</div>
+                            <input 
+                                v-else
+                                v-model="editedDiary.title"
+                                class="title-input"
+                                type="text"
+                                placeholder="제목을 입력하세요"
+                            />
                         </div>
 
                         <div class="textarea-wrapper">
                             <div class="emotion-tag-header">
                                 <h3>감정 태그: </h3>
                                 <div class="emotion-tags">
-                                    <span 
-                                        v-for="(tag, index) in (diary.hashtags || [])" 
-                                        :key="index" 
-                                        class="emotion-tag"
-                                    >
-                                        #{{ tag }}
-                                    </span>
+                                    <template v-if="!isEditing">
+                                        <span 
+                                            v-for="(tag, index) in (diary.hashtags || [])" 
+                                            :key="index" 
+                                            class="emotion-tag"
+                                        >
+                                            #{{ tag }}
+                                        </span>
+                                    </template>
+                                    <template v-else>
+                                        <input
+                                            v-model="editedDiary.hashtags"
+                                            class="emotion-tag-input"
+                                            type="text"
+                                            placeholder="태그를 입력하세요 (쉼표로 구분)"
+                                            @keyup.enter="addTag"
+                                        />
+                                    </template>
                                 </div>
                             </div>
-                            <div class="notebook-textarea">{{ diary.content || '내용이 없습니다' }}</div>
+                            <div v-if="!isEditing" class="notebook-textarea">{{ diary.content || '내용이 없습니다' }}</div>
+                            <textarea
+                                v-else
+                                v-model="editedDiary.content"
+                                class="notebook-textarea"
+                                placeholder="일기 내용을 입력하세요"
+                            ></textarea>
 
                             <div class="sticker-layer">
                                 <div
@@ -156,6 +180,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 수정 완료 확인 모달 -->
+    <div v-if="showEditConfirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>일기 수정 완료</h3>
+            <p>정말 수정을 완료하시겠습니까?</p>
+            <div class="modal-buttons">
+                <button @click="confirmEdit" class="confirm-button">확인</button>
+                <button @click="showEditConfirmModal = false" class="cancel-button">취소</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -188,7 +224,9 @@ const recommendedActions = ref([])
 const showConfirmModal = ref(false)
 const showDeleteModal = ref(false)
 const showAlreadyConfirmedModal = ref(false)
+const showEditConfirmModal = ref(false)
 const isEditing = ref(false)
+const editedDiary = ref(null)
 
 const totalScoreColor = computed(() => {
     const score = myDiaryEmotion.value?.totalScore || 0
@@ -439,11 +477,63 @@ const confirmDelete = async () => {
     }
 }
 
-const handleEdit = () => {
+const handleEdit = async () => {
     if (diary.value?.isConfirmed === 'Y') {
         return; // 이미 확정된 일기는 수정 불가
     }
-    isEditing.value = !isEditing.value;
+    
+    if (!isEditing.value) {
+        // 수정 모드 진입 시 현재 데이터를 복사
+        editedDiary.value = {
+            ...diary.value,
+            title: diary.value.title || '',
+            content: diary.value.content || '',
+            hashtags: [...(diary.value.hashtags || [])]
+        }
+        isEditing.value = true
+    } else {
+        showEditConfirmModal.value = true
+    }
+}
+
+const confirmEdit = async () => {
+    try {
+        // 수정 완료 시 API 호출
+        const requestData = {
+            ...diary.value, // 기존 데이터
+            ...editedDiary.value, // 수정된 데이터로 덮어쓰기
+            createdAt: diary.value.createdAt.toISOString().slice(0, -1),
+            styleLayer: JSON.stringify(styleLayer.value),
+            tags: editedDiary.value.hashtags || []
+        }
+
+        const response = await axios.put('/mydiary/update', requestData)
+        
+        if (response.status === 200) {
+            // 성공 시 이전 페이지로 이동
+            if (dailyDiaryStore.previousPage === 'weekly') {
+                router.push({ name: 'WeeklyDiary' })
+            } else if (dailyDiaryStore.previousPage === 'monthly') {
+                router.push({ name: 'MonthlyDiary' })
+            } else {
+                router.push({ name: 'MonthlyDiary' })
+            }
+            dailyDiaryStore.clearPreviousPage()
+        }
+    } catch (error) {
+        console.error('일기 수정 중 오류 발생:', error)
+        alert('일기 수정에 실패했습니다')
+    }
+    showEditConfirmModal.value = false
+}
+
+const addTag = (event) => {
+    const tagInput = event.target.value.trim()
+    if (tagInput) {
+        const tags = tagInput.split(',').map(tag => tag.trim()).filter(tag => tag)
+        editedDiary.value.hashtags = [...new Set([...editedDiary.value.hashtags, ...tags])]
+        event.target.value = ''
+    }
 }
 
 // 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴
@@ -886,65 +976,116 @@ watch(selectedDate, () => {
 }
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 1000 !important;
 }
 
 .modal-content {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 300px;
-    text-align: center;
+    background: white !important;
+    padding: 2rem !important;
+    border-radius: 8px !important;
+    width: 300px !important;
+    text-align: center !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
 
     h3 {
-        margin-bottom: 1rem;
-        color: #333;
+        margin-bottom: 1rem !important;
+        color: #333 !important;
+        font-size: 1.2rem !important;
+        font-weight: 600 !important;
     }
 
     p {
-        margin-bottom: 1.5rem;
-        color: #666;
+        margin-bottom: 1.5rem !important;
+        color: #666 !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
     }
 }
 
 .modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
 
     button {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 1rem;
+        padding: 0.5rem 1.5rem !important;
+        border: none !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+
+        &:hover {
+            transform: translateY(-1px) !important;
+        }
     }
 
     .confirm-button {
-        background-color: #FFE0B2;
-        color: #333;
+        background-color: #FFE0B2 !important;
+        color: #333 !important;
 
         &:hover {
-            background-color: #FFD180;
+            background-color: #FFD180 !important;
         }
     }
 
     .cancel-button {
-        background-color: #E0E0E0;
-        color: #333;
+        background-color: #E0E0E0 !important;
+        color: #333 !important;
 
         &:hover {
-            background-color: #D0D0D0;
+            background-color: #D0D0D0 !important;
         }
     }
+}
+
+.emotion-tag-input {
+    flex: 1;
+    min-width: 200px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid #d9c7aa;
+    border-radius: 4px;
+    background-color: #fffce6;
+    font-family: 'Ownglyph PDH', sans-serif;
+    font-size: 14px;
+    color: #535353;
+    outline: none;
+
+    &:focus {
+        border-color: #c5b496;
+        box-shadow: 0 0 0 2px rgba(197, 180, 150, 0.2);
+    }
+}
+
+textarea.notebook-textarea {
+    resize: none;
+    outline: none;
+    border: none;
+    font-family: 'Ownglyph PDH', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #535353;
+    line-height: 34px;
+    padding: 0 18px 12px 18px;
+    min-height: 500px;
+    max-height: 500px;
+    width: 100%;
+    background: repeating-linear-gradient(to bottom, #fffce6 0px, #fffce6 33px, #d9c7aa 34px);
+    background-size: 100% 34px;
+    background-position-y: 0;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    overflow-y: auto;
 }
 </style>
