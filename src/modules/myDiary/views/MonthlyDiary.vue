@@ -244,6 +244,7 @@ const bottomThreeEntries = computed(() => {
 
 const goToDailyDiary = (day) => {
     const date = new Date(selectedDate.value.getFullYear(), selectedDate.value.getMonth(), day);
+    date.setHours(12, 0, 0, 0); // 시간을 정오로 설정하여 시간대 문제 방지
     dailyDiaryStore.setPreviousPage('monthly', date);
     router.push({ name: 'DailyMyDiaryWithDate', params: { date: date.toISOString().split('T')[0] } });
 };
