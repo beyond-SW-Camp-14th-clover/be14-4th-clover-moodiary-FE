@@ -303,21 +303,16 @@
 
       console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
 
-      const response = await fetch('http://localhost:8080/mydiary/regist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(diaryData)
-      });
+      const response = await axios.post('http://localhost:8080/mydiary/regist', diaryData);
 
-      if (response.ok) {
-        alert('일기 등록 완료!');
-      } else if (response.status === 409) {
-        alert('오늘 이미 일기를 등록하셨습니다.');
-      } else {
-        throw new Error('서버 응답 오류');
-      }
+      if (response.status >= 200 && response.status < 300) {
+          console.log('✅ 일기 등록 성공:', response.data);
+        } else if (response.status === 409) {
+          alert('오늘 이미 일기를 등록하셨습니다.');
+        } else {
+          console.error('⚠️ 예외 상태 코드:', response.status);
+          throw new Error('서버 응답 오류');
+        }
     } catch (error) {
       console.error('일기 등록 중 오류가 발생했습니다:', error);
       alert('일기 등록에 실패했습니다. 다시 시도해주세요.');

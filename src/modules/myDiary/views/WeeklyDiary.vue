@@ -257,6 +257,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useWeeklyDiaryStore } from '../../../stores/weeklyDiaryStore';
 import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const weeklyDiaryStore = useWeeklyDiaryStore();
 const dailyDiaryStore = useDailyDiaryStore();
@@ -335,10 +336,12 @@ const getCurrentWeekDates = computed(() => {
     for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
+        // 한국 시간으로 변환
+        const koreanDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
         dates.push({
-            date: date.getDate(),
-            day: date.getDay(),
-            fullDate: date.toLocaleDateString('en-CA') // YYYY-MM-DD 형식으로 반환
+            date: koreanDate.getDate(),
+            day: koreanDate.getDay(),
+            fullDate: koreanDate.toISOString().split('T')[0]
         });
     }
     
@@ -448,9 +451,10 @@ const fetchWeeklyData = async () => {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
 
-    const startDate = new Date(weekStart);
+    // 한국 시간으로 변환
+    const startDate = new Date(weekStart.getTime() + (9 * 60 * 60 * 1000));
     startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(weekEnd);
+    const endDate = new Date(weekEnd.getTime() + (9 * 60 * 60 * 1000));
     endDate.setHours(23, 59, 59, 999);
 
     const startDateStr = startDate.toISOString().split('T')[0];
@@ -458,19 +462,30 @@ const fetchWeeklyData = async () => {
     const userId = 1;
 
     try {
-        const response = await fetch(`http://localhost:8080/mydiary/weekly?startDate=${startDateStr}&endDate=${endDateStr}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('네트워크 응답이 올바르지 않습니다.');
-        }
-        const data = await response.json();
+        const response = await axios.get(`http://localhost:8080/mydiary/weekly`, {
+            params: {
+                startDate: startDateStr,
+                endDate: endDateStr,
+                userId: userId
+            }
+        });
         
+        const data = response.data;
         const sortedData = [];
         for (let i = 0; i < 7; i++) {
             const currentDate = new Date(weekStart);
             currentDate.setDate(weekStart.getDate() + i);
-            const dateStr = currentDate.toISOString().split('T')[0];
+            // 한국 시간으로 변환
+            const koreanDate = new Date(currentDate.getTime() + (9 * 60 * 60 * 1000));
+            const dateStr = koreanDate.toISOString().split('T')[0];
             
-            const matchingData = data.find(d => d.createdAt.startsWith(dateStr));
+            const matchingData = data.find(d => {
+                if (!d) return false;
+                // 서버에서 받은 createdAt도 한국 시간으로 변환
+                const diaryDate = new Date(d.createdAt);
+                const koreanDiaryDate = new Date(diaryDate.getTime() + (9 * 60 * 60 * 1000));
+                return koreanDiaryDate.toISOString().split('T')[0] === dateStr;
+            });
             sortedData[i] = matchingData || null;
         }
         
@@ -524,12 +539,13 @@ const fetchMoodlogContent = async () => {
     const userId = 1;
 
     try {
-        const response = await fetch(`http://localhost:8080/mydiary/moodlog?targetMonth=${targetMonth}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('네트워크 응답이 올바르지 않습니다.');
-        }
-        const data = await response.json();
-        moodlogContent.value = data.content || '';
+        const response = await axios.get(`http://localhost:8080/mydiary/moodlog`, {
+            params: {
+                targetMonth: targetMonth,
+                userId: userId
+            }
+        });
+        moodlogContent.value = response.data.content || '';
     } catch (error) {
         console.error('moodlog 데이터를 가져오는 중 오류가 발생했습니다:', error);
         moodlogContent.value = '';
@@ -560,32 +576,24 @@ const saveMoodlog = async () => {
   };
 
   try {
-    const response = await fetch('http://localhost:8080/mydiary/moodlog', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
-
-    const text = await response.text();
-    if (!response.ok) {
-      throw new Error(text);
-    }
-
-    console.log('moodlog 저장 성공:', text);
+    const response = await axios.post('http://localhost:8080/mydiary/moodlog', requestData);
+    console.log('moodlog 저장 성공:', response.data);
   } catch (error) {
     console.error('moodlog 저장 중 오류 발생:', error);
-    alert(error.message || '저장에 실패했습니다.');
+    alert(error.response?.data || '저장에 실패했습니다.');
   }
 };
 
 const goToDailyDiary = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    // 한국 시간으로 변환
+    const koreanDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+    const dateStr = koreanDate.toISOString().split('T')[0];
     const diaryData = weeklyData.value.find(data => {
         if (!data) return false;
-        const diaryDate = new Date(data.createdAt).toISOString().split('T')[0];
-        return diaryDate === dateStr;
+        // 서버에서 받은 createdAt도 한국 시간으로 변환
+        const diaryDate = new Date(data.createdAt);
+        const koreanDiaryDate = new Date(diaryDate.getTime() + (9 * 60 * 60 * 1000));
+        return koreanDiaryDate.toISOString().split('T')[0] === dateStr;
     });
 
     if (!diaryData) {
@@ -593,7 +601,7 @@ const goToDailyDiary = (date) => {
         return;
     }
 
-    dailyDiaryStore.setPreviousPage('weekly', date);
+    dailyDiaryStore.setPreviousPage('weekly', koreanDate);
     router.push({ name: 'DailyMyDiaryWithDate', params: { date: dateStr } });
 };
 </script>

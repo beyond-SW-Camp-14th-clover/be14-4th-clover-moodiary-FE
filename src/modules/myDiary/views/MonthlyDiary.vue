@@ -106,6 +106,7 @@ import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
 import Moodlog from '../components/Moodlog.vue';
+import axios from 'axios';
 
 const router = useRouter();
 const dailyDiaryStore = useDailyDiaryStore();
@@ -206,16 +207,16 @@ const diaryEntries = ref([]);
 const fetchMonthlyDiary = async (targetMonth, userId) => {
     try {
         console.log('월간 일기 조회 요청:', `http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
-        const response = await fetch(`http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error(`서버 쪽에서 리스폰스 객체가 넘어오는데 문제가 생김: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        console.log('백엔드 응답 데이터:', data);
-        diaryEntries.value = data; // 데이터를 상태에 저장
+        const response = await axios.get(`http://localhost:8080/mydiary/monthly`, {
+            params: {
+                targetMonth,
+                userId
+            }
+        });
+        console.log('백엔드 응답 데이터:', response.data);
+        diaryEntries.value = response.data;
     } catch (error) {
-        console.error('Fetch error:', error);
-        // 임시 데이터로 대체하여 UI가 작동하는지 확인
+        console.error('Axios error:', error);
         diaryEntries.value = [];
     }
 };
