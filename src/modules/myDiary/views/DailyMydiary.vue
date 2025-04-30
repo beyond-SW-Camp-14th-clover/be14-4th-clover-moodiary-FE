@@ -9,23 +9,23 @@
                             <div class="score-section">
                                 <h3>감정 분석 결과</h3>
                                 <div class="score-box">
-                                    <p>긍정 감정 점수: {{ diaryEmotion?.positiveScore || 0 }}</p>
-                                    <p>보통 감정 점수: {{ diaryEmotion?.neutralScore || 0 }}</p>
-                                    <p>부정 감정 점수: {{ diaryEmotion?.negativeScore || 0 }}</p>
+                                    <p>긍정 감정 점수: {{ myDiaryEmotion?.positiveScore || 0 }}</p>
+                                    <p>보통 감정 점수: {{ myDiaryEmotion?.neutralScore || 0 }}</p>
+                                    <p>부정 감정 점수: {{ myDiaryEmotion?.negativeScore || 0 }}</p>
                                 </div>
                             </div>
                             <div class="recommended-section">
                                 <h3>추천 일기 제목</h3>
                                 <div class="recommended-title-box">
                                     <div class="title-placeholder">
-                                        {{ diaryEmotion?.diarySummary || '추천 제목이 여기에 표시됩니다' }}
+                                        {{ myDiaryEmotion?.diarySummary || '추천 제목이 여기에 표시됩니다' }}
                                     </div>
                                 </div>
                             </div>
                             <div class="total-score-section">
                                 <h3>종합</h3>
                                 <div class="total-score-box">
-                                    <p class="total-score" :style="{ color: totalScoreColor }">{{ diaryEmotion?.totalScore || 0 }}</p>
+                                    <p class="total-score" :style="{ color: totalScoreColor }">{{ myDiaryEmotion?.totalScore || 0 }}</p>
                                 </div>
                             </div>
                         </div>
@@ -33,18 +33,16 @@
                         <div class="emotion-section">
                             <h3>감정 요약</h3>
                             <ul class="emotion-list">
-                                <li>{{ diaryEmotion?.emotionSummary1 || '감정 요약이 없습니다' }}</li>
-                                <li>{{ diaryEmotion?.emotionSummary2 || '감정 요약이 없습니다' }}</li>
-                                <li>{{ diaryEmotion?.emotionSummary3 || '감정 요약이 없습니다' }}</li>
+                                <li>{{ myDiaryEmotion?.emotionSummary1 || '감정 요약이 없습니다' }}</li>
+                                <li>{{ myDiaryEmotion?.emotionSummary2 || '감정 요약이 없습니다' }}</li>
+                                <li>{{ myDiaryEmotion?.emotionSummary3 || '감정 요약이 없습니다' }}</li>
                             </ul>
                         </div>
 
                         <div class="action-section">
                             <h3>행동 추천</h3>
                             <ul class="action-list">
-                                <li v-if="diary?.isConfirmed === 'Y'">일기가 확정되었습니다</li>
-                                <li v-if="diary?.isDeleted === 'Y'">삭제된 일기입니다</li>
-                                <li>작성일: {{ diary?.createdAt?.toLocaleDateString() || '날짜 정보 없음' }}</li>
+                                <li v-for="action in recommendedActions" :key="action.id">{{ action.action }}</li>
                             </ul>
                         </div>
                     </div>
@@ -130,11 +128,12 @@ if (route.params.date) {
 }
 
 const diary = ref(null)
-const diaryEmotion = ref(null)
+const myDiaryEmotion = ref(null)
 const styleLayer = ref(null)
+const recommendedActions = ref([])  // 행동 추천 데이터를 저장할 ref 추가
 
 const totalScoreColor = computed(() => {
-    const score = diaryEmotion.value?.totalScore || 0
+    const score = myDiaryEmotion.value?.totalScore || 0
     if (score <= 33) return '#CA2B2B'
     if (score <= 66) return '#DA930E'
     return '#346FD2'
@@ -158,6 +157,7 @@ const fetchDiary = async () => {
 
         const data = await response.json()
         console.log('일일 일기 데이터:', data)
+        console.log('myDiaryEmotion 데이터:', data.myDiaryEmotion)  // myDiaryEmotion 데이터 확인
         
         if (data) {
             // 기본 일기 정보
@@ -193,21 +193,33 @@ const fetchDiary = async () => {
             console.log('stickers 설정됨:', diary.value.stickers)
 
             // 감정 분석 정보
-            if (data.diaryEmotion) {
-                diaryEmotion.value = {
-                    id: data.diaryEmotion.id,
-                    positiveScore: data.diaryEmotion.positiveScore,
-                    neutralScore: data.diaryEmotion.neutralScore,
-                    negativeScore: data.diaryEmotion.negativeScore,
-                    totalScore: data.diaryEmotion.totalScore,
-                    emotionSummary1: data.diaryEmotion.emotionSummary1,
-                    emotionSummary2: data.diaryEmotion.emotionSummary2,
-                    emotionSummary3: data.diaryEmotion.emotionSummary3,
-                    diarySummary: data.diaryEmotion.diarySummary
+            if (data.myDiaryEmotion && typeof data.myDiaryEmotion === 'object') {
+                console.log('myDiaryEmotion 데이터 처리 시작:', data.myDiaryEmotion)
+                myDiaryEmotion.value = {
+                    id: data.myDiaryEmotion.id || null,
+                    positiveScore: Number(data.myDiaryEmotion.positiveScore) || 0,
+                    neutralScore: Number(data.myDiaryEmotion.neutralScore) || 0,
+                    negativeScore: Number(data.myDiaryEmotion.negativeScore) || 0,
+                    totalScore: Number(data.myDiaryEmotion.totalScore) || 0,
+                    emotionSummary1: data.myDiaryEmotion.emotionSummary1 || '감정 분석이 필요합니다',
+                    emotionSummary2: data.myDiaryEmotion.emotionSummary2 || '감정 분석이 필요합니다',
+                    emotionSummary3: data.myDiaryEmotion.emotionSummary3 || '감정 분석이 필요합니다',
+                    diarySummary: data.myDiaryEmotion.diarySummary || '감정 분석이 필요합니다'
                 }
-                console.log('diaryEmotion.value 설정됨:', diaryEmotion.value)
+                console.log('myDiaryEmotion.value 설정됨:', myDiaryEmotion.value)
             } else {
-                console.log('diaryEmotion 데이터가 없습니다')
+                console.log('myDiaryEmotion 데이터가 없거나 유효하지 않습니다:', data.myDiaryEmotion)
+                myDiaryEmotion.value = {
+                    id: null,
+                    positiveScore: 0,
+                    neutralScore: 0,
+                    negativeScore: 0,
+                    totalScore: 0,
+                    emotionSummary1: '감정 분석이 필요합니다',
+                    emotionSummary2: '감정 분석이 필요합니다',
+                    emotionSummary3: '감정 분석이 필요합니다',
+                    diarySummary: '감정 분석이 필요합니다'
+                }
             }
         } else {
             console.log('데이터가 null입니다')
@@ -217,16 +229,37 @@ const fetchDiary = async () => {
     }
 }
 
+// 행동 추천 데이터를 가져오는 함수
+const fetchRecommendedActions = async () => {
+    try {
+        const userId = 1; // 임시로 고정된 userId 사용
+        const response = await fetch(`http://localhost:8080/action/recommend?userId=${userId}`)
+        
+        if (!response.ok) {
+            throw new Error('행동 추천을 불러오는데 실패했습니다')
+        }
+
+        const data = await response.json()
+        console.log('행동 추천 데이터:', data)
+        recommendedActions.value = data
+    } catch (error) {
+        console.error('행동 추천을 불러오는데 실패했습니다:', error)
+        recommendedActions.value = []
+    }
+}
+
 // 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴
 onMounted(() => {
     console.log('컴포넌트 마운트됨')
     fetchDiary()
+    fetchRecommendedActions()  // 행동 추천 데이터도 함께 가져옴
 })
 
 // 날짜가 변경될 때마다 데이터를 다시 가져옴
 watch(selectedDate, () => {
     console.log('선택된 날짜가 변경됨:', selectedDate.value)
     fetchDiary()
+    fetchRecommendedActions()  // 행동 추천 데이터도 함께 가져옴
 })
 </script>
 
