@@ -357,20 +357,33 @@
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
   
-  .diary-page { perspective: 1500px; }
+  .diary-page { 
+    perspective: 1500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
   .page-flip-enter-active, .page-flip-leave-active { transition: transform 0.6s ease; transform-style: preserve-3d; }
   .page-flip-enter-from { transform: rotateY(-90deg); }
   .page-flip-leave-to { transform: rotateY(90deg); }
   
   .write-wrapper {
     max-width: 850px;
+    width: 100%;
     padding: 3rem;
     background-color: #fffce6;
     border-radius: 20px;
     border: 3px dashed #d9c7aa;
-    font-family: 'Ownglyph PDH', sans-serif; font-size: 18px; font-weight: 200; color: #535353;
+    font-family: 'Ownglyph PDH', sans-serif; 
+    font-size: 18px; 
+    font-weight: 200; 
+    color: #535353;
     position: relative;
     animation: inkFadeIn 1.2s ease;
+    margin-top: -150px;
   }
   @keyframes inkFadeIn {
     from { filter: blur(3px); opacity: 0; transform: scale(1.02); }

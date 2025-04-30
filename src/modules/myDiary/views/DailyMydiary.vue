@@ -51,7 +51,13 @@
                             <button class="action-button">수정</button>
                             <button class="action-button">삭제</button>
                             <button class="action-button" @click="handleCancel">취소</button>
-                            <button class="action-button highlight">일기 확정</button>
+                            <button 
+                                class="action-button highlight" 
+                                @click="handleConfirm"
+                                :disabled="diary?.isConfirmed === 'Y'"
+                            >
+                                {{ diary?.isConfirmed === 'Y' ? '감정 분석' : '일기 확정' }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -106,6 +112,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 확인 모달 -->
+    <div v-if="showConfirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>일기 확정</h3>
+            <p>일기를 현재 상태로 확정하시겠습니까?</p>
+            <div class="modal-buttons">
+                <button @click="confirmDiary" class="confirm-button">확인</button>
+                <button @click="showConfirmModal = false" class="cancel-button">취소</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -134,6 +152,7 @@ const diary = ref(null)
 const myDiaryEmotion = ref(null)
 const styleLayer = ref(null)
 const recommendedActions = ref([])  // 행동 추천 데이터를 저장할 ref 추가
+const showConfirmModal = ref(false)
 
 const totalScoreColor = computed(() => {
     const score = myDiaryEmotion.value?.totalScore || 0
@@ -260,6 +279,40 @@ const handleCancel = () => {
         router.push({ name: 'MonthlyDiary' }) // 기본값
     }
     dailyDiaryStore.clearPreviousPage()
+}
+
+const handleConfirm = () => {
+    if (diary.value?.isConfirmed === 'Y') {
+        // 감정 분석 페이지로 이동하는 로직 추가
+        return
+    }
+    showConfirmModal.value = true
+}
+
+const confirmDiary = async () => {
+    try {
+        const response = await fetch('http://localhost:8080/mydiary/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: diary.value.id,
+                isConfirmed: 'Y'
+            })
+        })
+
+        if (!response.ok) {
+            throw new Error('일기 확정에 실패했습니다')
+        }
+
+        // 성공적으로 업데이트된 후 diary 객체의 isConfirmed 값을 업데이트
+        diary.value.isConfirmed = 'Y'
+        showConfirmModal.value = false
+    } catch (error) {
+        console.error('일기 확정 중 오류 발생:', error)
+        alert('일기 확정에 실패했습니다')
+    }
 }
 
 // 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴
@@ -686,6 +739,69 @@ watch(selectedDate, () => {
             padding: 50px;
             color: #666;
             font-size: 1.2rem;
+        }
+    }
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+
+    h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    p {
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .confirm-button {
+        background-color: #FFE0B2;
+        color: #333;
+
+        &:hover {
+            background-color: #FFD180;
+        }
+    }
+
+    .cancel-button {
+        background-color: #E0E0E0;
+        color: #333;
+
+        &:hover {
+            background-color: #D0D0D0;
         }
     }
 }
