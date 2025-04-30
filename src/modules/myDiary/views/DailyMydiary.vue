@@ -183,7 +183,7 @@ const fetchDiary = async () => {
             }
             
             // 스티커 정보 추가
-            diary.value.stickers = styleLayer.value.sticker.map(sticker => ({
+            diary.value.stickers = (styleLayer.value?.sticker || []).map(sticker => ({
                 url: `/stickers/${sticker}.png`,
                 x: Math.random() * 100,
                 y: Math.random() * 100,
