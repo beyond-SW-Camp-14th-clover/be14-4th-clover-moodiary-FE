@@ -49,6 +49,12 @@
     font-weight: normal;
     font-style: normal;
 }
+
+@font-face {
+    font-family: 'Ownglyph PDH';
+    src: url('../fonts/Ownglyph PDH.ttf') format('truetype');
+}
+
 /* -------------------------------
    기본 설정
 --------------------------------- */

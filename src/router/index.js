@@ -3,10 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import LandingPage from '@/components/LandingPage.vue'
 import Home from '@/pages/Home.vue'
-import MyPage from '@/pages/users/views/MyPage.vue'
-import LoginPage from '@/pages/users/views/Login.vue'
-import SignUp from '@/pages/users/views/SignUp.vue'
-import FindId from '@/pages/users/views/FindId.vue'
+import MyPage from '@/modules/user/views/MyPage.vue'
+import LoginPage from '@/modules/user/views/Login.vue'
+import SignUp from '@/modules/user/views/SignUp.vue'
+import FindId from '@/modules/user/views/FindId.vue'
 
 const routes = [
     {
@@ -24,11 +24,11 @@ const routes = [
             { path: 'registmydiary', name: 'RegistMyDiary', component: () => import('../modules/myDiary/views/RegistMyDiary.vue') },
             { path: 'mypage', name: 'MyPage', component: MyPage },
             { path: 'login', name: 'Login', component: LoginPage },
-            { path: 'shareddiary/room', name: 'SharedDiaryRoom', component: () => import('../pages/shareddiary/views/SharedDiaryMain.vue') },
-            { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('../pages/shareddiary/views/SharedDiaryList.vue') },
-            { path: '/shared-diary/:roomId/write', name: 'SharedDiaryWrite', component: () => import('../pages/shareddiary/views/SharedDiaryWrite.vue') },
-            { path: '/shared-diary/:roomId/diary/:diaryId', name: 'SharedDiaryDetail', component: () => import('../pages/shareddiary/views/SharedDiaryDetail.vue') },
-            { path: '/sa', name: 'SentimentAnalysis', component: () => import('../pages/sa/views/SentimentAnalysis.vue') },
+            { path: 'shareddiary/room', name: 'SharedDiaryRoom', component: () => import('../modules/shareddiary/views/SharedDiaryMain.vue') },
+            { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('../modules/shareddiary/views/SharedDiaryList.vue') },
+            { path: '/shared-diary/:roomId/write', name: 'SharedDiaryWrite', component: () => import('../modules/shareddiary/views/SharedDiaryWrite.vue') },
+            { path: '/shared-diary/:roomId/diary/:diaryId', name: 'SharedDiaryDetail', component: () => import('../modules/shareddiary/views/SharedDiaryDetail.vue') },
+            { path: '/sa', name: 'SentimentAnalysis', component: () => import('../modules/sa/views/SentimentAnalysis.vue') },
             { path: 'mypage', name: 'MyPage', component: MyPage }
         ]
     },

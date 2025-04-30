@@ -29,7 +29,7 @@
         <!-- 로그인 후: 프로필 + 드롭다운 -->
         <template v-if="authStore.isLogin">
           <div class="profile-menu-wrapper" ref="profileMenu">
-            <img src="@/assets/stickers/rabbit.png" alt="profile" class="profile-icon" @click.stop="toggleProfile" />
+            <img src="/public/stickers/rabbit.png" alt="profile" class="profile-icon" @click.stop="toggleProfile" />
             <ul v-if="showProfile" class="profile-dropdown">
               <li @click="goMyPage">내 정보 수정</li>
               <li @click="logout">로그아웃</li>
