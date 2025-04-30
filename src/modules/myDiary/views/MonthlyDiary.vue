@@ -48,7 +48,7 @@
                                     }"
                                 >{{ cell.day }}</span>
                                 <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)" class="score-circle">
-                                    <span class="score-text" :style="{ color: getScoreColor(getDiaryForDay(cell.day).totalScore) }">{{ getDiaryForDay(cell.day).totalScore }}</span>
+                                    <span class="score-text" :style="{ color: getDiaryForDay(cell.day).totalScore ? getScoreColor(getDiaryForDay(cell.day).totalScore) : '#C2C2C2' }">{{ getDiaryForDay(cell.day).totalScore ?? '-' }}</span>
                                 </div>
                             </div>
                             <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)">
@@ -65,7 +65,7 @@
                     <div v-for="(entry, index) in topThreeEntries" :key="index" class="entry-container">
                         <div class="happy-entry">
                             <div class="score-box">
-                                <span class="score-text" :style="{ color: getScoreColor(entry.totalScore) }">{{ entry.totalScore }}</span>
+                                <span class="score-text" :style="{ color: entry.totalScore ? getScoreColor(entry.totalScore) : '#C2C2C2' }">{{ entry.totalScore ?? '-' }}</span>
                             </div>
                             <div class="entry-title">{{ entry.title }}</div>
                         </div>
@@ -78,7 +78,7 @@
                     <div v-for="(entry, index) in bottomThreeEntries" :key="index" class="entry-container">
                         <div class="sad-entry">
                             <div class="score-box">
-                                <span class="score-text" :style="{ color: getScoreColor(entry.totalScore) }">{{ entry.totalScore }}</span>
+                                <span class="score-text" :style="{ color: entry.totalScore ? getScoreColor(entry.totalScore) : '#C2C2C2' }">{{ entry.totalScore ?? '-' }}</span>
                             </div>
                             <div class="entry-title">{{ entry.title }}</div>
                         </div>
@@ -554,6 +554,11 @@ onMounted(() => {
     font-weight: 400;
     font-size: 12px;
     color: inherit;
+}
+
+.score-text:empty::before {
+    content: '-';
+    color: #C2C2C2;
 }
 
 .cell-header {
