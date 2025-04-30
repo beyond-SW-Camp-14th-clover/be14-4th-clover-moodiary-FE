@@ -188,6 +188,7 @@ onMounted(() => {
             height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .scrollable-content {
@@ -195,6 +196,7 @@ onMounted(() => {
             overflow-y: auto;
             padding-right: 1rem;
             margin-right: -1rem;
+            margin-bottom: 5rem;
 
             &::-webkit-scrollbar {
                 width: 8px;
@@ -215,9 +217,14 @@ onMounted(() => {
         }
 
         .button-container {
-            margin-top: 3rem;
-            padding-top: 1rem;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 1rem 0;
             border-top: 1px solid #e0e0e0;
+            margin-top: 0;
         }
 
         .top-row {
