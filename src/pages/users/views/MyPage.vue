@@ -17,7 +17,7 @@
                     <h1>추천 설정</h1>
                 </router-link>
             </div>
-            <router-view class="my-page-inner" :userId="userId"/>
+            <router-view class="my-page-inner" />
         </div>
     </div>
 </template>
