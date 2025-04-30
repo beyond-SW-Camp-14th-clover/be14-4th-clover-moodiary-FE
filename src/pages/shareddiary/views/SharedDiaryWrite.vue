@@ -221,18 +221,15 @@ const confirmDiary = () => {
 
 const submitDiary = async () => {
   try {
-    await axios.post('http://localhost:3001/shared_diaries', {
+    await axios.post('/shareddiary/create', {
       title: title.value,
       content: content.value,
-      created_at: new Date().toISOString(),
-      is_deleted: 'N',
-      fixed_state: 'Y',
-      shared_diary_room_id: roomId,
-      user_id: loginUserId,
-      style_layer: JSON.stringify(stickers.value)
+      userId: loginUserId,
+      roomId: roomId,
+      styleLayer: JSON.stringify(stickers.value)
     })
     alert('일기 등록 완료!')
-    router.push({ name: 'SharedDiaryList', params: { roomId } }) // ✅ 여기 수정
+    router.push({ name: 'SharedDiaryList', params: { roomId } })
   } catch (error) {
     console.error('등록 실패', error)
     alert('등록 실패')
@@ -241,7 +238,7 @@ const submitDiary = async () => {
 
 const cancelDiary = () => {
   if (confirm('작성 중인 일기를 취소하시겠습니까?')) {
-    router.push({ name: 'SharedDiaryList', params: { roomId } }) // ✅ 여기 수정
+    router.push({ name: 'SharedDiaryList', params: { roomId } })
   }
 }
 </script>

@@ -17,15 +17,15 @@
           v-for="diary in diaries"
           :key="diary.id"
           class="diary-bubble"
-          :class="{ mine: diary.user_id === loginUserId, theirs: diary.user_id !== loginUserId }"
+          :class="{ mine: diary.userId === loginUserId, theirs: diary.userId !== loginUserId }"
           @click="goToDetail(diary.id)"
           style="cursor: pointer;"
         >
           <div class="bubble-inner">
             <p class="title">{{ diary.title }}</p>
             <div class="footer">
-              <span class="author">{{ getUserName(diary.user_id) }}</span>
-              <span class="created-at">{{ formatDate(diary.created_at) }}</span>
+              <span class="author">{{ diary.userName }}</span>
+              <span class="created-at">{{ formatDate(diary.createdAt) }}</span>
             </div>
           </div>
         </div>
@@ -45,12 +45,6 @@ const roomId = Number(route.params.roomId)
 const loginUserId = 1
 
 const diaries = ref([])
-const users = ref([])
-
-const getUserName = (id) => {
-  const user = users.value.find(u => Number(u.id) === Number(id))
-  return user ? user.name : '알 수 없음'
-}
 
 const formatDate = (isoString) => {
   const date = new Date(isoString)
@@ -65,7 +59,7 @@ const formatDate = (isoString) => {
 const canWrite = computed(() => {
   if (diaries.value.length === 0) return true
   const last = diaries.value[0]
-  return last.user_id !== loginUserId
+  return last.userId !== loginUserId
 })
 
 const writeDiary = () => {
@@ -81,14 +75,12 @@ const goToDetail = (diaryId) => {
 }
 
 onMounted(async () => {
-  const [resDiary, resUser] = await Promise.all([
-    axios.get('http://localhost:3001/shared_diaries'),
-    axios.get('http://localhost:3001/users')
-  ])
-  users.value = resUser.data
-  diaries.value = resDiary.data
-    .filter(d => d.shared_diary_room_id === roomId)
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  try {
+    const res = await axios.get('/shareddiary', { params: { roomId } })
+    diaries.value = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  } catch (e) {
+    console.error('일기 불러오기 실패:', e)
+  }
 })
 </script>
 
@@ -98,7 +90,6 @@ onMounted(async () => {
   justify-content: center;
 }
 
-/* 전체를 감싸는 박스 */
 .diary-container {
   display: flex;
   flex-direction: column;
@@ -107,7 +98,6 @@ onMounted(async () => {
   max-width: 720px;
 }
 
-/* 방 번호 + 버튼 */
 .top-bar {
   width: 100%;
   display: flex;
@@ -143,7 +133,6 @@ onMounted(async () => {
   background-color: #5a8755;
 }
 
-/* 일기 리스트 */
 .diary-list {
   width: 100%;
   background-color: #fdfaf5;

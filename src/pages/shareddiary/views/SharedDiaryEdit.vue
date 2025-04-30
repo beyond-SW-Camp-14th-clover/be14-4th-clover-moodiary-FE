@@ -113,29 +113,28 @@
         stickers.value.splice(selectedIndex.value, 1)
         selectedIndex.value = null
     }
-    }
+  }
     
   // 기존 일기 데이터 불러오기
   onMounted(async () => {
-    try {
-      const res = await axios.get(`http://localhost:3001/shared_diaries/${diaryId}`)
-      const data = res.data
-  
-      title.value = data.title
-      content.value = data.content
-      if (data.style_layer) {
-        stickers.value = JSON.parse(data.style_layer)
-      }
-  
-      loaded.value = true
+  try {
+    const res = await axios.get(`/shareddiary/${diaryId}`)
+    const data = res.data
 
-      window.addEventListener('keydown', handleKeyDown)
-    } catch (e) {
-      console.error('일기 불러오기 실패', e)
-      alert('일기를 불러올 수 없습니다.')
-      router.push({ name: 'SharedDiaryList', params: { roomId } })
+    title.value = data.title
+    content.value = data.content
+    if (data.styleLayer) {
+      stickers.value = JSON.parse(data.styleLayer)
     }
-  })
+
+    loaded.value = true
+    window.addEventListener('keydown', handleKeyDown)
+  } catch (e) {
+    console.error('일기 불러오기 실패', e)
+    alert('일기를 불러올 수 없습니다.')
+    router.push({ name: 'SharedDiaryList', params: { roomId } })
+  }
+})
   
   const triggerFileInput = () => {
     fileInput.value?.click()
@@ -221,23 +220,25 @@
   }
   
   const confirmUpdate = async () => {
-    if (!title.value || !content.value) {
-      alert('제목과 내용을 모두 입력해주세요.')
-      return
-    }
-    try {
-      await axios.patch(`http://localhost:3001/shared_diaries/${diaryId}`, {
-        title: title.value,
-        content: content.value,
-        style_layer: JSON.stringify(stickers.value)
-      })
-      alert('수정 완료!')
-      router.push({ name: 'SharedDiaryDetail', params: { roomId, diaryId } })
-    } catch (error) {
-      console.error('수정 실패', error)
-      alert('수정 실패')
-    }
+  if (!title.value || !content.value) {
+    alert('제목과 내용을 모두 입력해주세요.')
+    return
   }
+  try {
+    await axios.patch(`/shareddiary/update`, {
+      diaryId: Number(diaryId),
+      userId: loginUserId,
+      title: title.value,
+      content: content.value,
+      styleLayer: JSON.stringify(stickers.value)
+    })
+    alert('수정 완료!')
+    router.push({ name: 'SharedDiaryDetail', params: { roomId, diaryId } })
+  } catch (error) {
+    console.error('수정 실패', error)
+    alert('수정 실패')
+  }
+}
   
   const goBack = () => {
     router.back()
