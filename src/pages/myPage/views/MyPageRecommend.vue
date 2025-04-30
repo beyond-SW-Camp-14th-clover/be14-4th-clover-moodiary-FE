@@ -25,7 +25,7 @@
         </div>
         <br>
         <!-- 선택된 항목 전송 -->
-        <button class="mt-4" @click="submitSelection">선택 항목 전송</button>
+        <button style="width: 100px; align-self: center;" @click="submitSelection">추천 제외하기</button>
     </div>
 </template>
 

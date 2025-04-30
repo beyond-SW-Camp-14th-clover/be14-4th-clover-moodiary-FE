@@ -46,9 +46,6 @@
     const form = ref({ ...dummy_user })
     const message = ref('')
 
-    // TODO. 로그인 중인 현재 회원 받아오기
-
-
     // 설명. 현재 회원 정보 받아오기
     const fetchUser = async () => {
         try {

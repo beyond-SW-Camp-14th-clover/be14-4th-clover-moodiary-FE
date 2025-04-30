@@ -26,11 +26,12 @@
     import { ref } from 'vue';
     import { useAuthStore } from '@/stores/auth.js';
 
-    // TODO. 링크로 들어오는 경우에 대비해 로그인 여부 받아오기
+    // 설명. 링크로 들어오는 경우에 대비해 로그인 여부 받아오기
     const store = useAuthStore();
     const isLogin = ref(store.isLogin);
-    const userId = ref(1);
 
+    // 설명. 현재 로그인 중인 회원의 PK값 받아오기
+    const userId = ref(1);
 
 </script>
 
