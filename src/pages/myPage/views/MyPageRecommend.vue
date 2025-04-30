@@ -1,27 +1,33 @@
 <template>
     <div class="my-page-inner">
         <h1>추천 설정</h1>
-        <!-- 목록을 2열 그리드로 표시 -->
-        <div class="item-grid">
-            <div v-for="item in pagedItems" :key="item.id" class="item-card">
-                <label>
-                    <input type="checkbox" :value="item.id" v-model="selectedItems" />
-                    {{ item.name }}
-                </label>
-            </div>
-            <!-- 빈 칸 (자리를 채우기 위해) -->
-            <div
-                v-for="n in emptySlots"
-                :key="'empty-' + n"
-                class="item-card empty"
-            ></div>
+        <div>
+            <input type="text" v-model="keyword"/>
+            <button @click="fetchItems">검색</button>
         </div>
+        <div>
+            <!-- 목록을 2열 그리드로 표시 -->
+            <div class="item-grid">
+                <div v-for="item in pagedItems" :key="item.id" class="item-card">
+                    <label>
+                        <input type="checkbox" :value="item.id" v-model="selectedItems" />
+                        {{ item.name }}
+                    </label>
+                </div>
+                <!-- 빈 칸 (자리를 채우기 위해) -->
+                <div
+                    v-for="n in emptySlots"
+                    :key="'empty-' + n"
+                    class="item-card empty"
+                ></div>
+            </div>
 
-        <!-- 페이지네이션 -->
-        <div class="pagination">
-            <button @click="prevPage" :disabled="currentPage === 1">이전</button>
-            <span>페이지 {{ currentPage }} / {{ totalPages }}</span>
-            <button @click="nextPage" :disabled="currentPage === totalPages">다음</button>
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <button @click="prevPage" :disabled="currentPage === 1">이전</button>
+                <span>페이지 {{ currentPage }} / {{ totalPages }}</span>
+                <button @click="nextPage" :disabled="currentPage === totalPages">다음</button>
+            </div>
         </div>
         <br>
         <!-- 선택된 항목 전송 -->
@@ -38,13 +44,6 @@ const selectedItems = ref([])
 const keyword = ref('');
 const currentPage = ref(1)             // 현재 페이지
 const itemsPerPage = 16                // 2열 x 8행 = 16개
-
-const props = defineProps({
-    userId: {
-        type: Number,
-        required: true,
-    }
-});
 
 const pagedItems = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage
@@ -81,7 +80,7 @@ const fetchItems = async () => {
 // 선택 항목 백엔드로 전송
 const submitSelection = async () => {
     try {
-        const response = await fetch(`http://localhost:8080/action/exclude?userId=${props.userId}`, {
+        const response = await fetch(`http://localhost:8080/action/exclude`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(selectedItems.value)

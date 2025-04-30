@@ -36,20 +36,13 @@
         phoneNumber: "010-1234-5678",
     };
 
-    const props = defineProps({
-        userId: {
-            type: Number,
-            required: true,
-        }
-    });
-
     const form = ref({ ...dummy_user })
     const message = ref('')
 
     // 설명. 현재 회원 정보 받아오기
     const fetchUser = async () => {
         try {
-            const res = await axios.get(`http://localhost:8080/user/query/info/${props.userId}`)
+            const res = await axios.get(`http://localhost:8080/user/query/info`)
             form.value = res.data
         } catch (err) {
             message.value = '사용자 정보를 불러오지 못했습니다. 더미 데이터를 표시합니다.'
