@@ -110,7 +110,7 @@
                 <div class="weekly-card sunday" 
                      @mouseenter="handleMouseEnter('sunday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('sunday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (0 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[0] }}</div>
                         <div class="day-label">일</div>
                         <div class="image-container">
@@ -130,7 +130,7 @@
                 <div class="weekly-card monday"
                      @mouseenter="handleMouseEnter('monday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('monday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (1 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[1] }}</div>
                         <div class="day-label">월</div>
                         <div class="image-container">
@@ -150,7 +150,7 @@
                 <div class="weekly-card tuesday"
                      @mouseenter="handleMouseEnter('tuesday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('tuesday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (2 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[2] }}</div>
                         <div class="day-label">화</div>
                         <div class="image-container">
@@ -170,7 +170,7 @@
                 <div class="weekly-card wednesday"
                      @mouseenter="handleMouseEnter('wednesday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('wednesday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (3 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[3] }}</div>
                         <div class="day-label">수</div>
                         <div class="image-container">
@@ -190,7 +190,7 @@
                 <div class="weekly-card thursday"
                      @mouseenter="handleMouseEnter('thursday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('thursday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (4 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[4] }}</div>
                         <div class="day-label">목</div>
                         <div class="image-container">
@@ -210,7 +210,7 @@
                 <div class="weekly-card friday"
                      @mouseenter="handleMouseEnter('friday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('friday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (5 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[5] }}</div>
                         <div class="day-label">금</div>
                         <div class="image-container">
@@ -230,7 +230,7 @@
                 <div class="weekly-card saturday"
                      @mouseenter="handleMouseEnter('saturday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('saturday') }">
-                    <div class="card-content">
+                    <div class="card-content" @click="goToDailyDiary(new Date(selectedDate.value.getTime() + (6 * 24 * 60 * 60 * 1000)))">
                         <div class="date-label">{{ getCurrentWeekDates[6] }}</div>
                         <div class="day-label">토</div>
                         <div class="image-container">
@@ -255,8 +255,12 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useWeeklyDiaryStore } from '../../../stores/weeklyDiaryStore';
+import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
+import { useRouter } from 'vue-router';
 
 const weeklyDiaryStore = useWeeklyDiaryStore();
+const dailyDiaryStore = useDailyDiaryStore();
+const router = useRouter();
 const selectedDate = ref(new Date());
 const selectedWeek = ref('1');
 const score = computed(() => {
@@ -574,6 +578,11 @@ const saveMoodlog = async () => {
     console.error('moodlog 저장 중 오류 발생:', error);
     alert(error.message || '저장에 실패했습니다.');
   }
+};
+
+const goToDailyDiary = (date) => {
+    dailyDiaryStore.setPreviousPage('weekly', date);
+    router.push({ name: 'DailyMyDiaryWithDate', params: { date: date.toISOString().split('T')[0] } });
 };
 </script>
 

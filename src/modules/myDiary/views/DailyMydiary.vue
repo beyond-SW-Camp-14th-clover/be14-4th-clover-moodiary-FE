@@ -50,7 +50,7 @@
                         <div class="button-group">
                             <button class="action-button">수정</button>
                             <button class="action-button">삭제</button>
-                            <button class="action-button">취소</button>
+                            <button class="action-button" @click="handleCancel">취소</button>
                             <button class="action-button highlight">일기 확정</button>
                         </div>
                     </div>
@@ -110,9 +110,12 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore'
 
 const route = useRoute()
+const router = useRouter()
+const dailyDiaryStore = useDailyDiaryStore()
 console.log('route params:', route.params)
 console.log('route path:', route.path)
 
@@ -246,6 +249,17 @@ const fetchRecommendedActions = async () => {
         console.error('행동 추천을 불러오는데 실패했습니다:', error)
         recommendedActions.value = []
     }
+}
+
+const handleCancel = () => {
+    if (dailyDiaryStore.previousPage === 'weekly') {
+        router.push({ name: 'WeeklyDiary' })
+    } else if (dailyDiaryStore.previousPage === 'monthly') {
+        router.push({ name: 'MonthlyDiary' })
+    } else {
+        router.push({ name: 'MonthlyDiary' }) // 기본값
+    }
+    dailyDiaryStore.clearPreviousPage()
 }
 
 // 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴

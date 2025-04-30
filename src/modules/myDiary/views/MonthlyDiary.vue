@@ -31,8 +31,12 @@
                             v-for="(cell, idx) in calendarCells" 
                             :key="idx" 
                             class="calendar-cell" 
-                            :class="{ 'empty': cell.type !== 'current' }"
-                            @click="handleCellClick(cell)"
+                            :class="{ 
+                                'prev-month': cell.type === 'prev',
+                                'next-month': cell.type === 'next',
+                                'has-diary': getDiaryForDay(cell.day)
+                            }"
+                            @click="cell.type === 'current' && goToDailyDiary(cell.day)"
                         >
                             <div class="cell-header">
                                 <span
@@ -98,11 +102,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
 import Moodlog from '../components/Moodlog.vue';
 
 const router = useRouter();
+const dailyDiaryStore = useDailyDiaryStore();
 const selectedDate = ref(new Date());
 
 const monthNames = [
@@ -236,34 +242,10 @@ const bottomThreeEntries = computed(() => {
         .slice(0, 3);
 });
 
-const handleCellClick = async (cell) => {
-    if (cell.type === 'current') {
-        const year = selectedDate.value.getFullYear();
-        const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
-        const day = cell.day.toString().padStart(2, '0');
-        const date = `${year}-${month}-${day}`;
-        
-        console.log('일일 일기 데이터 요청 시작:', date);
-        console.log('요청 URL:', `http://localhost:8080/mydiary/daily/${date}?userId=1`);
-        
-        try {
-            const response = await fetch(`http://localhost:8080/mydiary/daily/${date}?userId=1`);
-            console.log('서버 응답 상태:', response.status);
-            
-            if (!response.ok) {
-                throw new Error(`서버 응답 오류: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log('일일 일기 데이터 수신 성공:', data);
-            
-            // 데이터를 받아온 후 해당 날짜의 일기 페이지로 이동
-            router.push({ name: 'DailyMyDiaryWithDate', params: { date } });
-        } catch (error) {
-            console.error('일일 일기 데이터 조회 중 오류 발생:', error);
-            // 에러 발생 시에도 페이지 이동 (선택적)
-            router.push({ name: 'DailyMyDiaryWithDate', params: { date } });
-        }
-    }
+const goToDailyDiary = (day) => {
+    const date = new Date(selectedDate.value.getFullYear(), selectedDate.value.getMonth(), day);
+    dailyDiaryStore.setPreviousPage('monthly', date);
+    router.push({ name: 'DailyMyDiaryWithDate', params: { date: date.toISOString().split('T')[0] } });
 };
 
 onMounted(() => {
