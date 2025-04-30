@@ -1,7 +1,7 @@
 <template>
     <div class="page-wrapper">
         <form ref="formRef" class="findid-form" @submit.prevent="submitForm">
-            <div class="logo"><router-link to="/app">MOODI:ARY</router-link></div>
+            <div class="logo"><router-link to="/app/home">MOODI:ARY</router-link></div>
 
             <div class="form-contents">
                 <p><span>무디어리</span>에서 아이디 찾기</p>
