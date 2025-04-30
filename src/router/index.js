@@ -11,6 +11,7 @@ import FindId from '@/pages/users/views/FindId.vue'
 import MonthlyDiary from '../modules/myDiary/views/MonthlyDiary.vue'
 import WeeklyDiary from '../modules/myDiary/views/WeeklyDiary.vue'
 import RegistMyDiary from '../modules/myDiary/views/RegistMyDiary.vue'
+import DailyMydiary from '../modules/myDiary/views/DailyMydiary.vue'
 
 const routes = [
     {
@@ -22,6 +23,7 @@ const routes = [
             { path: 'monthlydiary', name: 'MonthlyDiary', component: () => import('../modules/myDiary/views/MonthlyDiary.vue') },
             { path: 'weeklydiary', name: 'WeeklyDiary', component: () => import('../modules/myDiary/views/WeeklyDiary.vue') },
             { path: 'registmydiary', name: 'RegistMyDiary', component: () => import('../modules/myDiary/views/RegistMyDiary.vue') },
+            { path: 'dailydiary', name: 'DailyMydiary', component: () => import('../modules/myDiary/views/DailyMydiary.vue') },
             { path: 'mypage', name: 'MyPage', component: MyPage },
             { path: 'login', name: 'Login', component: LoginPage },
             { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../pages/shareddiary/views/SharedDiaryMain.vue') },

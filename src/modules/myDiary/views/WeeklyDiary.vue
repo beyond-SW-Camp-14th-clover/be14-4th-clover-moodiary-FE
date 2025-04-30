@@ -96,7 +96,7 @@
                 <div class="moodlog">
                     <div class="moodlog-header">
                         <h3>moodlog</h3>
-                        <button class="save-button">저장</button>
+                        <button class="save-button" @click="saveMoodlog">저장</button>
                     </div>
                     <div class="moodlog-content">
                         <div class="moodlog-textbox">
@@ -542,6 +542,39 @@ onMounted(() => {
     fetchWeeklyData();
     fetchMoodlogContent();
 });
+
+const saveMoodlog = async () => {
+  const year = selectedDate.value.getFullYear();
+  const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
+  const targetMonth = `${year}-${month}-01`;
+  const userId = 1;
+
+  const requestData = {
+    userId,
+    targetMonth,
+    content: moodlogContent.value
+  };
+
+  try {
+    const response = await fetch('http://localhost:8080/mydiary/moodlog', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      throw new Error(text);
+    }
+
+    console.log('moodlog 저장 성공:', text);
+  } catch (error) {
+    console.error('moodlog 저장 중 오류 발생:', error);
+    alert(error.message || '저장에 실패했습니다.');
+  }
+};
 </script>
 
 <style scoped>

@@ -97,7 +97,11 @@
         :show="showRegistModal"
         title="일기 등록"
         message="정말로 등록하시겠습니까?"
-        @confirm="submitDiary"
+        @confirm="async () => {
+          await submitDiary();
+          showRegistModal = false;
+          router.push({ name: 'MonthlyDiary' });
+        }"
         @cancel="showRegistModal = false"
       />
     </div>
@@ -287,10 +291,44 @@
   }
   
   const submitDiary = async () => {
-    showRegistModal.value = false
-    alert('일기 등록 완료!')
-    router.push({ name: 'MonthlyDiary' })
-  }
+    try {
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const koreaISOString = koreaTime.toISOString().slice(0, 23);
+
+      const diaryData = {
+        title: title.value,
+        content: content.value,
+        createdAt: koreaISOString,
+        isDeleted: 'N',
+        isConfirmed: isConfirmed.value ? 'Y' : 'N',
+        styleLayer: JSON.stringify(stickers.value),
+        userId: loginUserId,
+        tags: hashtags.value
+      };
+
+      console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
+
+      const response = await fetch('http://localhost:8080/mydiary/regist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(diaryData)
+      });
+
+      if (response.ok) {
+        alert('일기 등록 완료!');
+      } else if (response.status === 409) {
+        alert('오늘 이미 일기를 등록하셨습니다.');
+      } else {
+        throw new Error('서버 응답 오류');
+      }
+    } catch (error) {
+      console.error('일기 등록 중 오류가 발생했습니다:', error);
+      alert('일기 등록에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
   
   const confirmDiary = () => {
     if (!title.value || !content.value) {
@@ -326,7 +364,6 @@
   
   .write-wrapper {
     max-width: 850px;
-    margin: 4rem auto;
     padding: 3rem;
     background-color: #fffce6;
     border-radius: 20px;

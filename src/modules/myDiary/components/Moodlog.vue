@@ -2,7 +2,7 @@
     <div class="moodlog">
         <div class="moodlog-header">
             <h3>moodlog</h3>
-            <button class="save-button">저장</button>
+            <button class="save-button" @click="saveMoodlog">저장</button>
         </div>
         <div class="moodlog-content">
             <div class="moodlog-textbox">
@@ -16,6 +16,43 @@
 import { ref, onMounted } from 'vue';
 
 const moodlogContent = ref('');
+
+const saveMoodlog = async () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const targetMonth = `${year}-${month}-01`;
+    const userId = 1;
+
+    const requestData = {
+        userId: userId,
+        targetMonth: targetMonth,
+        content: moodlogContent.value
+    };
+
+    console.log('전송할 데이터:', requestData);
+
+    try {
+        const response = await fetch('http://localhost:8080/mydiary/moodlog', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const text = await response.text(); // JSON 파싱 대신 text()로 처리
+
+        if (!response.ok) {
+            throw new Error(text || '저장에 실패했습니다.');
+        }
+
+        console.log('저장 성공:', text);
+    } catch (error) {
+        console.error('저장 중 오류 발생:', error);
+        alert(error.message || '저장에 실패했습니다.');
+    }
+};
 
 const fetchMoodlog = async () => {
     const today = new Date();
