@@ -48,7 +48,14 @@
                     </div>
                     <div class="button-container">
                         <div class="button-group">
-                            <button class="action-button">수정</button>
+                            <button 
+                                class="action-button" 
+                                @click="handleEdit"
+                                :disabled="diary?.isConfirmed === 'Y'"
+                                :class="{ 'disabled-button': diary?.isConfirmed === 'Y' }"
+                            >
+                                {{ isEditing ? '수정 완료' : '수정' }}
+                            </button>
                             <button class="action-button" @click="handleDelete">삭제</button>
                             <button class="action-button" @click="handleCancel">취소</button>
                             <button 
@@ -176,10 +183,11 @@ if (route.params.date) {
 const diary = ref(null)
 const myDiaryEmotion = ref(null)
 const styleLayer = ref(null)
-const recommendedActions = ref([])  // 행동 추천 데이터를 저장할 ref 추가
+const recommendedActions = ref([])
 const showConfirmModal = ref(false)
 const showDeleteModal = ref(false)
 const showAlreadyConfirmedModal = ref(false)
+const isEditing = ref(false)
 
 const totalScoreColor = computed(() => {
     const score = myDiaryEmotion.value?.totalScore || 0
@@ -383,6 +391,39 @@ const confirmDiary = async () => {
         const analyzeData = await analyzeResponse.json();
         console.log('[감정 분석 결과]', analyzeData);
 
+        // 감정 분석 결과를 저장하는 API 호출
+        const emotionData = {
+            positive_score: Math.max(1, analyzeData.positiveScore || 0),
+            neutral_score: Math.max(1, analyzeData.neutralScore || 0),
+            negative_score: Math.max(1, analyzeData.negativeScore || 0),
+            total_score: Math.max(1, analyzeData.totalScore || 0),
+            emotion_summary1: analyzeData.emotion1 || '감정 요약이 없습니다',
+            emotion_summary2: analyzeData.emotion2 || '감정 요약이 없습니다',
+            emotion_summary3: analyzeData.emotion3 || '감정 요약이 없습니다',
+            my_diary_summary: analyzeData.diaryTitle || '추천 제목이 없습니다',
+            my_diary_id: diary.value.id
+        };
+
+        console.log('[감정 분석 저장 요청 데이터]', emotionData);
+        console.log('[감정 분석 저장 요청 JSON]', JSON.stringify(emotionData));
+
+        const emotionResponse = await fetch('http://localhost:8080/mydiary/registEmotion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(emotionData)
+        });
+
+        console.log('[감정 분석 저장 응답 상태]', emotionResponse.status);
+        const responseText = await emotionResponse.text();
+        console.log('[감정 분석 저장 응답]', responseText);
+
+        if (!emotionResponse.ok) {
+            console.error('[감정 분석 저장 오류 응답]', responseText);
+            throw new Error('감정 분석 저장 실패: ' + responseText);
+        }
+
         // 감정 분석 결과를 화면에 반영
         myDiaryEmotion.value = {
             ...myDiaryEmotion.value,
@@ -439,6 +480,13 @@ const confirmDelete = async () => {
         console.error('[예외 발생] 일기 삭제 중 오류 발생:', error);
         alert('일기 삭제에 실패했습니다');
     }
+}
+
+const handleEdit = () => {
+    if (diary.value?.isConfirmed === 'Y') {
+        return; // 이미 확정된 일기는 수정 불가
+    }
+    isEditing.value = !isEditing.value;
 }
 
 // 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴
