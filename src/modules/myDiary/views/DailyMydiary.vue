@@ -104,13 +104,14 @@
                                         </span>
                                     </template>
                                     <template v-else>
-                                        <input
-                                            v-model="editedDiary.hashtags"
-                                            class="emotion-tag-input"
-                                            type="text"
-                                            placeholder="태그를 입력하세요 (쉼표로 구분)"
-                                            @keyup.enter="addTag"
-                                        />
+                                        <span 
+                                            v-for="(tag, index) in editedDiary.hashtags" 
+                                            :key="index" 
+                                            class="emotion-tag"
+                                            @click="removeHashtag(index)"
+                                        >
+                                            #{{ tag }}
+                                        </span>
                                     </template>
                                 </div>
                             </div>
@@ -120,11 +121,14 @@
                                 v-model="editedDiary.content"
                                 class="notebook-textarea"
                                 placeholder="일기 내용을 입력하세요"
+                                @input="handleContentInput"
+                                @compositionstart="handleCompositionStart"
+                                @compositionend="handleCompositionEnd"
                             ></textarea>
 
                             <div class="sticker-layer">
                                 <div
-                                    v-for="(sticker, i) in (diary.stickers || [])"
+                                    v-for="(sticker, i) in (isEditing ? editedDiary.stickers : diary.stickers)"
                                     :key="i"
                                     class="sticker-wrapper"
                                     :style="{ left: sticker.x + 'px', top: sticker.y + 'px', width: sticker.width + 'px', height: sticker.height + 'px', zIndex: i }"
@@ -132,9 +136,23 @@
                                     <img
                                         :src="sticker.url"
                                         class="sticker"
+                                        :class="{ selected: selectedIndex === i }"
+                                        @mousedown="(e) => isEditing && startDrag(i, e)"
+                                        @click.stop="isEditing && selectSticker(i)"
                                     />
+                                    <div
+                                        v-if="isEditing && selectedIndex === i"
+                                        class="resize-handle"
+                                        @mousedown.stop="startResize(i, $event)"
+                                    ></div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div v-if="isEditing" class="sticker-toolbar">
+                            <button type="button" class="upload-btn" @click="showStickerModal = true">🧸 스티커 추가</button>
+                            <button type="button" class="upload-btn" @click="triggerFileInput">📷 사진 추가</button>
+                            <input type="file" ref="fileInput" accept="image/*" @change="handlePhotoUpload" hidden />
                         </div>
                     </div>
                 </div>
@@ -192,6 +210,15 @@
             </div>
         </div>
     </div>
+
+    <div v-if="showStickerModal" class="sticker-modal">
+        <div class="sticker-modal-inner">
+            <div class="sticker-option" v-for="src in stickerOptions" :key="src">
+                <img :src="src" @click="addSticker(src); showStickerModal = false" />
+            </div>
+            <button @click="showStickerModal = false" class="close-btn">닫기</button>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -227,6 +254,10 @@ const showAlreadyConfirmedModal = ref(false)
 const showEditConfirmModal = ref(false)
 const isEditing = ref(false)
 const editedDiary = ref(null)
+const selectedIndex = ref(null)
+const showStickerModal = ref(false)
+const fileInput = ref(null)
+const isComposing = ref(false)
 
 const totalScoreColor = computed(() => {
     const score = myDiaryEmotion.value?.totalScore || 0
@@ -234,6 +265,15 @@ const totalScoreColor = computed(() => {
     if (score <= 66) return '#DA930E'
     return '#346FD2'
 })
+
+const stickerOptions = [
+    '/src/assets/stickers/heart.png',
+    '/src/assets/stickers/star.png',
+    '/src/assets/stickers/rabbit.png'
+]
+
+let dragging = ref(null)
+let resizing = ref(null)
 
 const fetchDiary = async () => {
     try {
@@ -527,20 +567,160 @@ const confirmEdit = async () => {
     showEditConfirmModal.value = false
 }
 
-const addTag = (event) => {
-    const tagInput = event.target.value.trim()
-    if (tagInput) {
-        const tags = tagInput.split(',').map(tag => tag.trim()).filter(tag => tag)
-        editedDiary.value.hashtags = [...new Set([...editedDiary.value.hashtags, ...tags])]
-        event.target.value = ''
+const triggerFileInput = () => {
+    fileInput.value?.click()
+}
+
+const addSticker = (url) => {
+    editedDiary.value.stickers.push({ url, x: 100, y: 100, width: 80, height: 80, type: 'sticker' })
+}
+
+const handlePhotoUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+        editedDiary.value.stickers.push({
+            url: reader.result,
+            x: 100,
+            y: 100,
+            width: 140,
+            height: 140,
+            type: 'photo'
+        })
+    }
+    reader.readAsDataURL(file)
+}
+
+const startDrag = (index, event) => {
+    event.preventDefault()
+    dragging.value = {
+        index,
+        startX: event.clientX,
+        startY: event.clientY,
+        origX: editedDiary.value.stickers[index].x,
+        origY: editedDiary.value.stickers[index].y
+    }
+    document.addEventListener('mousemove', onDrag)
+    document.addEventListener('mouseup', stopDrag)
+}
+
+const onDrag = (event) => {
+    if (!dragging.value) return
+    const { index, startX, startY, origX, origY } = dragging.value
+    const deltaX = event.clientX - startX
+    const deltaY = event.clientY - startY
+
+    const wrapper = document.querySelector('.textarea-wrapper')
+    const maxX = wrapper.offsetWidth - editedDiary.value.stickers[index].width
+    const maxY = wrapper.offsetHeight - editedDiary.value.stickers[index].height
+
+    editedDiary.value.stickers[index].x = Math.min(Math.max(0, origX + deltaX), maxX)
+    editedDiary.value.stickers[index].y = Math.min(Math.max(0, origY + deltaY), maxY)
+}
+
+const stopDrag = () => {
+    dragging.value = null
+    resizing.value = null
+    document.removeEventListener('mousemove', onDrag)
+    document.removeEventListener('mousemove', onResize)
+    document.removeEventListener('mouseup', stopDrag)
+}
+
+const selectSticker = (index) => {
+    if (selectedIndex.value !== index) {
+        const target = editedDiary.value.stickers.splice(index, 1)[0]
+        editedDiary.value.stickers.push(target)
+        selectedIndex.value = editedDiary.value.stickers.length - 1
     }
 }
 
-// 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴
+const startResize = (index, event) => {
+    event.preventDefault()
+    resizing.value = {
+        index,
+        startX: event.clientX,
+        startY: event.clientY,
+        origWidth: editedDiary.value.stickers[index].width,
+        origHeight: editedDiary.value.stickers[index].height
+    }
+    document.addEventListener('mousemove', onResize)
+    document.addEventListener('mouseup', stopDrag)
+}
+
+const onResize = (event) => {
+    if (!resizing.value) return
+    const { index, startX, startY, origWidth, origHeight } = resizing.value
+    const deltaX = event.clientX - startX
+    const deltaY = event.clientY - startY
+
+    if (event.shiftKey) {
+        const ratio = origWidth / origHeight
+        const newWidth = Math.max(30, origWidth + deltaX)
+        const newHeight = Math.max(30, newWidth / ratio)
+        editedDiary.value.stickers[index].width = newWidth
+        editedDiary.value.stickers[index].height = newHeight
+    } else {
+        editedDiary.value.stickers[index].width = Math.max(30, origWidth + deltaX)
+        editedDiary.value.stickers[index].height = Math.max(30, origHeight + deltaY)
+    }
+}
+
+const deleteSelected = () => {
+    if (selectedIndex.value !== null) {
+        const target = editedDiary.value.stickers[selectedIndex.value]
+        editedDiary.value.stickers = editedDiary.value.stickers.filter((s) => s !== target)
+        selectedIndex.value = null
+    }
+}
+
+const handleContentInput = (e) => {
+    editedDiary.value.content = e.target.value
+    if (!isComposing.value) {
+        checkHashtag(e.target.value)
+    }
+}
+
+const handleCompositionStart = () => {
+    isComposing.value = true
+}
+
+const handleCompositionEnd = (e) => {
+    isComposing.value = false
+    checkHashtag(e.target.value)
+}
+
+const checkHashtag = (text) => {
+    if (isComposing.value) return
+
+    const words = text.split(/\s+/)
+    if (words.length > 1) {
+        const lastWord = words[words.length - 2]
+        if (lastWord && lastWord.startsWith('#')) {
+            const hashtag = lastWord.slice(1)
+            if (hashtag && !editedDiary.value.hashtags.includes(hashtag)) {
+                editedDiary.value.hashtags.push(hashtag)
+                const updatedWords = words.slice(0, words.length - 2).concat(words.slice(words.length - 1))
+                editedDiary.value.content = updatedWords.join(' ') + ' '
+            }
+        }
+    }
+}
+
+const removeHashtag = (index) => {
+    editedDiary.value.hashtags.splice(index, 1)
+}
+
 onMounted(() => {
     console.log('컴포넌트 마운트됨')
     fetchDiary()
     fetchRecommendedActions()  // 행동 추천 데이터도 함께 가져옴
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Delete' && selectedIndex.value !== null && isEditing.value) {
+            deleteSelected()
+        }
+    })
 })
 
 // 날짜가 변경될 때마다 데이터를 다시 가져옴
@@ -957,6 +1137,7 @@ watch(selectedDate, () => {
 
         .sticker-wrapper {
             position: absolute;
+            pointer-events: auto;
         }
 
         .sticker {
@@ -964,6 +1145,7 @@ watch(selectedDate, () => {
             height: 100%;
             user-select: none;
             touch-action: none;
+            cursor: move;
         }
 
         .no-diary {
@@ -1087,5 +1269,80 @@ textarea.notebook-textarea {
     box-sizing: border-box;
     white-space: pre-wrap;
     overflow-y: auto;
+}
+
+.sticker-toolbar { 
+    display: flex; 
+    gap: 1rem; 
+    margin-top: 1.5rem; 
+    justify-content: center;
+    width: 100%;
+}
+
+.upload-btn {
+    background-color: #f5eccc;
+    border-radius: 10px;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+    min-width: 90px;
+    color: #7a5c3d;
+    font-family: 'Ownglyph PDH', sans-serif;
+    font-weight: 400;
+}
+
+.sticker-modal { 
+    position: fixed; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    background-color: #fffce6; 
+    border: 2px solid #d9c7aa; 
+    border-radius: 12px; 
+    padding: 2rem; 
+    z-index: 100; 
+}
+
+.sticker-modal-inner { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 1rem; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+.sticker-option img { 
+    width: 60px; 
+    height: 60px; 
+    cursor: pointer; 
+}
+
+.sticker-option img:hover { 
+    transform: scale(1.1); 
+}
+
+.close-btn { 
+    margin-top: 1rem; 
+    background-color: #c9a36b; 
+    color: white; 
+    border-radius: 8px; 
+    padding: 0.5rem 1.2rem; 
+}
+
+.resize-handle {
+    width: 12px; 
+    height: 12px;
+    background-color: #6f9d6b;
+    border-radius: 50%;
+    position: absolute;
+    right: -6px; 
+    bottom: -6px;
+    cursor: nwse-resize;
+    pointer-events: auto;
+}
+
+.sticker.selected { 
+    outline: 2px dashed #f06292; 
 }
 </style>
