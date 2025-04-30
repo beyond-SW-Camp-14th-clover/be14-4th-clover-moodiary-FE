@@ -81,7 +81,7 @@ function logout() {
   authStore.clear()
   localStorage.removeItem('token')
   delete axios.defaults.headers.common['Authorization']
-  router.push('/login')
+  router.push('/app/home')
 }
 </script>
 
