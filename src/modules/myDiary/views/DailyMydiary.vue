@@ -289,7 +289,7 @@ const fetchDiary = async () => {
         
         const data = response.data
         console.log('일일 일기 데이터:', data)
-        console.log('myDiaryEmotion 데이터:', data.myDiaryEmotion)  // myDiaryEmotion 데이터 확인
+        console.log('styleLayer 데이터:', data.styleLayer)
         
         if (data) {
             // 기본 일기 정보
@@ -307,22 +307,52 @@ const fetchDiary = async () => {
 
             // 스타일 레이어 정보
             try {
-                styleLayer.value = JSON.parse(data.styleLayer || '{"bg": "", "sticker": []}')
+                const parsedStyleLayer = JSON.parse(data.styleLayer || '{"bg": "", "sticker": []}')
+                console.log('파싱된 styleLayer:', parsedStyleLayer)
+                
+                // 스티커 정보 처리
+                if (parsedStyleLayer.sticker && Array.isArray(parsedStyleLayer.sticker)) {
+                    diary.value.stickers = parsedStyleLayer.sticker.map(sticker => {
+                        console.log('처리 전 스티커 데이터:', sticker)
+                        
+                        // URL 처리 로직 개선
+                        let stickerUrl = sticker.url
+                        if (sticker.type === 'photo') {
+                            // 사진인 경우 Base64 데이터 URL 그대로 사용
+                            stickerUrl = sticker.url
+                        } else {
+                            // 스티커인 경우 경로 처리
+                            stickerUrl = sticker.url.startsWith('http') 
+                                ? sticker.url 
+                                : sticker.url.startsWith('/') 
+                                    ? sticker.url 
+                                    : `/stickers/${sticker.url}`
+                        }
+                        
+                        const processedSticker = {
+                            url: stickerUrl,
+                            x: sticker.x || Math.random() * 100,
+                            y: sticker.y || Math.random() * 100,
+                            width: sticker.width || 50,
+                            height: sticker.height || 50,
+                            type: sticker.type || 'sticker'
+                        }
+                        
+                        console.log('처리 후 스티커 데이터:', processedSticker)
+                        return processedSticker
+                    })
+                    console.log('최종 스티커 배열:', diary.value.stickers)
+                } else {
+                    diary.value.stickers = []
+                }
+                
+                styleLayer.value = parsedStyleLayer
                 console.log('styleLayer.value 설정됨:', styleLayer.value)
             } catch (e) {
                 console.error('styleLayer 파싱 에러:', e)
                 styleLayer.value = { bg: "", sticker: [] }
+                diary.value.stickers = []
             }
-            
-            // 스티커 정보 추가
-            diary.value.stickers = (styleLayer.value?.sticker || []).map(sticker => ({
-                url: `/stickers/${sticker}.png`,
-                x: Math.random() * 100,
-                y: Math.random() * 100,
-                width: 50,
-                height: 50
-            }))
-            console.log('stickers 설정됨:', diary.value.stickers)
 
             // 감정 분석 정보
             if (data.myDiaryEmotion && typeof data.myDiaryEmotion === 'object') {
@@ -538,14 +568,33 @@ const handleEdit = async () => {
 
 const confirmEdit = async () => {
     try {
+        // 스타일 레이어 정보 구성
+        const styleLayerData = {
+            bg: styleLayer.value?.bg || "",
+            sticker: editedDiary.value.stickers.map(sticker => ({
+                url: sticker.url,
+                x: sticker.x,
+                y: sticker.y,
+                width: sticker.width,
+                height: sticker.height,
+                type: sticker.type || 'sticker'
+            }))
+        }
+
         // 수정 완료 시 API 호출
         const requestData = {
             ...diary.value, // 기존 데이터
-            ...editedDiary.value, // 수정된 데이터로 덮어쓰기
+            title: editedDiary.value.title,
+            content: editedDiary.value.content,
             createdAt: diary.value.createdAt.toISOString().slice(0, -1),
-            styleLayer: JSON.stringify(styleLayer.value),
-            tags: editedDiary.value.hashtags || []
+            styleLayer: JSON.stringify(styleLayerData),
+            tags: editedDiary.value.hashtags || [],
+            isDeleted: diary.value.isDeleted,
+            isConfirmed: diary.value.isConfirmed,
+            userId: diary.value.userId
         }
+
+        console.log('[수정 요청 데이터]', requestData);
 
         const response = await axios.put('/mydiary/update', requestData)
         
