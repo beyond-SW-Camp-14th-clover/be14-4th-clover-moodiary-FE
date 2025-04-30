@@ -162,6 +162,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore'
+import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -206,13 +207,9 @@ const fetchDiary = async () => {
         
         console.log('요청 날짜:', dairyDate)
         const userId = 1; // 임시로 고정된 userId 사용
-        const response = await fetch(`http://localhost:8080/mydiary/daily/${dairyDate}?userId=${userId}`)
+        const response = await axios.get(`/mydiary/daily/${dairyDate}?userId=${userId}`)
         
-        if (!response.ok) {
-            throw new Error('일기를 불러오는데 실패했습니다')
-        }
-
-        const data = await response.json()
+        const data = response.data
         console.log('일일 일기 데이터:', data)
         console.log('myDiaryEmotion 데이터:', data.myDiaryEmotion)  // myDiaryEmotion 데이터 확인
         
@@ -290,13 +287,9 @@ const fetchDiary = async () => {
 const fetchRecommendedActions = async () => {
     try {
         const userId = 1; // 임시로 고정된 userId 사용
-        const response = await fetch(`http://localhost:8080/action/recommend?userId=${userId}`)
+        const response = await axios.get(`/action/recommend?userId=${userId}`)
         
-        if (!response.ok) {
-            throw new Error('행동 추천을 불러오는데 실패했습니다')
-        }
-
-        const data = await response.json()
+        const data = response.data
         console.log('행동 추천 데이터:', data)
         recommendedActions.value = data
     } catch (error) {
@@ -354,75 +347,50 @@ const confirmDiary = async () => {
         console.log('[전송 전] JSON.stringify(requestData):', JSON.stringify(requestData));
 
         // 일기 확정 요청
-        const updateResponse = await fetch('http://localhost:8080/mydiary/update', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        });
+        const updateResponse = await axios.put('/mydiary/update', requestData)
 
-        console.log('[응답 상태] updateResponse.ok:', updateResponse.ok);
-        if (!updateResponse.ok) {
-            const errorBody = await updateResponse.text();
-            console.error('[응답 오류 내용]', errorBody);
-            throw new Error('서버 응답 오류: ' + errorBody);
-        }
+        console.log('[응답 상태] updateResponse.status:', updateResponse.status);
 
         // 일기 확정 성공 후 감정 분석 요청
         console.log('[감정 분석 요청 시작]');
-        const analyzeResponse = await fetch('http://localhost:8080/api/gpt/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                content: diary.value.content
-            })
-        });
+        const analyzeResponse = await axios.post('/api/gpt/analyze', {
+            content: diary.value.content
+        })
 
         console.log('[감정 분석 응답 상태]', analyzeResponse.status);
-        if (!analyzeResponse.ok) {
-            const errorText = await analyzeResponse.text();
-            console.error('[감정 분석 오류 응답]', errorText);
-            throw new Error('감정 분석 실패: ' + errorText);
-        }
-
-        const analyzeData = await analyzeResponse.json();
-        console.log('[감정 분석 결과]', analyzeData);
+        const analyzeData = analyzeResponse.data;
+        console.log('[감정 분석 결과 전체]', analyzeData);
+        console.log('[감정 분석 결과 diaryTitle]', analyzeData.diaryTitle);
+        console.log('[감정 분석 결과 emotion1]', analyzeData.emotion1);
+        console.log('[감정 분석 결과 emotion2]', analyzeData.emotion2);
+        console.log('[감정 분석 결과 emotion3]', analyzeData.emotion3);
+        console.log('[감정 분석 결과 점수들]', {
+            positiveScore: analyzeData.positiveScore,
+            neutralScore: analyzeData.neutralScore,
+            negativeScore: analyzeData.negativeScore,
+            totalScore: analyzeData.totalScore
+        });
 
         // 감정 분석 결과를 저장하는 API 호출
         const emotionData = {
-            positive_score: Math.max(1, analyzeData.positiveScore || 0),
-            neutral_score: Math.max(1, analyzeData.neutralScore || 0),
-            negative_score: Math.max(1, analyzeData.negativeScore || 0),
-            total_score: Math.max(1, analyzeData.totalScore || 0),
-            emotion_summary1: analyzeData.emotion1 || '감정 요약이 없습니다',
-            emotion_summary2: analyzeData.emotion2 || '감정 요약이 없습니다',
-            emotion_summary3: analyzeData.emotion3 || '감정 요약이 없습니다',
-            my_diary_summary: analyzeData.diaryTitle || '추천 제목이 없습니다',
-            my_diary_id: diary.value.id
+            positiveScore: Math.max(1, analyzeData.positiveScore || 0),
+            neutralScore: Math.max(1, analyzeData.neutralScore || 0),
+            negativeScore: Math.max(1, analyzeData.negativeScore || 0),
+            totalScore: Math.max(1, analyzeData.totalScore || 0),
+            emotionSummary1: analyzeData.emotion1 || '감정 요약이 없습니다',
+            emotionSummary2: analyzeData.emotion2 || '감정 요약이 없습니다',
+            emotionSummary3: analyzeData.emotion3 || '감정 요약이 없습니다',
+            myDiarySummary: analyzeData.diaryTitle || '추천 제목이 없습니다',
+            myDiaryId: diary.value.id
         };
 
-        console.log('[감정 분석 저장 요청 데이터]', emotionData);
-        console.log('[감정 분석 저장 요청 JSON]', JSON.stringify(emotionData));
+        console.log('[감정 분석 저장 요청 데이터 전체]', emotionData);
+        console.log('[감정 분석 저장 요청 myDiarySummary]', emotionData.myDiarySummary);
 
-        const emotionResponse = await fetch('http://localhost:8080/mydiary/registEmotion', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(emotionData)
-        });
+        const emotionResponse = await axios.post('/mydiary/registEmotion', emotionData)
 
         console.log('[감정 분석 저장 응답 상태]', emotionResponse.status);
-        const responseText = await emotionResponse.text();
-        console.log('[감정 분석 저장 응답]', responseText);
-
-        if (!emotionResponse.ok) {
-            console.error('[감정 분석 저장 오류 응답]', responseText);
-            throw new Error('감정 분석 저장 실패: ' + responseText);
-        }
+        console.log('[감정 분석 저장 응답]', emotionResponse.data);
 
         // 감정 분석 결과를 화면에 반영
         myDiaryEmotion.value = {
@@ -457,20 +425,9 @@ const handleDelete = () => {
 const confirmDelete = async () => {
     try {
         console.log('[삭제 요청 시작] 일기 ID:', diary.value.id);
-        const response = await fetch(`http://localhost:8080/mydiary/${diary.value.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
+        const response = await axios.delete(`/mydiary/${diary.value.id}`)
 
         console.log('[삭제 응답 상태]', response.status);
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('[삭제 오류 응답]', errorText);
-            throw new Error('일기 삭제에 실패했습니다');
-        }
-
         console.log('[성공] 일기 삭제 완료');
         showDeleteModal.value = false;
         
