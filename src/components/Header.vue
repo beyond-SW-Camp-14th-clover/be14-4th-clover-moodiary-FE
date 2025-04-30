@@ -36,10 +36,12 @@
               class="profile-icon"
               @click.stop="toggleProfile"
             />
-            <ul v-if="showProfile" class="profile-dropdown">
-              <li @click="goMyPage">내 정보 수정</li>
-              <li @click="logout">로그아웃</li>
-            </ul>
+            <div class="submenu">
+              <router-link to="/app/mypage/info">내 정보</router-link>
+              <router-link to="/app/mypage/pet">펫 관리</router-link>
+              <router-link to="/app/mypage/recommend">추천 설정</router-link>
+              <router-link @click="logout" to="/app">로그아웃</router-link>
+            </div>
           </div>
         </template>
 
@@ -76,7 +78,6 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
 const router = useRouter()
 function goLogin()  { router.push('/login') }
-function goMyPage() { router.push('/app/mypage') }
 function logout() {
   authStore.clear()
   localStorage.removeItem('token')
@@ -160,6 +161,11 @@ function logout() {
 }
 
 .profile-menu-wrapper { position: relative; }
+
+.profile-menu-wrapper:hover .submenu {
+    display: flex; animation: fadeIn 0.3s ease-in-out;
+}
+
 .profile-icon {
   width: 36px; height: 36px; border-radius: 50%;
   object-fit: cover; cursor: pointer;
