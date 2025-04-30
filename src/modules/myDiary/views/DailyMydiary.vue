@@ -9,23 +9,23 @@
                             <div class="score-section">
                                 <h3>감정 분석 결과</h3>
                                 <div class="score-box">
-                                    <p>긍정 감정 점수: {{ diary?.positiveScore || 48 }}</p>
-                                    <p>보통 감정 점수: {{ diary?.neutralScore || 26 }}</p>
-                                    <p>부정 감정 점수: {{ diary?.negativeScore || 26 }}</p>
+                                    <p>긍정 감정 점수: {{ diaryEmotion?.positiveScore || 0 }}</p>
+                                    <p>보통 감정 점수: {{ diaryEmotion?.neutralScore || 0 }}</p>
+                                    <p>부정 감정 점수: {{ diaryEmotion?.negativeScore || 0 }}</p>
                                 </div>
                             </div>
                             <div class="recommended-section">
                                 <h3>추천 일기 제목</h3>
                                 <div class="recommended-title-box">
                                     <div class="title-placeholder">
-                                        추천 제목이 여기에 표시됩니다
+                                        {{ diaryEmotion?.diarySummary || '추천 제목이 여기에 표시됩니다' }}
                                     </div>
                                 </div>
                             </div>
                             <div class="total-score-section">
                                 <h3>종합</h3>
                                 <div class="total-score-box">
-                                    <p class="total-score" :style="{ color: totalScoreColor }">{{ diary?.positiveScore || 48 }}</p>
+                                    <p class="total-score" :style="{ color: totalScoreColor }">{{ diaryEmotion?.totalScore || 0 }}</p>
                                 </div>
                             </div>
                         </div>
@@ -33,18 +33,18 @@
                         <div class="emotion-section">
                             <h3>감정 요약</h3>
                             <ul class="emotion-list">
-                                <li>일상 속의 소소한 기쁨</li>
-                                <li>사람들과의 따뜻한 교감</li>
-                                <li>여유롭고 즐거운 여가 시간</li>
+                                <li>{{ diaryEmotion?.emotionSummary1 || '감정 요약이 없습니다' }}</li>
+                                <li>{{ diaryEmotion?.emotionSummary2 || '감정 요약이 없습니다' }}</li>
+                                <li>{{ diaryEmotion?.emotionSummary3 || '감정 요약이 없습니다' }}</li>
                             </ul>
                         </div>
 
                         <div class="action-section">
                             <h3>행동 추천</h3>
                             <ul class="action-list">
-                                <li>행동 1</li>
-                                <li>행동 2</li>
-                                <li>행동 3</li>
+                                <li v-if="diary?.isConfirmed === 'Y'">일기가 확정되었습니다</li>
+                                <li v-if="diary?.isDeleted === 'Y'">삭제된 일기입니다</li>
+                                <li>작성일: {{ diary?.createdAt?.toLocaleDateString() || '날짜 정보 없음' }}</li>
                             </ul>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                     
                     <div class="write-form">
                         <div class="title-section">
-                            <div class="title-input">{{ diary.title }}</div>
+                            <div class="title-input">{{ diary.title || '제목 없음' }}</div>
                         </div>
 
                         <div class="textarea-wrapper">
@@ -76,7 +76,7 @@
                                 <h3>감정 태그: </h3>
                                 <div class="emotion-tags">
                                     <span 
-                                        v-for="(tag, index) in diary.hashtags" 
+                                        v-for="(tag, index) in (diary.hashtags || [])" 
                                         :key="index" 
                                         class="emotion-tag"
                                     >
@@ -84,11 +84,11 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="notebook-textarea">{{ diary.content }}</div>
+                            <div class="notebook-textarea">{{ diary.content || '내용이 없습니다' }}</div>
 
                             <div class="sticker-layer">
                                 <div
-                                    v-for="(sticker, i) in diary.stickers"
+                                    v-for="(sticker, i) in (diary.stickers || [])"
                                     :key="i"
                                     class="sticker-wrapper"
                                     :style="{ left: sticker.x + 'px', top: sticker.y + 'px', width: sticker.width + 'px', height: sticker.height + 'px', zIndex: i }"
@@ -111,16 +111,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
 
 const route = useRoute()
-const selectedDate = ref(new Date(route.query.date || new Date()))
+console.log('route params:', route.params)
+console.log('route path:', route.path)
+
+// 날짜 파라미터가 있는 경우 해당 날짜로 설정, 없는 경우 현재 날짜 사용
+const selectedDate = ref(new Date())
+if (route.params.date) {
+    try {
+        selectedDate.value = new Date(route.params.date)
+        console.log('선택된 날짜:', selectedDate.value)
+    } catch (error) {
+        console.error('날짜 파싱 에러:', error)
+    }
+}
+
 const diary = ref(null)
+const diaryEmotion = ref(null)
+const styleLayer = ref(null)
 
 const totalScoreColor = computed(() => {
-    const score = diary.value?.positiveScore || 48
+    const score = diaryEmotion.value?.totalScore || 0
     if (score <= 33) return '#CA2B2B'
     if (score <= 66) return '#DA930E'
     return '#346FD2'
@@ -128,14 +142,90 @@ const totalScoreColor = computed(() => {
 
 const fetchDiary = async () => {
     try {
-        const response = await axios.get(`/api/diary/${selectedDate.value.toISOString().split('T')[0]}`)
-        diary.value = response.data
+        // 날짜를 YYYY-MM-DD 형식으로 변환
+        const year = selectedDate.value.getFullYear()
+        const month = String(selectedDate.value.getMonth() + 1).padStart(2, '0')
+        const day = String(selectedDate.value.getDate()).padStart(2, '0')
+        const dairyDate = `${year}-${month}-${day}`
+        
+        console.log('요청 날짜:', dairyDate)
+        const userId = 1; // 임시로 고정된 userId 사용
+        const response = await fetch(`http://localhost:8080/mydiary/daily/${dairyDate}?userId=${userId}`)
+        
+        if (!response.ok) {
+            throw new Error('일기를 불러오는데 실패했습니다')
+        }
+
+        const data = await response.json()
+        console.log('일일 일기 데이터:', data)
+        
+        if (data) {
+            // 기본 일기 정보
+            diary.value = {
+                id: data.id,
+                title: data.title,
+                content: data.content,
+                createdAt: new Date(data.createdAt),
+                isDeleted: data.isDeleted,
+                isConfirmed: data.isConfirmed,
+                userId: data.userId,
+                hashtags: data.tags || []
+            }
+            console.log('diary.value 설정됨:', diary.value)
+
+            // 스타일 레이어 정보
+            try {
+                styleLayer.value = JSON.parse(data.styleLayer || '{"bg": "", "sticker": []}')
+                console.log('styleLayer.value 설정됨:', styleLayer.value)
+            } catch (e) {
+                console.error('styleLayer 파싱 에러:', e)
+                styleLayer.value = { bg: "", sticker: [] }
+            }
+            
+            // 스티커 정보 추가
+            diary.value.stickers = styleLayer.value.sticker.map(sticker => ({
+                url: `/stickers/${sticker}.png`,
+                x: Math.random() * 100,
+                y: Math.random() * 100,
+                width: 50,
+                height: 50
+            }))
+            console.log('stickers 설정됨:', diary.value.stickers)
+
+            // 감정 분석 정보
+            if (data.diaryEmotion) {
+                diaryEmotion.value = {
+                    id: data.diaryEmotion.id,
+                    positiveScore: data.diaryEmotion.positiveScore,
+                    neutralScore: data.diaryEmotion.neutralScore,
+                    negativeScore: data.diaryEmotion.negativeScore,
+                    totalScore: data.diaryEmotion.totalScore,
+                    emotionSummary1: data.diaryEmotion.emotionSummary1,
+                    emotionSummary2: data.diaryEmotion.emotionSummary2,
+                    emotionSummary3: data.diaryEmotion.emotionSummary3,
+                    diarySummary: data.diaryEmotion.diarySummary
+                }
+                console.log('diaryEmotion.value 설정됨:', diaryEmotion.value)
+            } else {
+                console.log('diaryEmotion 데이터가 없습니다')
+            }
+        } else {
+            console.log('데이터가 null입니다')
+        }
     } catch (error) {
         console.error('일기를 불러오는데 실패했습니다:', error)
     }
 }
 
+// 컴포넌트가 마운트될 때와 날짜가 변경될 때마다 데이터를 가져옴
 onMounted(() => {
+    console.log('컴포넌트 마운트됨')
+    fetchDiary()
+})
+
+// 날짜가 변경될 때마다 데이터를 다시 가져옴
+watch(selectedDate, () => {
+    console.log('선택된 날짜가 변경됨:', selectedDate.value)
     fetchDiary()
 })
 </script>

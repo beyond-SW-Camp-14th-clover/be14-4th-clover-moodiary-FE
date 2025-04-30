@@ -27,7 +27,13 @@
                         <div v-for="day in weekDays" :key="day" class="calendar-header-cell">{{ day }}</div>
                     </div>
                     <div class="calendar-body">
-                        <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'empty': cell.type !== 'current' }">
+                        <div 
+                            v-for="(cell, idx) in calendarCells" 
+                            :key="idx" 
+                            class="calendar-cell" 
+                            :class="{ 'empty': cell.type !== 'current' }"
+                            @click="handleCellClick(cell)"
+                        >
                             <div class="cell-header">
                                 <span
                                     :style="{
@@ -91,10 +97,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
 import Moodlog from '../components/Moodlog.vue';
 
+const router = useRouter();
 const selectedDate = ref(new Date());
 
 const monthNames = [
@@ -191,15 +199,18 @@ const diaryEntries = ref([]);
 
 const fetchMonthlyDiary = async (targetMonth, userId) => {
     try {
+        console.log('월간 일기 조회 요청:', `http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
         const response = await fetch(`http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
         if (!response.ok) {
-            throw new Error('서버 쪽에서 리스폰스 객체가 넘어오는데 문제가 생김');
+            throw new Error(`서버 쪽에서 리스폰스 객체가 넘어오는데 문제가 생김: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         console.log('백엔드 응답 데이터:', data);
         diaryEntries.value = data; // 데이터를 상태에 저장
     } catch (error) {
         console.error('Fetch error:', error);
+        // 임시 데이터로 대체하여 UI가 작동하는지 확인
+        diaryEntries.value = [];
     }
 };
 
@@ -224,6 +235,36 @@ const bottomThreeEntries = computed(() => {
         .sort((a, b) => a.totalScore - b.totalScore)
         .slice(0, 3);
 });
+
+const handleCellClick = async (cell) => {
+    if (cell.type === 'current') {
+        const year = selectedDate.value.getFullYear();
+        const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
+        const day = cell.day.toString().padStart(2, '0');
+        const date = `${year}-${month}-${day}`;
+        
+        console.log('일일 일기 데이터 요청 시작:', date);
+        console.log('요청 URL:', `http://localhost:8080/mydiary/daily/${date}?userId=1`);
+        
+        try {
+            const response = await fetch(`http://localhost:8080/mydiary/daily/${date}?userId=1`);
+            console.log('서버 응답 상태:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`서버 응답 오류: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('일일 일기 데이터 수신 성공:', data);
+            
+            // 데이터를 받아온 후 해당 날짜의 일기 페이지로 이동
+            router.push({ name: 'DailyMyDiaryWithDate', params: { date } });
+        } catch (error) {
+            console.error('일일 일기 데이터 조회 중 오류 발생:', error);
+            // 에러 발생 시에도 페이지 이동 (선택적)
+            router.push({ name: 'DailyMyDiaryWithDate', params: { date } });
+        }
+    }
+};
 
 onMounted(() => {
     const year = selectedDate.value.getFullYear();
@@ -373,8 +414,17 @@ onMounted(() => {
     align-items: flex-start;
     justify-content: flex-start;
     height: 121px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.calendar-cell:hover {
+    background-color: #F7F2EB;
 }
 .calendar-cell.empty {
+    background: none;
+    cursor: default;
+}
+.calendar-cell.empty:hover {
     background: none;
 }
 .left-section {
