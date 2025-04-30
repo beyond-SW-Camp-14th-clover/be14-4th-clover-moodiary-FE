@@ -38,6 +38,8 @@
             />
             <ul v-if="showProfile" class="profile-dropdown">
               <li @click="goMyPage">내 정보 수정</li>
+              <li @click="goMyPet">펫 관리</li>
+              <li @click="goRecommendAction">추천 목록</li>
               <li @click="logout">로그아웃</li>
             </ul>
           </div>
@@ -45,10 +47,13 @@
 
         <!-- 로그인 전: 로그인 버튼 -->
         <template v-else>
-          <button class="btn login-btn" @click="goLogin">로그인</button>
+          <button class="btn login-btn" @click="$emit('open-login')">로그인</button>
         </template>
       </div>
     </div>
+
+    <!-- 로그인 모달 -->
+    <LoginModal v-model:show="showLogin" />
   </header>
 </template>
 
@@ -57,14 +62,16 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import LoginModal from '@/components/LoginModal.vue'
 
 const authStore = useAuthStore()
-const showProfile = ref(false)
+const router = useRouter()
 
+// 프로필 드롭다운
+const showProfile = ref(false)
 function toggleProfile() {
   showProfile.value = !showProfile.value
 }
-
 const profileMenu = ref(null)
 function handleClickOutside(e) {
   if (profileMenu.value && !profileMenu.value.contains(e.target)) {
@@ -74,9 +81,23 @@ function handleClickOutside(e) {
 onMounted(() => document.addEventListener('click', handleClickOutside))
 onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
-const router = useRouter()
-function goLogin()  { router.push('/login') }
-function goMyPage() { router.push('/app/mypage') }
+// 로그인 모달 제어
+const showLogin = ref(false)
+
+function goLogin() {
+  showLogin.value = true
+}
+function goMyPage() {
+  router.push('/app/mypage')
+}
+
+function goMyPet() {
+  router.push('/app/mypage')
+}
+
+function goRecommendAction() {
+  router.push('/app/mypage')
+}
 function logout() {
   authStore.clear()
   localStorage.removeItem('token')
@@ -87,31 +108,23 @@ function logout() {
 
 <style scoped>
 .header-bg {
-  position: fixed;
-  top: 0; left: 0;
+  position: fixed; top: 0; left: 0;
   width: 100vw; height: 80px;
   background-color: var(--color-brown);
   z-index: 9999;
 }
 .header-inner {
-  max-width: 1920px;
-  margin: 0 auto;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  box-sizing: border-box;
+  max-width: 1920px; margin: 0 auto;
+  height: 100%; display: flex;
+  align-items: center; justify-content: space-between;
+  padding: 0 40px; box-sizing: border-box;
 }
-
 .logo {
   color: var(--color-beige);
   font-family: var(--font-pixel);
   font-size: 2rem; font-weight: 800;
-  text-decoration: none;
-  text-shadow: -1px -1px 0 #A17C59;
+  text-decoration: none; text-shadow: -1px -1px 0 #A17C59;
 }
-
 .nav-links {
   display: flex; gap: 50px; align-items: center;
 }
@@ -136,9 +149,9 @@ function logout() {
   color: var(--color-brown);
   font-family: var(--font-omyu);
   font-size: 18px; text-decoration: none;
-  transition: color 0.2s;
 }
 .submenu a:hover { color: var(--color-green); }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -149,7 +162,6 @@ function logout() {
 .btn {
   all: unset; padding: 6px 14px; border-radius: 6px;
   font-size: 14px; font-weight: 500; cursor: pointer;
-  text-align: center;
 }
 .login-btn {
   background-color: #A17C59;
