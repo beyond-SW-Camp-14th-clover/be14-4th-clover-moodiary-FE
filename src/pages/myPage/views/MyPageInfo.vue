@@ -28,6 +28,10 @@
 <script setup>
     import { ref, onMounted } from "vue";
     import axios from 'axios';
+    import { useAuthStore } from '@/stores/auth.js';
+
+    // 설명. 링크로 들어오는 경우에 대비해 로그인 여부 받아오기
+    const store = useAuthStore();
 
     const dummy_user = {
         id: 0,
@@ -42,7 +46,9 @@
     // 설명. 현재 회원 정보 받아오기
     const fetchUser = async () => {
         try {
-            const res = await axios.get(`http://localhost:8080/user/query/info`)
+            const res = await axios.get(`http://localhost:8080/user/query/me`, {
+                headers: {'Authorization': `Bearer ${store.token}`}
+            })
             form.value = res.data
         } catch (err) {
             message.value = '사용자 정보를 불러오지 못했습니다. 더미 데이터를 표시합니다.'

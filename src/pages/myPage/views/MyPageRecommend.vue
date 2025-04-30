@@ -37,7 +37,10 @@
 
 <script setup>
 import {onMounted, ref, computed} from 'vue'
+import { useAuthStore } from '@/stores/auth.js';
 
+// 설명. 링크로 들어오는 경우에 대비해 로그인 여부 받아오기
+const store = useAuthStore();
 // 상태 정의
 const items = ref([])
 const selectedItems = ref([])
@@ -82,7 +85,10 @@ const submitSelection = async () => {
     try {
         const response = await fetch(`http://localhost:8080/action/exclude`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${store.token}`,
+            },
             body: JSON.stringify(selectedItems.value)
         })
         console.log(selectedItems.value);
