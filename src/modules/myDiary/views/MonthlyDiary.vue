@@ -36,7 +36,7 @@
                                 'next-month': cell.type === 'next',
                                 'has-diary': getDiaryForDay(cell.day)
                             }"
-                            @click="cell.type === 'current' && goToDailyDiary(cell.day)"
+                            @click="cell.type === 'current' && getDiaryForDay(cell.day) && goToDailyDiary(cell.day)"
                         >
                             <div class="cell-header">
                                 <span

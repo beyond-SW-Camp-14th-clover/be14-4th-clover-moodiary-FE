@@ -74,12 +74,6 @@
             <div class="sticker-toolbar">
               <button type="button" class="submit-btn" @click="showRegistModal = true">등록</button>
               <button type="button" class="submit-btn" @click="cancelDiary">취소</button>
-              <button 
-                type="button" 
-                class="submit-btn confirm-btn" 
-                :class="{ 'confirmed': isConfirmed }"
-                @click="confirmDiary"
-              >일기 확정</button>
             </div>
           </form>
         </div>
@@ -131,8 +125,6 @@
   const showRegistModal = ref(false)
   const hashtags = ref([])
   const isComposing = ref(false)
-  const currentDiaryId = ref(null)
-  const currentDiaryData = ref(null)
   
   const stickerOptions = [
     '/src/assets/stickers/heart.png',
@@ -251,32 +243,12 @@
     }
   }
   
-  const fetchCurrentDiary = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/mydiary/${roomId}`)
-      if (response.ok) {
-        const diaryData = await response.json()
-        console.log('받아온 일기 데이터:', diaryData)
-        currentDiaryData.value = diaryData
-        currentDiaryId.value = diaryData.id
-        title.value = diaryData.title
-        content.value = diaryData.content || ''
-        stickers.value = JSON.parse(diaryData.styleLayer || '[]')
-        isConfirmed.value = diaryData.isConfirmed === 'Y'
-        hashtags.value = diaryData.tags || []
-      }
-    } catch (error) {
-      console.error('일기 데이터를 가져오는 중 오류가 발생했습니다:', error)
-    }
-  }
-  
   onMounted(() => {
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Delete' && selectedIndex.value !== null) {
         deleteSelected()
       }
     })
-    fetchCurrentDiary()
   })
   
   const handleContentInput = (e) => {
@@ -353,74 +325,16 @@
   };
   
   const confirmDiary = () => {
-    console.log('확정 버튼 클릭됨')
     if (!title.value || !content.value) {
       alert('제목과 내용을 모두 입력해주세요.')
       return
     }
-    if (!currentDiaryData.value) {
-      alert('일기 데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.')
-      return
-    }
-    console.log('확정 버튼 클릭 시 currentDiaryData:', currentDiaryData.value)
     showConfirmModal.value = true
   }
   
-  const handleConfirm = async () => {
-    console.log('확정 모달 확인 버튼 클릭됨')
-    try {
-      if (!currentDiaryData.value) {
-        alert('일기 데이터를 찾을 수 없습니다. 다시 시도해주세요.')
-        return
-      }
-
-      // 데이터 구조 확인
-      console.log('확정 모달 확인 클릭 시 currentDiaryData:', currentDiaryData.value)
-      console.log('현재 입력된 content:', content.value)
-      console.log('현재 입력된 title:', title.value)
-      console.log('현재 입력된 stickers:', stickers.value)
-      console.log('현재 입력된 hashtags:', hashtags.value)
-
-      // content가 null이 되지 않도록 보장
-      const diaryContent = content.value || currentDiaryData.value.content || ''
-
-      // 원본 데이터를 그대로 사용하면서 isConfirmed만 변경
-      const diaryData = {
-        id: currentDiaryData.value.id,
-        title: title.value,
-        content: diaryContent,
-        createdAt: currentDiaryData.value.createdAt,
-        isDeleted: currentDiaryData.value.isDeleted,
-        isConfirmed: 'Y',
-        styleLayer: JSON.stringify(stickers.value),
-        userId: currentDiaryData.value.userId,
-        tags: hashtags.value
-      };
-
-      console.log('PUT 요청 보내는 데이터:', diaryData)
-      console.log('content 필드 값:', diaryData.content)
-
-      const response = await fetch('http://localhost:8080/mydiary/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(diaryData)
-      });
-
-      if (response.ok) {
-        isConfirmed.value = true;
-        showConfirmModal.value = false;
-        alert('일기가 확정되었습니다!');
-      } else {
-        const errorData = await response.json().catch(() => null)
-        console.error('서버 응답 오류:', errorData)
-        throw new Error('서버 응답 오류')
-      }
-    } catch (error) {
-      console.error('일기 확정 중 오류가 발생했습니다:', error)
-      alert('일기 확정에 실패했습니다. 다시 시도해주세요.')
-    }
+  const handleConfirm = () => {
+    isConfirmed.value = true
+    showConfirmModal.value = false
   }
   
   const cancelDiary = () => {
