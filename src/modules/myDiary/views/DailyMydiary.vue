@@ -49,12 +49,12 @@
                     <div class="button-container">
                         <div class="button-group">
                             <button class="action-button">수정</button>
-                            <button class="action-button">삭제</button>
+                            <button class="action-button" @click="handleDelete">삭제</button>
                             <button class="action-button" @click="handleCancel">취소</button>
                             <button 
                                 class="action-button highlight" 
                                 @click="handleConfirm"
-                                :disabled="diary?.isConfirmed === 'Y'"
+                                :disabled="false"
                             >
                                 {{ diary?.isConfirmed === 'Y' ? '감정 분석' : '일기 확정' }}
                             </button>
@@ -124,6 +124,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div v-if="showDeleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>일기 삭제</h3>
+            <p>정말로 이 일기를 삭제하시겠습니까?</p>
+            <div class="modal-buttons">
+                <button @click="confirmDelete" class="confirm-button">확인</button>
+                <button @click="showDeleteModal = false" class="cancel-button">취소</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -153,6 +165,7 @@ const myDiaryEmotion = ref(null)
 const styleLayer = ref(null)
 const recommendedActions = ref([])  // 행동 추천 데이터를 저장할 ref 추가
 const showConfirmModal = ref(false)
+const showDeleteModal = ref(false)
 
 const totalScoreColor = computed(() => {
     const score = myDiaryEmotion.value?.totalScore || 0
@@ -281,37 +294,184 @@ const handleCancel = () => {
     dailyDiaryStore.clearPreviousPage()
 }
 
-const handleConfirm = () => {
+const handleConfirm = async () => {
+    console.log('handleConfirm 호출됨');
+    console.log('diary.value:', diary.value);
+    console.log('isConfirmed:', diary.value?.isConfirmed);
+    
     if (diary.value?.isConfirmed === 'Y') {
-        // 감정 분석 페이지로 이동하는 로직 추가
-        return
+        console.log('감정 분석 시작');
+        try {
+            console.log('감정 분석 요청 시작');
+            console.log('요청할 일기 내용:', diary.value.content);
+            
+            const response = await fetch('http://localhost:8080/api/gpt/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: diary.value.content
+                })
+            });
+
+            console.log('서버 응답 상태:', response.status);
+            console.log('서버 응답 헤더:', response.headers);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('서버 오류 응답:', errorText);
+                throw new Error('감정 분석에 실패했습니다');
+            }
+
+            const data = await response.json();
+            console.log('감정 분석 결과 데이터:', data);
+            
+            // 감정 분석 결과를 화면에 반영
+            myDiaryEmotion.value = {
+                ...myDiaryEmotion.value,
+                diarySummary: data.diaryTitle || '추천 제목이 없습니다',
+                emotionSummary1: data.emotion1 || '감정 요약이 없습니다',
+                emotionSummary2: data.emotion2 || '감정 요약이 없습니다',
+                emotionSummary3: data.emotion3 || '감정 요약이 없습니다',
+                positiveScore: Math.max(1, data.positiveScore || 0),
+                neutralScore: Math.max(1, data.neutralScore || 0),
+                negativeScore: Math.max(1, data.negativeScore || 0),
+                totalScore: Math.max(1, data.totalScore || 0)
+            };
+
+            console.log('업데이트된 감정 분석 상태:', myDiaryEmotion.value);
+        } catch (error) {
+            console.error('감정 분석 중 오류 발생:', error);
+            console.error('오류 스택:', error.stack);
+            alert('감정 분석에 실패했습니다');
+        }
+    } else {
+        console.log('일기 확정 모달 표시');
+        showConfirmModal.value = true;
     }
-    showConfirmModal.value = true
 }
 
 const confirmDiary = async () => {
     try {
-        const response = await fetch('http://localhost:8080/mydiary/update', {
+        console.log('[확인 시작] diary.value:', diary.value);
+
+        const requestData = {
+            id: diary.value.id,
+            title: diary.value.title,
+            content: diary.value.content,
+            createdAt: diary.value.createdAt.toISOString().slice(0, -1),
+            isDeleted: diary.value.isDeleted,
+            isConfirmed: 'Y',
+            styleLayer: JSON.stringify(styleLayer.value.map(s => ({
+                url: s.url,
+                x: s.x,
+                y: s.y,
+                width: s.width,
+                height: s.height,
+                type: 'sticker'
+            }))),
+            userId: diary.value.userId,
+            tags: diary.value.hashtags || []
+        }
+
+        console.log('[전송 전] requestData:', requestData);
+        console.log('[전송 전] JSON.stringify(requestData):', JSON.stringify(requestData));
+
+        // 일기 확정 요청
+        const updateResponse = await fetch('http://localhost:8080/mydiary/update', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                id: diary.value.id,
-                isConfirmed: 'Y'
-            })
-        })
+            body: JSON.stringify(requestData)
+        });
 
-        if (!response.ok) {
-            throw new Error('일기 확정에 실패했습니다')
+        console.log('[응답 상태] updateResponse.ok:', updateResponse.ok);
+        if (!updateResponse.ok) {
+            const errorBody = await updateResponse.text();
+            console.error('[응답 오류 내용]', errorBody);
+            throw new Error('서버 응답 오류: ' + errorBody);
         }
 
-        // 성공적으로 업데이트된 후 diary 객체의 isConfirmed 값을 업데이트
-        diary.value.isConfirmed = 'Y'
-        showConfirmModal.value = false
+        // 일기 확정 성공 후 감정 분석 요청
+        console.log('[감정 분석 요청 시작]');
+        const analyzeResponse = await fetch('http://localhost:8080/api/gpt/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content: diary.value.content
+            })
+        });
+
+        console.log('[감정 분석 응답 상태]', analyzeResponse.status);
+        if (!analyzeResponse.ok) {
+            const errorText = await analyzeResponse.text();
+            console.error('[감정 분석 오류 응답]', errorText);
+            throw new Error('감정 분석 실패: ' + errorText);
+        }
+
+        const analyzeData = await analyzeResponse.json();
+        console.log('[감정 분석 결과]', analyzeData);
+
+        // 감정 분석 결과를 화면에 반영
+        myDiaryEmotion.value = {
+            ...myDiaryEmotion.value,
+            diarySummary: analyzeData.diaryTitle || '추천 제목이 없습니다',
+            emotionSummary1: analyzeData.emotion1 || '감정 요약이 없습니다',
+            emotionSummary2: analyzeData.emotion2 || '감정 요약이 없습니다',
+            emotionSummary3: analyzeData.emotion3 || '감정 요약이 없습니다',
+            positiveScore: Math.max(1, analyzeData.positiveScore || 0),
+            neutralScore: Math.max(1, analyzeData.neutralScore || 0),
+            negativeScore: Math.max(1, analyzeData.negativeScore || 0),
+            totalScore: Math.max(1, analyzeData.totalScore || 0)
+        };
+
+        // 성공 시
+        diary.value.isConfirmed = 'Y';
+        showConfirmModal.value = false;
+        console.log('[성공] 일기 확정 및 감정 분석 완료');
     } catch (error) {
-        console.error('일기 확정 중 오류 발생:', error)
-        alert('일기 확정에 실패했습니다')
+        console.error('[예외 발생] 처리 중 오류 발생:', error);
+        alert('일기 확정에 실패했습니다');
+    }
+}
+
+const handleDelete = () => {
+    if (!diary.value?.id) {
+        console.error('삭제할 일기의 ID가 없습니다');
+        return;
+    }
+    showDeleteModal.value = true;
+}
+
+const confirmDelete = async () => {
+    try {
+        console.log('[삭제 요청 시작] 일기 ID:', diary.value.id);
+        const response = await fetch(`http://localhost:8080/mydiary/${diary.value.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        console.log('[삭제 응답 상태]', response.status);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[삭제 오류 응답]', errorText);
+            throw new Error('일기 삭제에 실패했습니다');
+        }
+
+        console.log('[성공] 일기 삭제 완료');
+        showDeleteModal.value = false;
+        
+        // 삭제 후 월간 일기 페이지로 이동
+        router.push({ name: 'MonthlyDiary' });
+    } catch (error) {
+        console.error('[예외 발생] 일기 삭제 중 오류 발생:', error);
+        alert('일기 삭제에 실패했습니다');
     }
 }
 
