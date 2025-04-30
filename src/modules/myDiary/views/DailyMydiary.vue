@@ -54,9 +54,10 @@
                             <button 
                                 class="action-button highlight" 
                                 @click="handleConfirm"
-                                :disabled="false"
+                                :disabled="diary?.isConfirmed === 'Y'"
+                                :class="{ 'disabled-button': diary?.isConfirmed === 'Y' }"
                             >
-                                {{ diary?.isConfirmed === 'Y' ? '감정 분석' : '일기 확정' }}
+                                일기 확정
                             </button>
                         </div>
                     </div>
@@ -136,6 +137,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 이미 확정된 일기 모달 -->
+    <div v-if="showAlreadyConfirmedModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>일기 확정</h3>
+            <p>이미 확정된 일기입니다.</p>
+            <div class="modal-buttons">
+                <button @click="showAlreadyConfirmedModal = false" class="confirm-button">확인</button>
+                <button @click="showAlreadyConfirmedModal = false" class="cancel-button">취소</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -166,6 +179,7 @@ const styleLayer = ref(null)
 const recommendedActions = ref([])  // 행동 추천 데이터를 저장할 ref 추가
 const showConfirmModal = ref(false)
 const showDeleteModal = ref(false)
+const showAlreadyConfirmedModal = ref(false)
 
 const totalScoreColor = computed(() => {
     const score = myDiaryEmotion.value?.totalScore || 0
@@ -294,65 +308,18 @@ const handleCancel = () => {
     dailyDiaryStore.clearPreviousPage()
 }
 
-const handleConfirm = async () => {
-    console.log('handleConfirm 호출됨');
-    console.log('diary.value:', diary.value);
-    console.log('isConfirmed:', diary.value?.isConfirmed);
-    
+const handleConfirm = () => {
     if (diary.value?.isConfirmed === 'Y') {
-        console.log('감정 분석 시작');
-        try {
-            console.log('감정 분석 요청 시작');
-            console.log('요청할 일기 내용:', diary.value.content);
-            
-            const response = await fetch('http://localhost:8080/api/gpt/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    content: diary.value.content
-                })
-            });
-
-            console.log('서버 응답 상태:', response.status);
-            console.log('서버 응답 헤더:', response.headers);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('서버 오류 응답:', errorText);
-                throw new Error('감정 분석에 실패했습니다');
-            }
-
-            const data = await response.json();
-            console.log('감정 분석 결과 데이터:', data);
-            
-            // 감정 분석 결과를 화면에 반영
-            myDiaryEmotion.value = {
-                ...myDiaryEmotion.value,
-                diarySummary: data.diaryTitle || '추천 제목이 없습니다',
-                emotionSummary1: data.emotion1 || '감정 요약이 없습니다',
-                emotionSummary2: data.emotion2 || '감정 요약이 없습니다',
-                emotionSummary3: data.emotion3 || '감정 요약이 없습니다',
-                positiveScore: Math.max(1, data.positiveScore || 0),
-                neutralScore: Math.max(1, data.neutralScore || 0),
-                negativeScore: Math.max(1, data.negativeScore || 0),
-                totalScore: Math.max(1, data.totalScore || 0)
-            };
-
-            console.log('업데이트된 감정 분석 상태:', myDiaryEmotion.value);
-        } catch (error) {
-            console.error('감정 분석 중 오류 발생:', error);
-            console.error('오류 스택:', error.stack);
-            alert('감정 분석에 실패했습니다');
-        }
+        showAlreadyConfirmedModal.value = true;
     } else {
-        console.log('일기 확정 모달 표시');
         showConfirmModal.value = true;
     }
 }
 
 const confirmDiary = async () => {
+    // 모달 먼저 닫기
+    showConfirmModal.value = false;
+    
     try {
         console.log('[확인 시작] diary.value:', diary.value);
 
@@ -431,7 +398,6 @@ const confirmDiary = async () => {
 
         // 성공 시
         diary.value.isConfirmed = 'Y';
-        showConfirmModal.value = false;
         console.log('[성공] 일기 확정 및 감정 분석 완료');
     } catch (error) {
         console.error('[예외 발생] 처리 중 오류 발생:', error);
@@ -676,7 +642,7 @@ watch(selectedDate, () => {
             color: #333 !important;
             cursor: pointer !important;
             font-size: 12px !important;
-            transition: background-color 0.2s !important;
+            transition: all 0.2s !important;
             margin: 0 !important;
             line-height: normal !important;
             text-align: center !important;
@@ -701,6 +667,17 @@ watch(selectedDate, () => {
 
                 &:hover {
                     background-color: #FFD180 !important;
+                }
+            }
+
+            &.disabled-button {
+                background-color: #E0E0E0 !important;
+                color: #999 !important;
+                cursor: not-allowed !important;
+
+                &:hover {
+                    background-color: #E0E0E0 !important;
+                    color: #999 !important;
                 }
             }
         }
