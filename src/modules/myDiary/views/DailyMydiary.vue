@@ -307,56 +307,40 @@ const fetchDiary = async () => {
 
             // 스타일 레이어 정보
             try {
-                const parsedStyleLayer = JSON.parse(data.styleLayer || '{"bg": "", "sticker": []}')
-                console.log('파싱된 styleLayer:', parsedStyleLayer)
-                
-                // 스티커 정보 처리
-                if (parsedStyleLayer.sticker && Array.isArray(parsedStyleLayer.sticker)) {
-                    diary.value.stickers = parsedStyleLayer.sticker.map(sticker => {
-                        console.log('처리 전 스티커 데이터:', sticker)
+                let parsedStyleLayer;
+                const styleLayerStr = data.styleLayer?.trim() || '';
 
-                        console.log('sticker url:', sticker.url)
-                        
-                        // URL 처리 로직 개선
-                        let stickerUrl = sticker.url
-                        if (sticker.type === 'photo') {
-                            if (sticker.url.startsWith('http')) {
-                                stickerUrl = sticker.url 
-                            } else {
-                                stickerUrl = sticker.url
-                            }
-                        } else {
-                            // 스티커인 경우 경로 처리
-                            stickerUrl = sticker.url.startsWith('http') 
-                                ? sticker.url 
-                                : sticker.url.startsWith('/') 
-                                    ? sticker.url 
-                                    : `/stickers/${sticker.url}`
-                        }
-                        
-                        const processedSticker = {
-                            url: stickerUrl,
-                            x: sticker.x || Math.random() * 100,
-                            y: sticker.y || Math.random() * 100,
-                            width: sticker.width || 50,
-                            height: sticker.height || 50,
-                            type: sticker.type || 'sticker'
-                        }
-                        
-                        console.log('처리 후 스티커 데이터:', processedSticker)
-                        return processedSticker
-                    })
-                    console.log('최종 스티커 배열:', diary.value.stickers)
+                if (styleLayerStr.startsWith('{')) {
+                    // JSON string인 경우
+                    parsedStyleLayer = JSON.parse(styleLayerStr);
+                } else if (styleLayerStr.startsWith('http')) {
+                    // URL string인 경우 -> JSON 객체로 감싸기
+                    parsedStyleLayer = {
+                        bg: "",
+                        sticker: [{ type: "photo", url: styleLayerStr, x: 100, y: 100, width: 140, height: 140 }]
+                    };
                 } else {
-                    diary.value.stickers = []
+                    // 둘 다 아닌 경우 빈 객체
+                    parsedStyleLayer = { bg: "", sticker: [] };
                 }
-                
-                styleLayer.value = parsedStyleLayer
-                console.log('styleLayer.value 설정됨:', styleLayer.value)
+
+                console.log('최종 파싱된 styleLayer:', parsedStyleLayer);
+
+                diary.value.stickers = parsedStyleLayer.sticker.map(sticker => ({
+                    url: sticker.url,
+                    x: sticker.x ?? 100,
+                    y: sticker.y ?? 100,
+                    width: sticker.width ?? 50,
+                    height: sticker.height ?? 50,
+                    type: sticker.type ?? 'sticker'
+                }));
+
+                styleLayer.value = parsedStyleLayer;
+                console.log('styleLayer.value 설정됨:', styleLayer.value);
             } catch (e) {
-                console.error('styleLayer 파싱 에러:', e)
-                styleLayer.value = { bg: "", sticker: [] }
-                diary.value.stickers = []
+                console.error('styleLayer 파싱 에러:', e);
+                styleLayer.value = { bg: "", sticker: [] };
+                diary.value.stickers = [];
             }
 
             // 감정 분석 정보
@@ -619,7 +603,7 @@ const handlePhotoUpload = async (e) => {
   formData.append("file", file)
 
   try {
-    const response = await axios.post("/s3/upload", formData, {
+    const response = await axios.post("/mydiary/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" }
     })
 

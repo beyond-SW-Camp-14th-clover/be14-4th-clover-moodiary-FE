@@ -227,15 +227,22 @@ const getDiaryForDay = (day) => {
     const entry = diaryEntries.value.find(entry => new Date(entry.createdAt).getDate() === day);
     if (entry && entry.styleLayer) {
         try {
-            const parsedStyleLayer = JSON.parse(entry.styleLayer);
-            if (parsedStyleLayer.sticker && parsedStyleLayer.sticker.length > 0) {
-                const photo = parsedStyleLayer.sticker.find(s => s.type === 'photo');
-                if (photo) {
-                    entry.photoUrl = photo.url;
+            if (entry.styleLayer.trim().startsWith('{')) {
+                // JSON string인 경우
+                const parsedStyleLayer = JSON.parse(entry.styleLayer);
+                if (parsedStyleLayer.sticker && parsedStyleLayer.sticker.length > 0) {
+                    const photo = parsedStyleLayer.sticker.find(s => s.type === 'photo');
+                    if (photo) {
+                        entry.photoUrl = photo.url;
+                    }
                 }
+            } else {
+                // 그냥 URL string인 경우
+                entry.photoUrl = entry.styleLayer;
             }
         } catch (e) {
             console.error('styleLayer 파싱 에러:', e);
+            entry.photoUrl = null; // fallback
         }
     }
     return entry;
