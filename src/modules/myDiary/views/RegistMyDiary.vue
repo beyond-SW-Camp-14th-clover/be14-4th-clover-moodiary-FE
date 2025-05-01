@@ -74,12 +74,6 @@
             <div class="sticker-toolbar">
               <button type="button" class="submit-btn" @click="showRegistModal = true">등록</button>
               <button type="button" class="submit-btn" @click="cancelDiary">취소</button>
-              <button 
-                type="button" 
-                class="submit-btn confirm-btn" 
-                :class="{ 'confirmed': isConfirmed }"
-                @click="confirmDiary"
-              >일기 확정</button>
             </div>
           </form>
         </div>
@@ -97,7 +91,11 @@
         :show="showRegistModal"
         title="일기 등록"
         message="정말로 등록하시겠습니까?"
-        @confirm="submitDiary"
+        @confirm="async () => {
+          await submitDiary();
+          showRegistModal = false;
+          router.push({ name: 'MonthlyDiary' });
+        }"
         @cancel="showRegistModal = false"
       />
     </div>
@@ -287,10 +285,42 @@
   }
   
   const submitDiary = async () => {
-    showRegistModal.value = false
-    alert('일기 등록 완료!')
-    router.push({ name: 'MonthlyDiary' })
-  }
+    try {
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const koreaISOString = koreaTime.toISOString().slice(0, 23);
+
+      const diaryData = {
+        title: title.value,
+        content: content.value,
+        createdAt: koreaISOString,
+        isDeleted: 'N',
+        isConfirmed: isConfirmed.value ? 'Y' : 'N',
+        styleLayer: JSON.stringify({
+          bg: "",
+          sticker: stickers.value
+        }),
+        userId: loginUserId,
+        tags: hashtags.value
+      };
+
+      console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
+
+      const response = await axios.post('/mydiary/regist', diaryData);
+
+      if (response.status >= 200 && response.status < 300) {
+          console.log('✅ 일기 등록 성공:', response.data);
+        } else if (response.status === 409) {
+          alert('오늘 이미 일기를 작성하셨습니다.');
+        } else {
+          console.error('⚠️ 예외 상태 코드:', response.status);
+          throw new Error('서버 응답 오류');
+        }
+    } catch (error) {
+      console.error('일기 등록 중 오류가 발생했습니다:', error);
+      alert('일기 등록에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
   
   const confirmDiary = () => {
     if (!title.value || !content.value) {
@@ -319,21 +349,33 @@
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
   
-  .diary-page { perspective: 1500px; }
+  .diary-page { 
+    perspective: 1500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
   .page-flip-enter-active, .page-flip-leave-active { transition: transform 0.6s ease; transform-style: preserve-3d; }
   .page-flip-enter-from { transform: rotateY(-90deg); }
   .page-flip-leave-to { transform: rotateY(90deg); }
   
   .write-wrapper {
     max-width: 850px;
-    margin: 4rem auto;
+    width: 100%;
     padding: 3rem;
     background-color: #fffce6;
     border-radius: 20px;
     border: 3px dashed #d9c7aa;
-    font-family: 'Ownglyph PDH', sans-serif; font-size: 18px; font-weight: 200; color: #535353;
+    font-family: 'Ownglyph PDH', sans-serif; 
+    font-size: 18px; 
+    font-weight: 200; 
+    color: #535353;
     position: relative;
     animation: inkFadeIn 1.2s ease;
+    margin-top: -150px;
   }
   @keyframes inkFadeIn {
     from { filter: blur(3px); opacity: 0; transform: scale(1.02); }

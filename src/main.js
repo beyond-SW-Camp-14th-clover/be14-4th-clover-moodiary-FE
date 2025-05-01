@@ -14,8 +14,11 @@ const userJson = localStorage.getItem('user')
 
 const app = createApp(App)
 const pinia = createPinia()
+
+
 app.use(pinia)      
 app.use(router)
+app.config.globalProperties.$axios = axios
 
 const authStore = useAuthStore()  
 if (token) {
@@ -33,5 +36,4 @@ if (userJson && userJson !== 'undefined') {
   }
 }
 
-app.config.globalProperties.$axios = axios
 app.mount('#app')

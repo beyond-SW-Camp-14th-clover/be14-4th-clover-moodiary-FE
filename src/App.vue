@@ -4,11 +4,13 @@
       <router-view />
     </main>
     <MP />
+    <Pets />
   </div>
 </template>
 
 <script setup>
 import MP from '@/components/common/MusicPlayer.vue'
+import Pets from '@/components/Pets.vue'
 
 function setRealVh() {
   const vh = window.innerHeight * 0.01

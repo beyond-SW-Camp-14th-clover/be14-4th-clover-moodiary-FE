@@ -27,7 +27,17 @@
                         <div v-for="day in weekDays" :key="day" class="calendar-header-cell">{{ day }}</div>
                     </div>
                     <div class="calendar-body">
-                        <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'empty': cell.type !== 'current' }">
+                        <div 
+                            v-for="(cell, idx) in calendarCells" 
+                            :key="idx" 
+                            class="calendar-cell" 
+                            :class="{ 
+                                'prev-month': cell.type === 'prev',
+                                'next-month': cell.type === 'next',
+                                'has-diary': getDiaryForDay(cell.day)
+                            }"
+                            @click="cell.type === 'current' && getDiaryForDay(cell.day) && goToDailyDiary(cell.day)"
+                        >
                             <div class="cell-header">
                                 <span
                                     :style="{
@@ -38,11 +48,14 @@
                                     }"
                                 >{{ cell.day }}</span>
                                 <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)" class="score-circle">
-                                    <span class="score-text" :style="{ color: getScoreColor(getDiaryForDay(cell.day).totalScore) }">{{ getDiaryForDay(cell.day).totalScore }}</span>
+                                    <span class="score-text" :style="{ color: getDiaryForDay(cell.day).totalScore ? getScoreColor(getDiaryForDay(cell.day).totalScore) : '#C2C2C2' }">{{ getDiaryForDay(cell.day).totalScore ?? '-' }}</span>
                                 </div>
                             </div>
-                            <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)">
-                                <span class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
+                            <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)" class="cell-content">
+                                <div v-if="getDiaryForDay(cell.day).photoUrl" class="cell-image">
+                                    <img :src="getDiaryForDay(cell.day).photoUrl" alt="일기 사진" />
+                                </div>
+                                <span v-if="!getDiaryForDay(cell.day).photoUrl" class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
                             </div>
                         </div>
                     </div>
@@ -55,7 +68,7 @@
                     <div v-for="(entry, index) in topThreeEntries" :key="index" class="entry-container">
                         <div class="happy-entry">
                             <div class="score-box">
-                                <span class="score-text" :style="{ color: getScoreColor(entry.totalScore) }">{{ entry.totalScore }}</span>
+                                <span class="score-text" :style="{ color: entry.totalScore ? getScoreColor(entry.totalScore) : '#C2C2C2' }">{{ entry.totalScore ?? '-' }}</span>
                             </div>
                             <div class="entry-title">{{ entry.title }}</div>
                         </div>
@@ -68,7 +81,7 @@
                     <div v-for="(entry, index) in bottomThreeEntries" :key="index" class="entry-container">
                         <div class="sad-entry">
                             <div class="score-box">
-                                <span class="score-text" :style="{ color: getScoreColor(entry.totalScore) }">{{ entry.totalScore }}</span>
+                                <span class="score-text" :style="{ color: entry.totalScore ? getScoreColor(entry.totalScore) : '#C2C2C2' }">{{ entry.totalScore ?? '-' }}</span>
                             </div>
                             <div class="entry-title">{{ entry.title }}</div>
                         </div>
@@ -91,10 +104,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
 import EmotionRates from '../components/EmotionRates.vue';
 import EmotionBarChart from '../components/EmotionBarChart.vue';
 import Moodlog from '../components/Moodlog.vue';
+import axios from 'axios';
 
+const router = useRouter();
+const dailyDiaryStore = useDailyDiaryStore();
 const selectedDate = ref(new Date());
 
 const monthNames = [
@@ -191,20 +209,36 @@ const diaryEntries = ref([]);
 
 const fetchMonthlyDiary = async (targetMonth, userId) => {
     try {
-        const response = await fetch(`http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('서버 쪽에서 리스폰스 객체가 넘어오는데 문제가 생김');
-        }
-        const data = await response.json();
-        console.log('백엔드 응답 데이터:', data);
-        diaryEntries.value = data; // 데이터를 상태에 저장
+        console.log('월간 일기 조회 요청:', `/mydiary/monthly`);
+        const response = await axios.get(`/mydiary/monthly`, {
+            params: {
+                targetMonth
+            }
+        });
+        console.log('백엔드 응답 데이터:', response.data);
+        diaryEntries.value = response.data;
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.error('Axios error:', error);
+        diaryEntries.value = [];
     }
 };
 
 const getDiaryForDay = (day) => {
-    return diaryEntries.value.find(entry => new Date(entry.createdAt).getDate() === day);
+    const entry = diaryEntries.value.find(entry => new Date(entry.createdAt).getDate() === day);
+    if (entry && entry.styleLayer) {
+        try {
+            const parsedStyleLayer = JSON.parse(entry.styleLayer);
+            if (parsedStyleLayer.sticker && parsedStyleLayer.sticker.length > 0) {
+                const photo = parsedStyleLayer.sticker.find(s => s.type === 'photo');
+                if (photo) {
+                    entry.photoUrl = photo.url;
+                }
+            }
+        } catch (e) {
+            console.error('styleLayer 파싱 에러:', e);
+        }
+    }
+    return entry;
 };
 
 const getScoreColor = (score) => {
@@ -224,6 +258,13 @@ const bottomThreeEntries = computed(() => {
         .sort((a, b) => a.totalScore - b.totalScore)
         .slice(0, 3);
 });
+
+const goToDailyDiary = (day) => {
+    const date = new Date(selectedDate.value.getFullYear(), selectedDate.value.getMonth(), day);
+    date.setHours(12, 0, 0, 0); // 시간을 정오로 설정하여 시간대 문제 방지
+    dailyDiaryStore.setPreviousPage('monthly', date);
+    router.push({ name: 'DailyMyDiaryWithDate', params: { date: date.toISOString().split('T')[0] } });
+};
 
 onMounted(() => {
     const year = selectedDate.value.getFullYear();
@@ -364,7 +405,7 @@ onMounted(() => {
     position: relative;
     border: 1px solid #F7F2EB;
     text-align: left;
-    padding: 0.5rem;
+    padding: 0;
     font-size: 1rem;
     background: #fff;
     box-sizing: border-box;
@@ -373,9 +414,18 @@ onMounted(() => {
     align-items: flex-start;
     justify-content: flex-start;
     height: 121px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    overflow: hidden;
 }
-.calendar-cell.empty {
-    background: none;
+.calendar-cell:hover {
+    background-color: #F7F2EB;
+}
+.calendar-cell:not(.has-diary) {
+    cursor: default;
+}
+.calendar-cell:not(.has-diary):hover {
+    background-color: #fff;
 }
 .left-section {
     display: flex;
@@ -523,22 +573,78 @@ onMounted(() => {
     color: inherit;
 }
 
+.score-text:empty::before {
+    content: '-';
+    color: #C2C2C2;
+}
+
 .cell-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     position: relative;
-    top: -2px;
+    z-index: 2;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.cell-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.cell-image {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.cell-image img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .title-text {
+    position: absolute;
+    top: calc(50% + 5px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
     display: block;
-    margin-top: 5px;
     font-family: 'Ownglyph PDH', sans-serif;
     font-size: 16px;
     color: #535353;
-    margin-left: 5px;
+    margin: 0;
+    padding: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.calendar-cell:hover .title-text {
+    background-color: rgba(247, 242, 235, 0.8);
 }
 
 .entry-container {

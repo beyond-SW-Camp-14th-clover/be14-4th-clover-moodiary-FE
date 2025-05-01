@@ -96,7 +96,7 @@
                 <div class="moodlog">
                     <div class="moodlog-header">
                         <h3>moodlog</h3>
-                        <button class="save-button">저장</button>
+                        <button class="save-button" @click="saveMoodlog">저장</button>
                     </div>
                     <div class="moodlog-content">
                         <div class="moodlog-textbox">
@@ -110,11 +110,14 @@
                 <div class="weekly-card sunday" 
                      @mouseenter="handleMouseEnter('sunday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('sunday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[0] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[0].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[0].date }}</div>
                         <div class="day-label">일</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[0])" 
+                                 :src="getStyleLayerImages(weeklyData[0])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[0]?.totalScore || 0) }">
                             {{ weeklyData[0]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -130,11 +133,14 @@
                 <div class="weekly-card monday"
                      @mouseenter="handleMouseEnter('monday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('monday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[1] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[1].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[1].date }}</div>
                         <div class="day-label">월</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[1])" 
+                                 :src="getStyleLayerImages(weeklyData[1])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[1]?.totalScore || 0) }">
                             {{ weeklyData[1]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -150,11 +156,14 @@
                 <div class="weekly-card tuesday"
                      @mouseenter="handleMouseEnter('tuesday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('tuesday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[2] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[2].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[2].date }}</div>
                         <div class="day-label">화</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[2])" 
+                                 :src="getStyleLayerImages(weeklyData[2])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[2]?.totalScore || 0) }">
                             {{ weeklyData[2]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -170,11 +179,14 @@
                 <div class="weekly-card wednesday"
                      @mouseenter="handleMouseEnter('wednesday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('wednesday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[3] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[3].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[3].date }}</div>
                         <div class="day-label">수</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[3])" 
+                                 :src="getStyleLayerImages(weeklyData[3])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[3]?.totalScore || 0) }">
                             {{ weeklyData[3]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -190,11 +202,14 @@
                 <div class="weekly-card thursday"
                      @mouseenter="handleMouseEnter('thursday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('thursday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[4] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[4].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[4].date }}</div>
                         <div class="day-label">목</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[4])" 
+                                 :src="getStyleLayerImages(weeklyData[4])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[4]?.totalScore || 0) }">
                             {{ weeklyData[4]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -210,11 +225,14 @@
                 <div class="weekly-card friday"
                      @mouseenter="handleMouseEnter('friday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('friday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[5] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[5].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[5].date }}</div>
                         <div class="day-label">금</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[5])" 
+                                 :src="getStyleLayerImages(weeklyData[5])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[5]?.totalScore || 0) }">
                             {{ weeklyData[5]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -230,11 +248,14 @@
                 <div class="weekly-card saturday"
                      @mouseenter="handleMouseEnter('saturday')"
                      :style="{ zIndex: weeklyDiaryStore.getCardZIndex('saturday') }">
-                    <div class="card-content">
-                        <div class="date-label">{{ getCurrentWeekDates[6] }}</div>
+                    <div class="card-content" @click="goToDailyDiary(new Date(getCurrentWeekDates[6].fullDate))">
+                        <div class="date-label">{{ getCurrentWeekDates[6].date }}</div>
                         <div class="day-label">토</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[6])" 
+                                 :src="getStyleLayerImages(weeklyData[6])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[6]?.totalScore || 0) }">
                             {{ weeklyData[6]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -255,8 +276,13 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useWeeklyDiaryStore } from '../../../stores/weeklyDiaryStore';
+import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const weeklyDiaryStore = useWeeklyDiaryStore();
+const dailyDiaryStore = useDailyDiaryStore();
+const router = useRouter();
 const selectedDate = ref(new Date());
 const selectedWeek = ref('1');
 const score = computed(() => {
@@ -331,14 +357,16 @@ const getCurrentWeekDates = computed(() => {
     for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
+        // 한국 시간으로 변환
+        const koreanDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
         dates.push({
-            date: date.getDate(),
-            day: date.getDay(),
-            fullDate: date.toLocaleDateString()
+            date: koreanDate.getDate(),
+            day: koreanDate.getDay(),
+            fullDate: koreanDate.toISOString().split('T')[0]
         });
     }
     
-    return dates.map(d => d.date);
+    return dates;
 });
 
 const hasFifthWeek = computed(() => {
@@ -444,9 +472,10 @@ const fetchWeeklyData = async () => {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
 
-    const startDate = new Date(weekStart);
+    // 한국 시간으로 변환
+    const startDate = new Date(weekStart.getTime() + (9 * 60 * 60 * 1000));
     startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(weekEnd);
+    const endDate = new Date(weekEnd.getTime() + (9 * 60 * 60 * 1000));
     endDate.setHours(23, 59, 59, 999);
 
     const startDateStr = startDate.toISOString().split('T')[0];
@@ -454,19 +483,30 @@ const fetchWeeklyData = async () => {
     const userId = 1;
 
     try {
-        const response = await fetch(`http://localhost:8080/mydiary/weekly?startDate=${startDateStr}&endDate=${endDateStr}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('네트워크 응답이 올바르지 않습니다.');
-        }
-        const data = await response.json();
+        const response = await axios.get(`http://localhost:8080/mydiary/weekly`, {
+            params: {
+                startDate: startDateStr,
+                endDate: endDateStr,
+                userId: userId
+            }
+        });
         
+        const data = response.data;
         const sortedData = [];
         for (let i = 0; i < 7; i++) {
             const currentDate = new Date(weekStart);
             currentDate.setDate(weekStart.getDate() + i);
-            const dateStr = currentDate.toISOString().split('T')[0];
+            // 한국 시간으로 변환
+            const koreanDate = new Date(currentDate.getTime() + (9 * 60 * 60 * 1000));
+            const dateStr = koreanDate.toISOString().split('T')[0];
             
-            const matchingData = data.find(d => d.createdAt.startsWith(dateStr));
+            const matchingData = data.find(d => {
+                if (!d) return false;
+                // 서버에서 받은 createdAt도 한국 시간으로 변환
+                const diaryDate = new Date(d.createdAt);
+                const koreanDiaryDate = new Date(diaryDate.getTime() + (9 * 60 * 60 * 1000));
+                return koreanDiaryDate.toISOString().split('T')[0] === dateStr;
+            });
             sortedData[i] = matchingData || null;
         }
         
@@ -520,12 +560,13 @@ const fetchMoodlogContent = async () => {
     const userId = 1;
 
     try {
-        const response = await fetch(`http://localhost:8080/mydiary/moodlog?targetMonth=${targetMonth}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('네트워크 응답이 올바르지 않습니다.');
-        }
-        const data = await response.json();
-        moodlogContent.value = data.content || '';
+        const response = await axios.get(`/mydiary/moodlog`, {
+            params: {
+                targetMonth: targetMonth,
+                userId: userId
+            }
+        });
+        moodlogContent.value = response.data.content || '';
     } catch (error) {
         console.error('moodlog 데이터를 가져오는 중 오류가 발생했습니다:', error);
         moodlogContent.value = '';
@@ -542,6 +583,62 @@ onMounted(() => {
     fetchWeeklyData();
     fetchMoodlogContent();
 });
+
+const saveMoodlog = async () => {
+  const year = selectedDate.value.getFullYear();
+  const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
+  const targetMonth = `${year}-${month}-01`;
+  const userId = 1;
+
+  const requestData = {
+    userId,
+    targetMonth,
+    content: moodlogContent.value
+  };
+
+  try {
+    const response = await axios.post('/mydiary/moodlog', requestData);
+    console.log('moodlog 저장 성공:', response.data);
+  } catch (error) {
+    console.error('moodlog 저장 중 오류 발생:', error);
+    alert(error.response?.data || '저장에 실패했습니다.');
+  }
+};
+
+const goToDailyDiary = (date) => {
+    // 한국 시간으로 변환
+    const koreanDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+    const dateStr = koreanDate.toISOString().split('T')[0];
+    const diaryData = weeklyData.value.find(data => {
+        if (!data) return false;
+        // 서버에서 받은 createdAt도 한국 시간으로 변환
+        const diaryDate = new Date(data.createdAt);
+        const koreanDiaryDate = new Date(diaryDate.getTime() + (9 * 60 * 60 * 1000));
+        return koreanDiaryDate.toISOString().split('T')[0] === dateStr;
+    });
+
+    if (!diaryData) {
+        alert('해당 날짜에 작성된 일기가 없습니다.');
+        return;
+    }
+
+    dailyDiaryStore.setPreviousPage('weekly', koreanDate);
+    router.push({ name: 'DailyMyDiaryWithDate', params: { date: dateStr } });
+};
+
+const getStyleLayerImages = (diaryData) => {
+    if (!diaryData?.styleLayer) return null;
+    try {
+        const parsedStyleLayer = JSON.parse(diaryData.styleLayer);
+        const dataImageSticker = parsedStyleLayer.sticker?.find(sticker => 
+            sticker.url?.startsWith('data:image')
+        );
+        return dataImageSticker?.url || null;
+    } catch (error) {
+        console.error('styleLayer 파싱 오류:', error);
+        return null;
+    }
+};
 </script>
 
 <style scoped>
@@ -924,7 +1021,8 @@ onMounted(() => {
     box-sizing: border-box;
     box-shadow: none;
     position: absolute;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, z-index 0.05s linear;
+    will-change: z-index;
 }
 
 .sunday {
@@ -978,10 +1076,9 @@ onMounted(() => {
 }
 
 .image-container {
-    width: 256px;
+    width: 254px;
     height: 511px;
     background-color: #F6F6F6;
-    margin: 0 auto;
     position: relative;
     z-index: 0;
 }
@@ -993,7 +1090,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     position: absolute;
-    left: 0;
+    left: 1px;
     top: 511px;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
@@ -1008,7 +1105,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     position: absolute;
-    left: 50px;
+    left: 41px;
     top: 511px;
     font-family: 'Ownglyph PDH', sans-serif;
     font-weight: 400;
@@ -1022,24 +1119,29 @@ onMounted(() => {
 }
 
 .image-bottom-content {
-    width: 256px;
-    height: 40px;
-    display: flex;
-    align-items: center;
+    width: 254px;
+    height: 60px;
     position: absolute;
-    left: 0;
+    left: 1px;
     top: 551px;
     font-family: 'Ownglyph PDH', sans-serif;
     font-weight: 400;
     font-size: 18px;
     color: #535353;
     z-index: 2;
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
     padding: 0 20px;
     box-sizing: border-box;
-    word-break: break-all;
-    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-height: 20px;
+}
+
+.diary-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 </style>
