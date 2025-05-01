@@ -212,8 +212,7 @@ const fetchMonthlyDiary = async (targetMonth, userId) => {
         console.log('월간 일기 조회 요청:', `/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
         const response = await axios.get(`/mydiary/monthly`, {
             params: {
-                targetMonth,
-                userId
+                targetMonth
             }
         });
         console.log('백엔드 응답 데이터:', response.data);
