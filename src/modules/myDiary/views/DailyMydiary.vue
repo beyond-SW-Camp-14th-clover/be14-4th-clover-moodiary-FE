@@ -269,7 +269,123 @@ const totalScoreColor = computed(() => {
 const stickerOptions = [
     '/src/assets/stickers/heart.png',
     '/src/assets/stickers/star.png',
-    '/src/assets/stickers/rabbit.png'
+    '/src/assets/stickers/rabbit.png',
+    '/src/assets/stickers/smpet.png',
+    '/src/assets/stickers/img1_sticker_3.png',
+    '/src/assets/stickers/img1_sticker_4.png',
+    '/src/assets/stickers/img1_sticker_5.png',
+    '/src/assets/stickers/img1_sticker_6.png',
+    '/src/assets/stickers/img1_sticker_7.png',
+    '/src/assets/stickers/img1_sticker_9.png',
+    '/src/assets/stickers/img1_sticker_10.png',
+    '/src/assets/stickers/img1_sticker_14.png',
+    '/src/assets/stickers/img1_sticker_16.png',
+    '/src/assets/stickers/img1_sticker_17.png',
+    '/src/assets/stickers/img1_sticker_22.png',
+    '/src/assets/stickers/img1_sticker_23.png',
+    '/src/assets/stickers/img1_sticker_24.png',
+    '/src/assets/stickers/img1_sticker_27.png',
+    '/src/assets/stickers/img1_sticker_28.png',
+    '/src/assets/stickers/img1_sticker_29.png',
+    '/src/assets/stickers/img1_sticker_30.png',
+    '/src/assets/stickers/img1_sticker_31.png',
+    '/src/assets/stickers/img1_sticker_32.png',
+    '/src/assets/stickers/img1_sticker_33.png',
+    '/src/assets/stickers/img1_sticker_34.png',
+    '/src/assets/stickers/img1_sticker_35.png',
+    '/src/assets/stickers/img1_sticker_36.png',
+    '/src/assets/stickers/img1_sticker_38.png',
+    '/src/assets/stickers/img1_sticker_41.png',
+    '/src/assets/stickers/img1_sticker_42.png',
+    '/src/assets/stickers/img1_sticker_45.png',
+    '/src/assets/stickers/img1_sticker_57.png',
+    '/src/assets/stickers/img1_sticker_81.png',
+    '/src/assets/stickers/img1_sticker_83.png',
+    '/src/assets/stickers/img1_sticker_85.png',
+    '/src/assets/stickers/img1_sticker_86.png',
+    '/src/assets/stickers/img1_sticker_87.png',
+    '/src/assets/stickers/img2_sticker_3.png',
+    '/src/assets/stickers/img2_sticker_4.png',
+    '/src/assets/stickers/img2_sticker_19.png',
+    '/src/assets/stickers/img2_sticker_20.png',
+    '/src/assets/stickers/img2_sticker_21.png',
+    '/src/assets/stickers/img2_sticker_38.png',
+    '/src/assets/stickers/img2_sticker_51.png',
+    '/src/assets/stickers/img2_sticker_52.png',
+    '/src/assets/stickers/img2_sticker_53.png',
+    '/src/assets/stickers/img2_sticker_60.png',
+    '/src/assets/stickers/img2_sticker_62.png',
+    '/src/assets/stickers/img2_sticker_63.png',
+    '/src/assets/stickers/img2_sticker_64.png',
+    '/src/assets/stickers/img2_sticker_69.png',
+    '/src/assets/stickers/img2_sticker_70.png',
+    '/src/assets/stickers/img3_sticker_0.png',
+    '/src/assets/stickers/img3_sticker_2.png',
+    '/src/assets/stickers/img3_sticker_5.png',
+    '/src/assets/stickers/img3_sticker_11.png',
+    '/src/assets/stickers/img3_sticker_13.png',
+    '/src/assets/stickers/img3_sticker_14.png',
+    '/src/assets/stickers/img3_sticker_17.png',
+    '/src/assets/stickers/img3_sticker_18.png',
+    '/src/assets/stickers/img3_sticker_22.png',
+    '/src/assets/stickers/img3_sticker_23.png',
+    '/src/assets/stickers/img3_sticker_24.png',
+    '/src/assets/stickers/img3_sticker_25.png',
+    '/src/assets/stickers/img3_sticker_27.png',
+    '/src/assets/stickers/img3_sticker_30.png',
+    '/src/assets/stickers/img3_sticker_31.png',
+    '/src/assets/stickers/img3_sticker_33.png',
+    '/src/assets/stickers/img3_sticker_34.png',
+    '/src/assets/stickers/img3_sticker_35.png',
+    '/src/assets/stickers/img3_sticker_37.png',
+    '/src/assets/stickers/img3_sticker_40.png',
+    '/src/assets/stickers/img3_sticker_41.png',
+    '/src/assets/stickers/img3_sticker_43.png',
+    '/src/assets/stickers/img3_sticker_45.png',
+    '/src/assets/stickers/img3_sticker_48.png',
+    '/src/assets/stickers/img3_sticker_49.png',
+    '/src/assets/stickers/img3_sticker_50.png',
+    '/src/assets/stickers/img3_sticker_51.png',
+    '/src/assets/stickers/img3_sticker_52.png',
+    '/src/assets/stickers/img3_sticker_53.png',
+    '/src/assets/stickers/img3_sticker_54.png',
+    '/src/assets/stickers/img4_sticker_1.png',
+    '/src/assets/stickers/img4_sticker_2.png',
+    '/src/assets/stickers/img4_sticker_3.png',
+    '/src/assets/stickers/img4_sticker_5.png',
+    '/src/assets/stickers/img4_sticker_6.png',
+    '/src/assets/stickers/img4_sticker_8.png',
+    '/src/assets/stickers/img4_sticker_9.png',
+    '/src/assets/stickers/img4_sticker_10.png',
+    '/src/assets/stickers/img4_sticker_11.png',
+    '/src/assets/stickers/img4_sticker_13.png',
+    '/src/assets/stickers/img4_sticker_14.png',
+    '/src/assets/stickers/img4_sticker_15.png',
+    '/src/assets/stickers/img4_sticker_17.png',
+    '/src/assets/stickers/img4_sticker_18.png',
+    '/src/assets/stickers/img4_sticker_19.png',
+    '/src/assets/stickers/img4_sticker_21.png',
+    '/src/assets/stickers/img4_sticker_22.png',
+    '/src/assets/stickers/img4_sticker_23.png',
+    '/src/assets/stickers/img4_sticker_24.png',
+    '/src/assets/stickers/img4_sticker_25.png',
+    '/src/assets/stickers/img4_sticker_26.png',
+    '/src/assets/stickers/img4_sticker_27.png',
+    '/src/assets/stickers/img4_sticker_28.png',
+    '/src/assets/stickers/img4_sticker_29.png',
+    '/src/assets/stickers/img4_sticker_30.png',
+    '/src/assets/stickers/img4_sticker_31.png',
+    '/src/assets/stickers/img4_sticker_32.png',
+    '/src/assets/stickers/img4_sticker_33.png',
+    '/src/assets/stickers/img4_sticker_34.png',
+    '/src/assets/stickers/img4_sticker_35.png',
+    '/src/assets/stickers/img4_sticker_36.png',
+    '/src/assets/stickers/img4_sticker_37.png',
+    '/src/assets/stickers/img4_sticker_38.png',
+    '/src/assets/stickers/img4_sticker_39.png',
+    '/src/assets/stickers/img4_sticker_40.png',
+    '/src/assets/stickers/img4_sticker_41.png',
+    '/src/assets/stickers/img4_sticker_42.png'
 ]
 
 let dragging = ref(null)
@@ -307,51 +423,40 @@ const fetchDiary = async () => {
 
             // 스타일 레이어 정보
             try {
-                const parsedStyleLayer = JSON.parse(data.styleLayer || '{"bg": "", "sticker": []}')
-                console.log('파싱된 styleLayer:', parsedStyleLayer)
-                
-                // 스티커 정보 처리
-                if (parsedStyleLayer.sticker && Array.isArray(parsedStyleLayer.sticker)) {
-                    diary.value.stickers = parsedStyleLayer.sticker.map(sticker => {
-                        console.log('처리 전 스티커 데이터:', sticker)
-                        
-                        // URL 처리 로직 개선
-                        let stickerUrl = sticker.url
-                        if (sticker.type === 'photo') {
-                            // 사진인 경우 Base64 데이터 URL 그대로 사용
-                            stickerUrl = sticker.url
-                        } else {
-                            // 스티커인 경우 경로 처리
-                            stickerUrl = sticker.url.startsWith('http') 
-                                ? sticker.url 
-                                : sticker.url.startsWith('/') 
-                                    ? sticker.url 
-                                    : `/stickers/${sticker.url}`
-                        }
-                        
-                        const processedSticker = {
-                            url: stickerUrl,
-                            x: sticker.x || Math.random() * 100,
-                            y: sticker.y || Math.random() * 100,
-                            width: sticker.width || 50,
-                            height: sticker.height || 50,
-                            type: sticker.type || 'sticker'
-                        }
-                        
-                        console.log('처리 후 스티커 데이터:', processedSticker)
-                        return processedSticker
-                    })
-                    console.log('최종 스티커 배열:', diary.value.stickers)
+                let parsedStyleLayer;
+                const styleLayerStr = data.styleLayer?.trim() || '';
+
+                if (styleLayerStr.startsWith('{')) {
+                    // JSON string인 경우
+                    parsedStyleLayer = JSON.parse(styleLayerStr);
+                } else if (styleLayerStr.startsWith('http')) {
+                    // URL string인 경우 -> JSON 객체로 감싸기
+                    parsedStyleLayer = {
+                        bg: "",
+                        sticker: [{ type: "photo", url: styleLayerStr, x: 100, y: 100, width: 140, height: 140 }]
+                    };
                 } else {
-                    diary.value.stickers = []
+                    // 둘 다 아닌 경우 빈 객체
+                    parsedStyleLayer = { bg: "", sticker: [] };
                 }
-                
-                styleLayer.value = parsedStyleLayer
-                console.log('styleLayer.value 설정됨:', styleLayer.value)
+
+                console.log('최종 파싱된 styleLayer:', parsedStyleLayer);
+
+                diary.value.stickers = parsedStyleLayer.sticker.map(sticker => ({
+                    url: sticker.url,
+                    x: sticker.x ?? 100,
+                    y: sticker.y ?? 100,
+                    width: sticker.width ?? 50,
+                    height: sticker.height ?? 50,
+                    type: sticker.type ?? 'sticker'
+                }));
+
+                styleLayer.value = parsedStyleLayer;
+                console.log('styleLayer.value 설정됨:', styleLayer.value);
             } catch (e) {
-                console.error('styleLayer 파싱 에러:', e)
-                styleLayer.value = { bg: "", sticker: [] }
-                diary.value.stickers = []
+                console.error('styleLayer 파싱 에러:', e);
+                styleLayer.value = { bg: "", sticker: [] };
+                diary.value.stickers = [];
             }
 
             // 감정 분석 정보
@@ -561,6 +666,8 @@ const confirmEdit = async () => {
             }))
         }
 
+        styleLayerData.sticker = styleLayerData.sticker.filter(s => !s.url.startsWith('blob:') && !s.url.startsWith('data:'))
+
         // 수정 완료 시 API 호출
         const requestData = {
             ...diary.value, // 기존 데이터
@@ -604,22 +711,31 @@ const addSticker = (url) => {
     editedDiary.value.stickers.push({ url, x: 100, y: 100, width: 80, height: 80, type: 'sticker' })
 }
 
-const handlePhotoUpload = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+const handlePhotoUpload = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = () => {
-        editedDiary.value.stickers.push({
-            url: reader.result,
-            x: 100,
-            y: 100,
-            width: 140,
-            height: 140,
-            type: 'photo'
-        })
-    }
-    reader.readAsDataURL(file)
+  const formData = new FormData()
+  formData.append("file", file)
+
+  try {
+    const response = await axios.post("/mydiary/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+
+    const s3Url = response.data.url
+    editedDiary.value.stickers.push({
+      url: s3Url,
+      x: 100,
+      y: 100,
+      width: 140,
+      height: 140,
+      type: "photo"
+    })
+  } catch (error) {
+    console.error("이미지 업로드 실패:", error)
+    alert("이미지 업로드에 실패했습니다.")
+  }
 }
 
 const startDrag = (index, event) => {

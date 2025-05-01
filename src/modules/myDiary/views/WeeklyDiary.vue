@@ -483,7 +483,7 @@ const fetchWeeklyData = async () => {
     const userId = 1;
 
     try {
-        const response = await axios.get(`http://localhost:8080/mydiary/weekly`, {
+        const response = await axios.get(`/mydiary/weekly`, {
             params: {
                 startDate: startDateStr,
                 endDate: endDateStr,
@@ -629,11 +629,17 @@ const goToDailyDiary = (date) => {
 const getStyleLayerImages = (diaryData) => {
     if (!diaryData?.styleLayer) return null;
     try {
-        const parsedStyleLayer = JSON.parse(diaryData.styleLayer);
-        const dataImageSticker = parsedStyleLayer.sticker?.find(sticker => 
-            sticker.url?.startsWith('data:image')
-        );
-        return dataImageSticker?.url || null;
+        if (diaryData.styleLayer.trim().startsWith('{')) {
+            // JSON string인 경우
+            const parsedStyleLayer = JSON.parse(diaryData.styleLayer);
+            const dataImageSticker = parsedStyleLayer.sticker?.find(sticker => 
+                sticker.url?.startsWith('data:image')
+            );
+            return dataImageSticker?.url || null;
+        } else {
+            // URL string인 경우
+            return diaryData.styleLayer;
+        }
     } catch (error) {
         console.error('styleLayer 파싱 오류:', error);
         return null;
