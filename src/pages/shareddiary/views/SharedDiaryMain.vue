@@ -26,113 +26,74 @@
   import { ref, computed, onMounted } from 'vue'
   import axios from 'axios'
   import { useRouter } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth'
   
   const router = useRouter()
-  const loginUserId = 1 // 임시 로그인 유저
+  const authStore = useAuthStore()
+  const loginUserId = computed(() => authStore.user?.id)
   
   const rooms = ref([])
-  const diaries = ref([])
-  const users = ref([])
   
-  // 유저 ID → 이름 변환
-  const getUserName = (id) => {
-    const user = users.value.find((u) => Number(u.id) === Number(id))
-    return user ? user.name : '알 수 없음'
-  }
-  
-  // 카드 리스트 계산
+  // ✅ 카드 정보 바로 사용 가능
   const roomCards = computed(() => {
-    if (!users.value.length) return []
-  
-    return rooms.value
-      .filter(r => r.user_id1 === loginUserId || r.user_id2 === loginUserId)
-      .sort((a, b) => b.id - a.id)
-      .map(r => {
-        const roomDiaries = diaries.value
-          .filter(d => Number(d.shared_diary_room_id) === Number(r.id))
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-  
-        const latest = roomDiaries[0]
-  
-        return {
-          roomId: r.id,
-          latestTitle: latest?.title ?? '아직 작성된 일기가 없어요',
-          authorName: getUserName(latest?.user_id),
-          createdAt: latest?.created_at ?? null
-        }
-      })
+    return rooms.value.map(r => ({
+      roomId: r.roomId,
+      latestTitle: r.latestTitle ?? '아직 작성된 일기가 없어요',
+      authorName: r.authorName ?? '작성자 없음',
+      createdAt: r.createdAt ?? null
+    }))
   })
   
-  // ✅ 방 생성
+  // ✅ Spring 서버로 공유 일기방 생성
   const createRoom = async () => {
     try {
-      const res = await axios.post('http://localhost:3001/shared_diary_rooms', {
-        user_id1: loginUserId,
-        user_id2: null
+      const res = await axios.post('http://localhost:8080/shareddiaryroom/create', {
+        userId1: loginUserId.value
       })
-      const newRoom = res.data
-      alert(`방이 생성되었습니다! 방 번호: ${newRoom.id}`)
-      rooms.value.push(newRoom)
+      const roomId = res.data.roomId
+      alert(`방이 생성되었습니다! 방 번호: ${roomId}`)
+      fetchRooms()
     } catch (err) {
       console.error('방 생성 실패', err)
-      alert('방 생성에 실패했습니다.')
+      alert('방 생성 실패')
     }
   }
   
-  // ✅ 방 입장
+  // ✅ Spring 서버로 공유 일기방 입장
   const enterRoom = async () => {
     const input = prompt('입장할 방 번호를 입력하세요.')
     if (!input) return
     const roomId = Number(input)
-    if (isNaN(roomId)) {
-      alert('숫자만 입력해주세요!')
-      return
-    }
+    if (isNaN(roomId)) return alert('숫자만 입력하세요.')
   
     try {
-      const res = await axios.get(`http://localhost:3001/shared_diary_rooms/${roomId}`)
-      const room = res.data
-  
-      if (!room) {
-        alert('존재하지 않는 방입니다.')
-        return
-      }
-  
-      if (room.user_id2) {
-        alert('이미 인원이 다 찬 방입니다.')
-        return
-      }
-  
-      // 조건 통과 → user_id2로 나를 등록
-      await axios.patch(`http://localhost:3001/shared_diary_rooms/${roomId}`, {
-        user_id2: loginUserId
+      await axios.post('http://localhost:8080/shareddiaryroom/enter', {
+        roomId,
+        userId: loginUserId.value
       })
-  
-      alert('방에 입장했습니다!')
+      alert('입장 완료!')
       router.push({ name: 'SharedDiaryList', params: { roomId } })
     } catch (err) {
       console.error('입장 실패', err)
-      alert('입장할 수 없습니다.')
+      alert('입장 실패')
     }
   }
   
-  // 기존 방 클릭
-  const goToRoom = (roomId) => {
-    router.push({ name: 'SharedDiaryList', params: { roomId } })
+  // ✅ 페이지 진입 시 방 리스트 조회
+  const fetchRooms = async () => {
+    try {
+      const res = await axios.get('http://localhost:8080/shareddiaryroom', {
+        params: { userId: loginUserId.value }
+      })
+      rooms.value = res.data
+    } catch (err) {
+      console.error('방 리스트 불러오기 실패', err)
+    }
   }
   
-  onMounted(async () => {
-    const [resRoom, resDiary, resUser] = await Promise.all([
-      axios.get('http://localhost:3001/shared_diary_rooms'),
-      axios.get('http://localhost:3001/shared_diaries'),
-      axios.get('http://localhost:3001/users')
-    ])
-    rooms.value = resRoom.data
-    diaries.value = resDiary.data
-    users.value = resUser.data
-  })
+  onMounted(fetchRooms)
   
-  // 날짜 포맷
+  // ✅ 날짜 포맷
   const formatDate = (isoString) => {
     const date = new Date(isoString)
     const yyyy = date.getFullYear()
@@ -141,6 +102,11 @@
     const hh = String(date.getHours()).padStart(2, '0')
     const min = String(date.getMinutes()).padStart(2, '0')
     return `${yyyy}.${mm}.${dd} ${hh}:${min}`
+  }
+  
+  // ✅ 카드 클릭 시 이동
+  const goToRoom = (roomId) => {
+    router.push({ name: 'SharedDiaryList', params: { roomId } })
   }
   </script>
   

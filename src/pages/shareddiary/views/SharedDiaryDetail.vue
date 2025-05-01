@@ -42,7 +42,7 @@
         <div class="sticker-toolbar">
           <button type="button" class="submit-btn" @click="goBack">← 돌아가기</button>
           <button
-            v-if="diary.user_id === loginUserId"
+            v-if="diary.userId === loginUserId"
             type="button"
             class="submit-btn"
             @click="goEdit"
@@ -62,23 +62,25 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
 
-const diaryId = route.params.diaryId  // ✅ 문자열로 그대로 받아야 함
-const loginUserId = 1  // 로그인 유저 ID (예시)
+const diaryId = route.params.diaryId  
+const authStore = useAuthStore()  
+const loginUserId = computed(() => authStore.user?.id)
 
 const diary = ref(null)
 const stickers = ref([])
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`http://localhost:3001/shared_diaries/${diaryId}`)
+    const res = await axios.get(`/shareddiary/${diaryId}`)
     diary.value = res.data
 
-    if (diary.value?.style_layer) {
-      stickers.value = JSON.parse(diary.value.style_layer)
+    if (diary.value?.styleLayer) {
+      stickers.value = JSON.parse(diary.value.styleLayer)
     }
   } catch (e) {
     console.error('일기 불러오기 실패', e)
@@ -88,22 +90,29 @@ onMounted(async () => {
 })
 
 const todayString = computed(() => {
-  if (!diary.value?.created_at) return ''
+  if (!diary.value?.createdAt) return ''
   const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
-  const date = new Date(diary.value.created_at)
+  const date = new Date(diary.value.createdAt)
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${days[date.getDay()]}`
 })
 
 const goBack = () => {
-  if (diary.value?.shared_diary_room_id) {
-    router.push({ name: 'SharedDiaryList', params: { roomId: diary.value.shared_diary_room_id } })
+  const roomId = diary.value?.sharedDiaryRoomId
+  if (roomId) {
+    router.push({ name: 'SharedDiaryList', params: { roomId } })
   } else {
     router.push('/mydiary/shareddiary')
   }
 }
 
 const goEdit = () => {
-  router.push({ name: 'SharedDiaryEdit', params: { roomId: diary.value.shared_diary_room_id, diaryId } })
+  router.push({
+    name: 'SharedDiaryEdit',
+    params: {
+      roomId: diary.value.sharedDiaryRoomId,
+      diaryId
+    }
+  })
 }
 </script>
 

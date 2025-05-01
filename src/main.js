@@ -1,27 +1,39 @@
-// src/main.js
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './assets/styles/base.css'
 import './assets/styles/fonts.css'
-
 import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'   
 
+axios.defaults.baseURL = 'http://localhost:8080' 
 
-// axios 기본 엔드포인트 설정
-axios.defaults.baseURL = 'http://localhost:8080'  // 실제 백엔드 URL로 변경
-
-// 로컬스토리지에 저장된 토큰이 있으면 모든 요청에 Authorization 헤더 붙이기
 const token = localStorage.getItem('token')
-if (token) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-}
+const userJson = localStorage.getItem('user')   
 
 const app = createApp(App)
 const pinia = createPinia()
 
-app.config.globalProperties.$axios = axios
+
+app.use(pinia)      
 app.use(router)
-app.use(pinia)
+app.config.globalProperties.$axios = axios
+
+const authStore = useAuthStore()  
+if (token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  authStore.setToken(token)
+}
+
+if (userJson && userJson !== 'undefined') {
+  try {
+    const user = JSON.parse(userJson)
+    authStore.setUser(user)
+    console.log('✅ 유저 복원 성공:', user)
+  } catch (e) {
+    console.error('❌ 유저 정보 파싱 실패:', e)
+  }
+}
+
 app.mount('#app')
