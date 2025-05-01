@@ -296,7 +296,10 @@
         createdAt: koreaISOString,
         isDeleted: 'N',
         isConfirmed: isConfirmed.value ? 'Y' : 'N',
-        styleLayer: JSON.stringify(stickers.value),
+        styleLayer: JSON.stringify({
+          bg: "",
+          sticker: stickers.value
+        }),
         userId: loginUserId,
         tags: hashtags.value
       };

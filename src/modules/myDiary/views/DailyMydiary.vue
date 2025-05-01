@@ -439,14 +439,7 @@ const confirmDiary = async () => {
             createdAt: diary.value.createdAt.toISOString().slice(0, -1),
             isDeleted: diary.value.isDeleted,
             isConfirmed: 'Y',
-            styleLayer: JSON.stringify(styleLayer.value.map(s => ({
-                url: s.url,
-                x: s.x,
-                y: s.y,
-                width: s.width,
-                height: s.height,
-                type: 'sticker'
-            }))),
+            styleLayer: JSON.stringify(styleLayer.value),
             userId: diary.value.userId,
             tags: diary.value.hashtags || []
         }
