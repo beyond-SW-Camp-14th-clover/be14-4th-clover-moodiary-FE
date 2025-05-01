@@ -99,6 +99,10 @@ const selectedDate = ref(new Date())
 const showRegistModal = ref(false)
 
 const stickerOptions = [
+  '/src/assets/stickers/heart.png',
+  '/src/assets/stickers/star.png',
+  '/src/assets/stickers/rabbit.png',
+  '/src/assets/stickers/smpet.png',
   '/src/assets/stickers/img1_sticker_3.png',
   '/src/assets/stickers/img1_sticker_4.png',
   '/src/assets/stickers/img1_sticker_5.png',

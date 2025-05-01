@@ -483,7 +483,7 @@ const fetchWeeklyData = async () => {
     const userId = 1;
 
     try {
-        const response = await axios.get(`http://localhost:8080/mydiary/weekly`, {
+        const response = await axios.get(`/mydiary/weekly`, {
             params: {
                 startDate: startDateStr,
                 endDate: endDateStr,
