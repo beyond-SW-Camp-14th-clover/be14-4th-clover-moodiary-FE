@@ -103,17 +103,16 @@ const initUserPref = async () => {
 
 // 선택 항목 백엔드로 전송
 const submitSelection = async () => {
+    console.log(JSON.stringify(selectedItems.value))
     try {
-        const response = await axios.post(`/action/exclude`, {
+        const response = await axios.post(`/action/exclude`, JSON.stringify(selectedItems.value), {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${store.token}`,
-            },
-            body: JSON.stringify(selectedItems.value)
+                'Authorization': `Bearer ${store.token}`
+            }
         })
-        console.log(selectedItems.value);
 
-        if (response.statusText === 'OK') {
+        if (response.status === 200) {
             alert('성공적으로 전송되었습니다.')
         } else {
             alert('전송 실패')
