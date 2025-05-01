@@ -62,7 +62,7 @@
   
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/user/query/me`, {
+      const res = await axios.get(`/user/query/me`, {
         headers: { 'Authorization': `Bearer ${store.token}` }
       })
       form.value = res.data
@@ -74,7 +74,7 @@
   
   const updateUser = async () => {
     try {
-      await axios.put(`http://localhost:8080/user/command/update`, form.value)
+      await axios.put(`/user/command/update`, form.value)
       alert('수정이 완료되었습니다.')
     } catch (err) {
       alert('수정 실패')
@@ -84,13 +84,13 @@
   const confirmDelete = async () => {
     try {
       // 1. 비밀번호 검증
-      await axios.post(`http://localhost:8080/user/command/login`, {
+      await axios.post(`/user/command/login`, {
         email: form.value.email,
         password: password.value
       })
   
       // 2. 회원 탈퇴 요청
-      await axios.post(`http://localhost:8080/user/command/delete`, null, {
+      await axios.post(`/user/command/delete`, null, {
         headers: { 'Authorization': `Bearer ${store.token}` }
       })
   
