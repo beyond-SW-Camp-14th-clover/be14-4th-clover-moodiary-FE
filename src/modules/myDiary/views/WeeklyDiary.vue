@@ -114,7 +114,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[0].date }}</div>
                         <div class="day-label">일</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[0])" 
+                                 :src="getStyleLayerImages(weeklyData[0])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[0]?.totalScore || 0) }">
                             {{ weeklyData[0]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -134,7 +137,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[1].date }}</div>
                         <div class="day-label">월</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[1])" 
+                                 :src="getStyleLayerImages(weeklyData[1])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[1]?.totalScore || 0) }">
                             {{ weeklyData[1]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -154,7 +160,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[2].date }}</div>
                         <div class="day-label">화</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[2])" 
+                                 :src="getStyleLayerImages(weeklyData[2])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[2]?.totalScore || 0) }">
                             {{ weeklyData[2]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -174,7 +183,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[3].date }}</div>
                         <div class="day-label">수</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[3])" 
+                                 :src="getStyleLayerImages(weeklyData[3])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[3]?.totalScore || 0) }">
                             {{ weeklyData[3]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -194,7 +206,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[4].date }}</div>
                         <div class="day-label">목</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[4])" 
+                                 :src="getStyleLayerImages(weeklyData[4])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[4]?.totalScore || 0) }">
                             {{ weeklyData[4]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -214,7 +229,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[5].date }}</div>
                         <div class="day-label">금</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[5])" 
+                                 :src="getStyleLayerImages(weeklyData[5])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[5]?.totalScore || 0) }">
                             {{ weeklyData[5]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -234,7 +252,10 @@
                         <div class="date-label">{{ getCurrentWeekDates[6].date }}</div>
                         <div class="day-label">토</div>
                         <div class="image-container">
-                            <!-- 이미지가 들어갈 공간 -->
+                            <img v-if="getStyleLayerImages(weeklyData[6])" 
+                                 :src="getStyleLayerImages(weeklyData[6])" 
+                                 alt="일기 이미지"
+                                 class="diary-image">
                         </div>
                         <div class="image-bottom-score" :style="{ color: getBottomTextColor(weeklyData[6]?.totalScore || 0) }">
                             {{ weeklyData[6]?.totalScore?.toString().padStart(2, '0') || '00' }}
@@ -603,6 +624,20 @@ const goToDailyDiary = (date) => {
 
     dailyDiaryStore.setPreviousPage('weekly', koreanDate);
     router.push({ name: 'DailyMyDiaryWithDate', params: { date: dateStr } });
+};
+
+const getStyleLayerImages = (diaryData) => {
+    if (!diaryData?.styleLayer) return null;
+    try {
+        const parsedStyleLayer = JSON.parse(diaryData.styleLayer);
+        const dataImageSticker = parsedStyleLayer.sticker?.find(sticker => 
+            sticker.url?.startsWith('data:image')
+        );
+        return dataImageSticker?.url || null;
+    } catch (error) {
+        console.error('styleLayer 파싱 오류:', error);
+        return null;
+    }
 };
 </script>
 
@@ -1103,5 +1138,11 @@ const goToDailyDiary = (date) => {
     box-sizing: border-box;
     word-break: break-all;
     line-height: 1.2;
+}
+
+.diary-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 </style>
