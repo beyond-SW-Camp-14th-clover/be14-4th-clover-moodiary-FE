@@ -38,6 +38,7 @@
 <script setup>
 import {onMounted, ref, computed} from 'vue'
 import { useAuthStore } from '@/stores/auth.js';
+import axios from 'axios';
 
 // 설명. 링크로 들어오는 경우에 대비해 로그인 여부 받아오기
 const store = useAuthStore();
@@ -73,8 +74,8 @@ const prevPage = () => {
 // 백엔드에서 목록 가져오기
 const fetchItems = async () => {
     try {
-        const response = await fetch(`http://localhost:8080/action/search?keyword=${keyword.value}`)
-        items.value = await response.json();
+        const response = await axios.get(`/action/search?keyword=${keyword.value}`)
+        items.value = response.data;
     } catch (error) {
         console.error('목록 불러오기 실패:', error)
     }
@@ -83,8 +84,7 @@ const fetchItems = async () => {
 // 선택 항목 백엔드로 전송
 const submitSelection = async () => {
     try {
-        const response = await fetch(`http://localhost:8080/action/exclude`, {
-            method: 'POST',
+        const response = await axios.post(`/action/exclude`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${store.token}`,
@@ -93,7 +93,7 @@ const submitSelection = async () => {
         })
         console.log(selectedItems.value);
 
-        if (response.ok) {
+        if (response.statusText === 'OK') {
             alert('성공적으로 전송되었습니다.')
         } else {
             alert('전송 실패')

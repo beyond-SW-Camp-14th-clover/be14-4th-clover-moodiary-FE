@@ -46,7 +46,7 @@
     // 설명. 현재 회원 정보 받아오기
     const fetchUser = async () => {
         try {
-            const res = await axios.get(`http://localhost:8080/user/query/me`, {
+            const res = await axios.get(`/user/query/me`, {
                 headers: {'Authorization': `Bearer ${store.token}`}
             })
             form.value = res.data
@@ -58,7 +58,7 @@
 
     const updateUser = async () => {
         try {
-            await axios.put(`http://localhost:8080/user/command/update`, form.value)
+            await axios.put(`/user/command/update`, form.value)
             message.value = '수정이 완료되었습니다.'
             alert(message.value);
         } catch (err) {
