@@ -4,6 +4,7 @@
         <div>
             <input type="text" v-model="keyword"/>
             <button @click="fetchItems">검색</button>
+            <button @click="initUserPref">초기화</button>
         </div>
         <div>
             <!-- 목록을 2열 그리드로 표시 -->
@@ -78,6 +79,23 @@ const fetchItems = async () => {
         items.value = response.data;
     } catch (error) {
         console.error('목록 불러오기 실패:', error)
+    }
+}
+
+const initUserPref = async () => {
+    try {
+        const response = await axios.post(`/action/weight/init`, {
+            headers: {
+                'Authorization': `Bearer ${store.token}`,
+            }
+        });
+        if (response.statusText === 'OK') {
+            alert('성공적으로 초기화되었습니다.')
+        } else {
+            alert('초기화 실패')
+        }
+    } catch (error) {
+        console.error('초기화 요청 중 오류 발생')
     }
 }
 
