@@ -253,22 +253,23 @@
   }
   
   const handlePhotoUpload = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-  
-    const reader = new FileReader()
-    reader.onload = () => {
-      stickers.value.push({
-        url: reader.result,
-        x: 100,
-        y: 100,
-        width: 140,
-        height: 140,
-        type: 'photo'
-      })
-    }
-    reader.readAsDataURL(file)
-  }
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 프리뷰용으로만 blob URL 사용 (실제 저장 X)
+    const previewUrl = URL.createObjectURL(file);
+
+    stickers.value.push({
+      url: previewUrl,
+      x: 100,
+      y: 100,
+      width: 140,
+      height: 140,
+      type: 'photo'
+    });
+
+    // 실제 파일은 formData에 image로 전달됨 → 서버에서 S3 업로드 후 DB 저장
+  };
   
   let dragging = ref(null)
   let resizing = ref(null)
@@ -402,38 +403,49 @@
       const koreaTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
       const koreaISOString = koreaTime.toISOString().slice(0, 23);
 
-      const diaryData = {
+      // 1. styleLayer → JSON 문자열
+      const styleLayer = JSON.stringify({
+        bg: "",
+        sticker: stickers.value
+      });
+
+      // 2. FormData 생성
+      const formData = new FormData();
+      const dto = {
         title: title.value,
         content: content.value,
         createdAt: koreaISOString,
         isDeleted: 'N',
         isConfirmed: isConfirmed.value ? 'Y' : 'N',
-        styleLayer: JSON.stringify({
-          bg: "",
-          sticker: stickers.value
-        }),
+        styleLayer: styleLayer,
         userId: loginUserId,
         tags: hashtags.value
       };
+      formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
 
-      console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
+      // 3. 이미지 선택된 경우 추가
+      if (fileInput.value?.files[0]) {
+        formData.append("image", fileInput.value.files[0]);
+      }
 
-      const response = await axios.post('/mydiary/regist', diaryData);
+      const response = await axios.post('/mydiary/regist', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-      if (response.status >= 200 && response.status < 300) {
-          console.log('✅ 일기 등록 성공:', response.data);
-        } else if (response.status === 409) {
-          alert('오늘 이미 일기를 작성하셨습니다.');
-        } else {
-          console.error('⚠️ 예외 상태 코드:', response.status);
-          throw new Error('서버 응답 오류');
-        }
+      if (response.status === 201) {
+        console.log('✅ 일기 등록 성공:', response.data);
+        router.push({ name: 'MonthlyDiary' });
+      } else if (response.status === 409) {
+        alert('오늘 이미 일기를 작성하셨습니다.');
+      } else {
+        throw new Error('서버 응답 오류');
+      }
     } catch (error) {
-      console.error('일기 등록 중 오류가 발생했습니다:', error);
-      alert('일기 등록에 실패했습니다. 다시 시도해주세요.');
+      console.error('일기 등록 중 오류:', error);
+      alert('일기 등록 실패');
     }
   };
-  
+    
   const confirmDiary = () => {
     if (!title.value || !content.value) {
       alert('제목과 내용을 모두 입력해주세요.')

@@ -314,12 +314,17 @@ const fetchDiary = async () => {
                 if (parsedStyleLayer.sticker && Array.isArray(parsedStyleLayer.sticker)) {
                     diary.value.stickers = parsedStyleLayer.sticker.map(sticker => {
                         console.log('처리 전 스티커 데이터:', sticker)
+
+                        console.log('sticker url:', sticker.url)
                         
                         // URL 처리 로직 개선
                         let stickerUrl = sticker.url
                         if (sticker.type === 'photo') {
-                            // 사진인 경우 Base64 데이터 URL 그대로 사용
-                            stickerUrl = sticker.url
+                            if (sticker.url.startsWith('http')) {
+                                stickerUrl = sticker.url 
+                            } else {
+                                stickerUrl = sticker.url
+                            }
                         } else {
                             // 스티커인 경우 경로 처리
                             stickerUrl = sticker.url.startsWith('http') 
@@ -561,6 +566,8 @@ const confirmEdit = async () => {
             }))
         }
 
+        styleLayerData.sticker = styleLayerData.sticker.filter(s => !s.url.startsWith('blob:') && !s.url.startsWith('data:'))
+
         // 수정 완료 시 API 호출
         const requestData = {
             ...diary.value, // 기존 데이터
@@ -604,22 +611,31 @@ const addSticker = (url) => {
     editedDiary.value.stickers.push({ url, x: 100, y: 100, width: 80, height: 80, type: 'sticker' })
 }
 
-const handlePhotoUpload = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+const handlePhotoUpload = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = () => {
-        editedDiary.value.stickers.push({
-            url: reader.result,
-            x: 100,
-            y: 100,
-            width: 140,
-            height: 140,
-            type: 'photo'
-        })
-    }
-    reader.readAsDataURL(file)
+  const formData = new FormData()
+  formData.append("file", file)
+
+  try {
+    const response = await axios.post("/s3/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+
+    const s3Url = response.data.url
+    editedDiary.value.stickers.push({
+      url: s3Url,
+      x: 100,
+      y: 100,
+      width: 140,
+      height: 140,
+      type: "photo"
+    })
+  } catch (error) {
+    console.error("이미지 업로드 실패:", error)
+    alert("이미지 업로드에 실패했습니다.")
+  }
 }
 
 const startDrag = (index, event) => {
