@@ -1,78 +1,78 @@
 <template>
-    <div class="diary-page">
-      <transition name="page-flip" mode="out-in">
-        <div v-if="loaded" key="edit" class="write-wrapper">
-  
-          <h2 class="today-title">✍️ {{ todayString }} 일기 수정</h2>
-  
-          <form class="write-form">
-            <div class="title-section">
-              <input v-model="title" type="text" placeholder="제목을 입력하세요" required class="title-input" />
-              <div class="title-buttons">
-                <button type="button" class="upload-btn" @click="showStickerModal = true">🧸 스티커 추가</button>
-                <button type="button" class="upload-btn" @click="triggerFileInput">📷 사진 추가</button>
-                <input type="file" ref="fileInput" accept="image/*" @change="handlePhotoUpload" hidden />
-              </div>
-            </div>
-  
-            <div class="textarea-wrapper">
-              <textarea
-                v-model="content"
-                placeholder="오늘의 이야기를 써주세요"
-                required
-                class="notebook-textarea"
-              ></textarea>
-  
-              <div class="sticker-layer">
-                <div
-                  v-for="(sticker, i) in stickers"
-                  :key="i"
-                  class="sticker-wrapper"
-                  :style="{
-                    left: sticker.x + 'px',
-                    top: sticker.y + 'px',
-                    width: sticker.width + 'px',
-                    height: sticker.height + 'px',
-                    zIndex: i
-                  }"
-                >
-                  <img
-                    :src="sticker.url"
-                    draggable="false"
-                    class="sticker"
-                    :class="{ selected: selectedIndex === i }"
-                    @mousedown="(e) => startDrag(i, e)"
-                    @click.stop="selectSticker(i)"
-                  />
-                  <div
-                    v-if="selectedIndex === i"
-                    class="resize-handle"
-                    @mousedown.stop="startResize(i, $event)"
-                  ></div>
-                </div>
-              </div>
-            </div>
-  
-            <div class="sticker-toolbar">
-              <button type="button" class="submit-btn" @click="confirmUpdate">수정 완료</button>
-              <button type="button" class="submit-btn" @click="goBack">취소</button>
-            </div>
-          </form>
-  
-          <!-- 스티커 선택 모달 -->
-          <div v-if="showStickerModal" class="sticker-modal">
-            <div class="sticker-modal-inner">
-              <div class="sticker-option" v-for="src in stickerOptions" :key="src">
-                <img :src="src" @click="addSticker(src); showStickerModal = false" />
-              </div>
-              <button @click="showStickerModal = false" class="close-btn">닫기</button>
+  <div class="diary-page">
+    <transition name="page-flip" mode="out-in">
+      <div v-if="loaded" key="edit" class="write-wrapper">
+
+        <h2 class="today-title">✍️ {{ todayString }} 일기 수정</h2>
+
+        <form class="write-form">
+          <div class="title-section">
+            <input v-model="title" type="text" placeholder="제목을 입력하세요" required class="title-input" />
+            <div class="title-buttons">
+              <button type="button" class="upload-btn" @click="showStickerModal = true">🧸 스티커 추가</button>
+              <button type="button" class="upload-btn" @click="triggerFileInput">📷 사진 추가</button>
+              <input type="file" ref="fileInput" accept="image/*" @change="handlePhotoUpload" hidden />
             </div>
           </div>
-  
+
+          <div class="textarea-wrapper">
+            <textarea
+              v-model="content"
+              placeholder="오늘의 이야기를 쓰어주세요"
+              required
+              class="notebook-textarea"
+            ></textarea>
+
+            <div class="sticker-layer">
+              <div
+                v-for="(sticker, i) in stickers"
+                :key="i"
+                class="sticker-wrapper"
+                :style="{
+                  left: sticker.x + 'px',
+                  top: sticker.y + 'px',
+                  width: sticker.width + 'px',
+                  height: sticker.height + 'px',
+                  zIndex: i
+                }"
+              >
+                <img
+                  :src="sticker.url"
+                  draggable="false"
+                  class="sticker"
+                  :class="{ selected: selectedIndex === i }"
+                  @mousedown="(e) => startDrag(i, e)"
+                  @click.stop="selectSticker(i)"
+                />
+                <div
+                  v-if="selectedIndex === i"
+                  class="resize-handle"
+                  @mousedown.stop="startResize(i, $event)"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sticker-toolbar">
+            <button type="button" class="submit-btn" @click="confirmUpdate">수정 완료</button>
+            <button type="button" class="submit-btn" @click="goBack">취소</button>
+          </div>
+        </form>
+
+        <!-- 스티커 선택 모델 -->
+        <div v-if="showStickerModal" class="sticker-modal">
+          <div class="sticker-modal-inner">
+            <div class="sticker-option" v-for="src in stickerOptions" :key="src">
+              <img :src="src" @click="addSticker(src); showStickerModal = false" />
+            </div>
+            <button @click="showStickerModal = false" class="close-btn">닫기</button>
+          </div>
         </div>
-      </transition>
-    </div>
-  </template>
+
+      </div>
+    </transition>
+  </div>
+</template>
   
   <script setup>
   import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
@@ -227,14 +227,31 @@
     alert('제목과 내용을 모두 입력해주세요.')
     return
   }
+
   try {
-    await axios.put(`/shareddiary/update`, {
-      diaryId: Number(diaryId),
-      userId: loginUserId.value,
+    // ✅ UpdateSharedDiaryRequest 구조에 맞춰 JSON 객체 생성
+    const requestDto = {
+      diaryId: diaryId,
       title: title.value,
       content: content.value,
       styleLayer: JSON.stringify(stickers.value)
-    })
+    }
+
+    // ✅ FormData에 JSON blob으로 묶어서 "data" 키로 추가
+    const formData = new FormData()
+    formData.append(
+      'data',
+      new Blob([JSON.stringify(requestDto)], { type: 'application/json' })
+    )
+
+    // 📌 선택적으로 이미지도 추가하고 싶다면 여기에 파일 추가
+    // if (fileInput.value?.files[0]) {
+    //   formData.append('image', fileInput.value.files[0])
+    // }
+
+    // ✅ axios 요청
+    await axios.put('/shareddiary/update', formData)
+
     alert('수정 완료!')
     router.push({ name: 'SharedDiaryDetail', params: { roomId, diaryId } })
   } catch (error) {
@@ -242,7 +259,6 @@
     alert('수정 실패')
   }
 }
-  
   const goBack = () => {
     router.back()
   }
