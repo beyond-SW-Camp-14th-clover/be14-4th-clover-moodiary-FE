@@ -74,12 +74,6 @@
             <div class="sticker-toolbar">
               <button type="button" class="submit-btn" @click="showRegistModal = true">등록</button>
               <button type="button" class="submit-btn" @click="cancelDiary">취소</button>
-              <button 
-                type="button" 
-                class="submit-btn confirm-btn" 
-                :class="{ 'confirmed': isConfirmed }"
-                @click="confirmDiary"
-              >일기 확정</button>
             </div>
           </form>
         </div>
@@ -97,7 +91,11 @@
         :show="showRegistModal"
         title="일기 등록"
         message="정말로 등록하시겠습니까?"
-        @confirm="submitDiary"
+        @confirm="async () => {
+          await submitDiary();
+          showRegistModal = false;
+          router.push({ name: 'MonthlyDiary' });
+        }"
         @cancel="showRegistModal = false"
       />
     </div>
@@ -129,9 +127,121 @@
   const isComposing = ref(false)
   
   const stickerOptions = [
-    '/src/assets/stickers/heart.png',
-    '/src/assets/stickers/star.png',
-    '/src/assets/stickers/rabbit.png'
+    '/src/assets/stickers/img1_sticker_3.png',
+    '/src/assets/stickers/img1_sticker_4.png',
+    '/src/assets/stickers/img1_sticker_5.png',
+    '/src/assets/stickers/img1_sticker_6.png',
+    '/src/assets/stickers/img1_sticker_7.png',
+    '/src/assets/stickers/img1_sticker_9.png',
+    '/src/assets/stickers/img1_sticker_10.png',
+    '/src/assets/stickers/img1_sticker_14.png',
+    '/src/assets/stickers/img1_sticker_16.png',
+    '/src/assets/stickers/img1_sticker_17.png',
+    '/src/assets/stickers/img1_sticker_22.png',
+    '/src/assets/stickers/img1_sticker_23.png',
+    '/src/assets/stickers/img1_sticker_24.png',
+    '/src/assets/stickers/img1_sticker_27.png',
+    '/src/assets/stickers/img1_sticker_28.png',
+    '/src/assets/stickers/img1_sticker_29.png',
+    '/src/assets/stickers/img1_sticker_30.png',
+    '/src/assets/stickers/img1_sticker_31.png',
+    '/src/assets/stickers/img1_sticker_32.png',
+    '/src/assets/stickers/img1_sticker_33.png',
+    '/src/assets/stickers/img1_sticker_34.png',
+    '/src/assets/stickers/img1_sticker_35.png',
+    '/src/assets/stickers/img1_sticker_36.png',
+    '/src/assets/stickers/img1_sticker_38.png',
+    '/src/assets/stickers/img1_sticker_41.png',
+    '/src/assets/stickers/img1_sticker_42.png',
+    '/src/assets/stickers/img1_sticker_45.png',
+    '/src/assets/stickers/img1_sticker_57.png',
+    '/src/assets/stickers/img1_sticker_81.png',
+    '/src/assets/stickers/img1_sticker_83.png',
+    '/src/assets/stickers/img1_sticker_85.png',
+    '/src/assets/stickers/img1_sticker_86.png',
+    '/src/assets/stickers/img1_sticker_87.png',
+    '/src/assets/stickers/img2_sticker_3.png',
+    '/src/assets/stickers/img2_sticker_4.png',
+    '/src/assets/stickers/img2_sticker_19.png',
+    '/src/assets/stickers/img2_sticker_20.png',
+    '/src/assets/stickers/img2_sticker_21.png',
+    '/src/assets/stickers/img2_sticker_38.png',
+    '/src/assets/stickers/img2_sticker_51.png',
+    '/src/assets/stickers/img2_sticker_52.png',
+    '/src/assets/stickers/img2_sticker_53.png',
+    '/src/assets/stickers/img2_sticker_60.png',
+    '/src/assets/stickers/img2_sticker_62.png',
+    '/src/assets/stickers/img2_sticker_63.png',
+    '/src/assets/stickers/img2_sticker_64.png',
+    '/src/assets/stickers/img2_sticker_69.png',
+    '/src/assets/stickers/img2_sticker_70.png',
+    '/src/assets/stickers/img3_sticker_0.png',
+    '/src/assets/stickers/img3_sticker_2.png',
+    '/src/assets/stickers/img3_sticker_5.png',
+    '/src/assets/stickers/img3_sticker_11.png',
+    '/src/assets/stickers/img3_sticker_13.png',
+    '/src/assets/stickers/img3_sticker_14.png',
+    '/src/assets/stickers/img3_sticker_17.png',
+    '/src/assets/stickers/img3_sticker_18.png',
+    '/src/assets/stickers/img3_sticker_22.png',
+    '/src/assets/stickers/img3_sticker_23.png',
+    '/src/assets/stickers/img3_sticker_24.png',
+    '/src/assets/stickers/img3_sticker_25.png',
+    '/src/assets/stickers/img3_sticker_27.png',
+    '/src/assets/stickers/img3_sticker_30.png',
+    '/src/assets/stickers/img3_sticker_31.png',
+    '/src/assets/stickers/img3_sticker_33.png',
+    '/src/assets/stickers/img3_sticker_34.png',
+    '/src/assets/stickers/img3_sticker_35.png',
+    '/src/assets/stickers/img3_sticker_37.png',
+    '/src/assets/stickers/img3_sticker_40.png',
+    '/src/assets/stickers/img3_sticker_41.png',
+    '/src/assets/stickers/img3_sticker_43.png',
+    '/src/assets/stickers/img3_sticker_45.png',
+    '/src/assets/stickers/img3_sticker_48.png',
+    '/src/assets/stickers/img3_sticker_49.png',
+    '/src/assets/stickers/img3_sticker_50.png',
+    '/src/assets/stickers/img3_sticker_51.png',
+    '/src/assets/stickers/img3_sticker_52.png',
+    '/src/assets/stickers/img3_sticker_53.png',
+    '/src/assets/stickers/img3_sticker_54.png',
+    '/src/assets/stickers/img4_sticker_1.png',
+    '/src/assets/stickers/img4_sticker_2.png',
+    '/src/assets/stickers/img4_sticker_3.png',
+    '/src/assets/stickers/img4_sticker_5.png',
+    '/src/assets/stickers/img4_sticker_6.png',
+    '/src/assets/stickers/img4_sticker_8.png',
+    '/src/assets/stickers/img4_sticker_9.png',
+    '/src/assets/stickers/img4_sticker_10.png',
+    '/src/assets/stickers/img4_sticker_11.png',
+    '/src/assets/stickers/img4_sticker_13.png',
+    '/src/assets/stickers/img4_sticker_14.png',
+    '/src/assets/stickers/img4_sticker_15.png',
+    '/src/assets/stickers/img4_sticker_17.png',
+    '/src/assets/stickers/img4_sticker_18.png',
+    '/src/assets/stickers/img4_sticker_19.png',
+    '/src/assets/stickers/img4_sticker_21.png',
+    '/src/assets/stickers/img4_sticker_22.png',
+    '/src/assets/stickers/img4_sticker_23.png',
+    '/src/assets/stickers/img4_sticker_24.png',
+    '/src/assets/stickers/img4_sticker_25.png',
+    '/src/assets/stickers/img4_sticker_26.png',
+    '/src/assets/stickers/img4_sticker_27.png',
+    '/src/assets/stickers/img4_sticker_28.png',
+    '/src/assets/stickers/img4_sticker_29.png',
+    '/src/assets/stickers/img4_sticker_30.png',
+    '/src/assets/stickers/img4_sticker_31.png',
+    '/src/assets/stickers/img4_sticker_32.png',
+    '/src/assets/stickers/img4_sticker_33.png',
+    '/src/assets/stickers/img4_sticker_34.png',
+    '/src/assets/stickers/img4_sticker_35.png',
+    '/src/assets/stickers/img4_sticker_36.png',
+    '/src/assets/stickers/img4_sticker_37.png',
+    '/src/assets/stickers/img4_sticker_38.png',
+    '/src/assets/stickers/img4_sticker_39.png',
+    '/src/assets/stickers/img4_sticker_40.png',
+    '/src/assets/stickers/img4_sticker_41.png',
+    '/src/assets/stickers/img4_sticker_42.png'
   ]
   
   const triggerFileInput = () => {
@@ -287,10 +397,42 @@
   }
   
   const submitDiary = async () => {
-    showRegistModal.value = false
-    alert('일기 등록 완료!')
-    router.push({ name: 'MonthlyDiary' })
-  }
+    try {
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const koreaISOString = koreaTime.toISOString().slice(0, 23);
+
+      const diaryData = {
+        title: title.value,
+        content: content.value,
+        createdAt: koreaISOString,
+        isDeleted: 'N',
+        isConfirmed: isConfirmed.value ? 'Y' : 'N',
+        styleLayer: JSON.stringify({
+          bg: "",
+          sticker: stickers.value
+        }),
+        userId: loginUserId,
+        tags: hashtags.value
+      };
+
+      console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
+
+      const response = await axios.post('/mydiary/regist', diaryData);
+
+      if (response.status >= 200 && response.status < 300) {
+          console.log('✅ 일기 등록 성공:', response.data);
+        } else if (response.status === 409) {
+          alert('오늘 이미 일기를 작성하셨습니다.');
+        } else {
+          console.error('⚠️ 예외 상태 코드:', response.status);
+          throw new Error('서버 응답 오류');
+        }
+    } catch (error) {
+      console.error('일기 등록 중 오류가 발생했습니다:', error);
+      alert('일기 등록에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
   
   const confirmDiary = () => {
     if (!title.value || !content.value) {
@@ -319,21 +461,33 @@
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
   
-  .diary-page { perspective: 1500px; }
+  .diary-page { 
+    perspective: 1500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
   .page-flip-enter-active, .page-flip-leave-active { transition: transform 0.6s ease; transform-style: preserve-3d; }
   .page-flip-enter-from { transform: rotateY(-90deg); }
   .page-flip-leave-to { transform: rotateY(90deg); }
   
   .write-wrapper {
     max-width: 850px;
-    margin: 4rem auto;
+    width: 100%;
     padding: 3rem;
     background-color: #fffce6;
     border-radius: 20px;
     border: 3px dashed #d9c7aa;
-    font-family: 'Ownglyph PDH', sans-serif; font-size: 18px; font-weight: 200; color: #535353;
+    font-family: 'Ownglyph PDH', sans-serif; 
+    font-size: 18px; 
+    font-weight: 200; 
+    color: #535353;
     position: relative;
     animation: inkFadeIn 1.2s ease;
+    margin-top: -150px;
   }
   @keyframes inkFadeIn {
     from { filter: blur(3px); opacity: 0; transform: scale(1.02); }

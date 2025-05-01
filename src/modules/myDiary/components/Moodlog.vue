@@ -2,7 +2,7 @@
     <div class="moodlog">
         <div class="moodlog-header">
             <h3>moodlog</h3>
-            <button class="save-button">저장</button>
+            <button class="save-button" @click="saveMoodlog">저장</button>
         </div>
         <div class="moodlog-content">
             <div class="moodlog-textbox">
@@ -14,8 +14,33 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
 const moodlogContent = ref('');
+
+const saveMoodlog = async () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const targetMonth = `${year}-${month}-01`;
+    const userId = 1;
+
+    const requestData = {
+        userId: userId,
+        targetMonth: targetMonth,
+        content: moodlogContent.value
+    };
+
+    console.log('전송할 데이터:', requestData);
+
+    try {
+        const response = await axios.post('http://localhost:8080/mydiary/moodlog', requestData);
+        console.log('저장 성공:', response.data);
+    } catch (error) {
+        console.error('저장 중 오류 발생:', error);
+        alert(error.response?.data || '저장에 실패했습니다.');
+    }
+};
 
 const fetchMoodlog = async () => {
     const today = new Date();
@@ -25,14 +50,15 @@ const fetchMoodlog = async () => {
     const userId = 1;
 
     try {
-        const response = await fetch(`http://localhost:8080/mydiary/moodlog?targetMonth=${targetMonth}&userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('서버 응답에 문제가 있습니다.');
-        }
-        const data = await response.json();
-        console.log('moodlog 데이터:', data);
-        if (data && data.content) {
-            moodlogContent.value = data.content;
+        const response = await axios.get(`http://localhost:8080/mydiary/moodlog`, {
+            params: {
+                targetMonth,
+                userId
+            }
+        });
+        console.log('moodlog 데이터:', response.data);
+        if (response.data && response.data.content) {
+            moodlogContent.value = response.data.content;
         }
     } catch (error) {
         console.error('moodlog 데이터를 가져오는 중 오류 발생:', error);

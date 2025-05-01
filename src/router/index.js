@@ -12,6 +12,7 @@ import FindId from '@/pages/users/views/FindId.vue'
 import MonthlyDiary from '../modules/myDiary/views/MonthlyDiary.vue'
 import WeeklyDiary from '../modules/myDiary/views/WeeklyDiary.vue'
 import RegistMyDiary from '../modules/myDiary/views/RegistMyDiary.vue'
+import DailyMyDiary from '@/modules/myDiary/views/DailyMyDiary.vue'
 
 const routes = [
     {
@@ -28,6 +29,8 @@ const routes = [
             { path: 'monthlydiary', name: 'MonthlyDiary', component: () => import('../modules/myDiary/views/MonthlyDiary.vue') },
             { path: 'weeklydiary', name: 'WeeklyDiary', component: () => import('../modules/myDiary/views/WeeklyDiary.vue') },
             { path: 'registmydiary', name: 'RegistMyDiary', component: () => import('../modules/myDiary/views/RegistMyDiary.vue') },
+            { path: 'dailydiary', name: 'DailyMyDiary', component: () => import('@/modules/myDiary/views/DailyMyDiary.vue') },
+            { path: 'mydiary/daily/:date', name: 'DailyMyDiaryWithDate', component: () => import('@/modules/myDiary/views/DailyMyDiary.vue') },
             {
                 path: 'mypage',
                 redirect: { name: 'MyPageInfo' },
@@ -38,6 +41,7 @@ const routes = [
                     { path: 'recommend', name: 'MyPageRecommend', component: () => import('@/pages/myPage/views/MyPageRecommend.vue')},
                 ]
             },
+
             { path: 'login', name: 'Login', component: LoginPage },
             { path: 'shareddiary', name: 'SharedDiaryRoom', component: () => import('../pages/shareddiary/views/SharedDiaryMain.vue') },
             { path: '/shared-diary/:roomId', name: 'SharedDiaryList', component: () => import('../pages/shareddiary/views/SharedDiaryList.vue') },
@@ -60,7 +64,9 @@ const routes = [
 
     { path: '/login', name: 'Login', component: LoginPage },
     { path: '/signup', name: 'SignUp', component: SignUp },
-    { path: '/findid', name: 'FindId', component: FindId }
+    { path: '/findid', name: 'FindId', component: FindId },
+    { path: '/reset-password', name: 'ResetPassword', component: () => import('@/modules/user/views/ResetPassword.vue') }
+    
 ]
 
 const router = createRouter({
