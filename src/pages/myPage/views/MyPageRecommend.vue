@@ -161,4 +161,13 @@ onMounted(fetchItems)
         padding: 20px 10%;
         min-height: 100vh;
     }
+
+    input {
+        padding: 12px 24px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        width: 70%;
+        font-family: var(--font-omyu);
+    }
 </style>
