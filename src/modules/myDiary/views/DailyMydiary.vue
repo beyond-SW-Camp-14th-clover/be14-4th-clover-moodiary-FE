@@ -868,7 +868,7 @@ watch(selectedDate, () => {
             background-color: #F6E475;
             padding: 1.5rem;
             border-radius: 0;
-            width: 150px;
+            width: 170px;
             height: 150px;
 
             p {
@@ -1154,6 +1154,9 @@ watch(selectedDate, () => {
             border: none;
             white-space: pre-wrap;
             overflow-y: auto;
+            overflow-x: auto;
+            word-wrap: break-word;
+            word-break: break-all;
         }
 
         .sticker-layer {
@@ -1299,6 +1302,9 @@ textarea.notebook-textarea {
     box-sizing: border-box;
     white-space: pre-wrap;
     overflow-y: auto;
+    overflow-x: auto;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .sticker-toolbar { 
