@@ -633,7 +633,7 @@ const getStyleLayerImages = (diaryData) => {
             // JSON string인 경우
             const parsedStyleLayer = JSON.parse(diaryData.styleLayer);
             const dataImageSticker = parsedStyleLayer.sticker?.find(sticker => 
-                sticker.url?.startsWith('data:image')
+                sticker.url?.startsWith('data:image') || sticker.url?.startsWith('http')
             );
             return dataImageSticker?.url || null;
         } else {

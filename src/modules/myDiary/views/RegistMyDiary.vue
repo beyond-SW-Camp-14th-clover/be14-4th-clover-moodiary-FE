@@ -28,36 +28,38 @@
                   </span>
                 </div>
               </div>
-              <textarea
-                v-model="content"
-                placeholder="오늘의 이야기를 써주세요"
-                required
-                class="notebook-textarea"
-                @input="handleContentInput"
-                @compositionstart="handleCompositionStart"
-                @compositionend="handleCompositionEnd"
-              ></textarea>
-  
-              <div class="sticker-layer">
-                <div
-                  v-for="(sticker, i) in stickers"
-                  :key="i"
-                  class="sticker-wrapper"
-                  :style="{ left: sticker.x + 'px', top: sticker.y + 'px', width: sticker.width + 'px', height: sticker.height + 'px', zIndex: i }"
-                >
-                  <img
-                    :src="sticker.url"
-                    draggable="false"
-                    class="sticker"
-                    :class="{ selected: selectedIndex === i }"
-                    @mousedown="(e) => startDrag(i, e)"
-                    @click.stop="selectSticker(i)"
-                  />
+              <div class="content-container">
+                <textarea
+                  v-model="content"
+                  placeholder="오늘의 이야기를 써주세요"
+                  required
+                  class="notebook-textarea"
+                  @input="handleContentInput"
+                  @compositionstart="handleCompositionStart"
+                  @compositionend="handleCompositionEnd"
+                ></textarea>
+
+                <div class="sticker-layer">
                   <div
-                    v-if="selectedIndex === i"
-                    class="resize-handle"
-                    @mousedown.stop="startResize(i, $event)"
-                  ></div>
+                    v-for="(sticker, i) in stickers"
+                    :key="i"
+                    class="sticker-wrapper"
+                    :style="getStickerStyle(sticker)"
+                  >
+                    <img
+                      :src="sticker.url"
+                      draggable="false"
+                      class="sticker"
+                      :class="{ selected: selectedIndex === i }"
+                      @mousedown="(e) => startDrag(i, e)"
+                      @click.stop="selectSticker(i)"
+                    />
+                    <div
+                      v-if="selectedIndex === i"
+                      class="resize-handle"
+                      @mousedown.stop="startResize(i, $event)"
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -102,7 +104,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, onUnmounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import axios from 'axios'
   import ConfirmCheck from '../components/ConfirmCheck.vue'
@@ -253,26 +255,39 @@
   }
   
   const addSticker = (url) => {
-    stickers.value.push({ url, x: 100, y: 100, width: 80, height: 80, type: 'sticker' })
+    const wrapper = document.querySelector('.textarea-wrapper')
+    const scrollTop = wrapper.scrollTop
+    const cursorPosition = scrollTop + 100
+    
+    stickers.value.push({ 
+      url, 
+      x: 100, 
+      y: cursorPosition, 
+      width: 80, 
+      height: 80, 
+      type: 'sticker',
+      scrollTop: scrollTop
+    })
   }
   
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // 프리뷰용으로만 blob URL 사용 (실제 저장 X)
     const previewUrl = URL.createObjectURL(file);
+    const wrapper = document.querySelector('.textarea-wrapper')
+    const scrollTop = wrapper.scrollTop
+    const cursorPosition = scrollTop + 100
 
     stickers.value.push({
       url: previewUrl,
       x: 100,
-      y: 100,
+      y: cursorPosition,
       width: 140,
       height: 140,
-      type: 'photo'
+      type: 'photo',
+      scrollTop: scrollTop
     });
-
-    // 실제 파일은 formData에 image로 전달됨 → 서버에서 S3 업로드 후 DB 저장
   };
   
   let dragging = ref(null)
@@ -280,6 +295,7 @@
   
   const startDrag = (index, event) => {
     event.preventDefault()
+    const wrapper = document.querySelector('.textarea-wrapper')
     dragging.value = {
       index,
       startX: event.clientX,
@@ -298,11 +314,14 @@
     const deltaY = event.clientY - startY
   
     const wrapper = document.querySelector('.textarea-wrapper')
-    const maxX = wrapper.offsetWidth - stickers.value[index].width
-    const maxY = wrapper.offsetHeight - stickers.value[index].height
+    const rect = wrapper.getBoundingClientRect()
+    const scrollTop = wrapper.scrollTop
+    const maxX = wrapper.clientWidth - stickers.value[index].width
+    const maxY = wrapper.scrollHeight - stickers.value[index].height
   
     stickers.value[index].x = Math.min(Math.max(0, origX + deltaX), maxX)
     stickers.value[index].y = Math.min(Math.max(0, origY + deltaY), maxY)
+    stickers.value[index].scrollTop = scrollTop
   }
   
   const stopDrag = () => {
@@ -366,6 +385,9 @@
         deleteSelected()
       }
     })
+  })
+  
+  onUnmounted(() => {
   })
   
   const handleContentInput = (e) => {
@@ -472,6 +494,19 @@
   const removeHashtag = (index) => {
     hashtags.value.splice(index, 1)
   }
+
+  const getStickerStyle = (sticker) => {
+    const wrapper = document.querySelector('.textarea-wrapper')
+    const currentScrollTop = wrapper ? wrapper.scrollTop : 0
+    const relativeY = sticker.y - (sticker.scrollTop || 0) + currentScrollTop
+    
+    return {
+      left: `${sticker.x}px`,
+      top: `${relativeY}px`,
+      width: `${sticker.width}px`,
+      height: `${sticker.height}px`
+    }
+  }
   </script>
     
   <style scoped>
@@ -558,11 +593,16 @@
     border: 1px solid #d9c7aa; 
     border-radius: 10px; 
     background-color: #fffce6; 
-    overflow: auto; 
+    overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: inset 0 0 8px rgba(0,0,0,0.08); 
+    height: 500px;
   }
   
   .emotion-tag-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     align-items: flex-start;
     padding: 8px 18px;
@@ -614,6 +654,11 @@
     background-color: #b3d6ff;
   }
   
+  .content-container {
+    position: relative;
+    min-height: 100%;
+  }
+  
   .notebook-textarea {
     font-family: 'Ownglyph PDH', sans-serif; 
     font-size: 18px; 
@@ -630,10 +675,25 @@
     border: none; 
     resize: vertical; 
     outline: none;
+    position: relative;
+    z-index: 1;
   }
   
-  .sticker-layer { position: absolute; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; }
-  .sticker-wrapper { position: absolute; pointer-events: auto; }
+  .sticker-layer { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    pointer-events: none; 
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+  
+  .sticker-wrapper { 
+    position: absolute; 
+    pointer-events: auto;
+  }
+  
   .sticker { width: 100%; height: 100%; user-select: none; touch-action: none; cursor: move; }
   .resize-handle {
     width: 12px; height: 12px;
