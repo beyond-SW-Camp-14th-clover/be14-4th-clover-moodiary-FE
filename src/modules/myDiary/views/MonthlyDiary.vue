@@ -51,8 +51,11 @@
                                     <span class="score-text" :style="{ color: getDiaryForDay(cell.day).totalScore ? getScoreColor(getDiaryForDay(cell.day).totalScore) : '#C2C2C2' }">{{ getDiaryForDay(cell.day).totalScore ?? '-' }}</span>
                                 </div>
                             </div>
-                            <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)">
-                                <span class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
+                            <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)" class="cell-content">
+                                <div v-if="getDiaryForDay(cell.day).photoUrl" class="cell-image">
+                                    <img :src="getDiaryForDay(cell.day).photoUrl" alt="일기 사진" />
+                                </div>
+                                <span v-if="!getDiaryForDay(cell.day).photoUrl" class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
                             </div>
                         </div>
                     </div>
@@ -222,7 +225,21 @@ const fetchMonthlyDiary = async (targetMonth, userId) => {
 };
 
 const getDiaryForDay = (day) => {
-    return diaryEntries.value.find(entry => new Date(entry.createdAt).getDate() === day);
+    const entry = diaryEntries.value.find(entry => new Date(entry.createdAt).getDate() === day);
+    if (entry && entry.styleLayer) {
+        try {
+            const parsedStyleLayer = JSON.parse(entry.styleLayer);
+            if (parsedStyleLayer.sticker && parsedStyleLayer.sticker.length > 0) {
+                const photo = parsedStyleLayer.sticker.find(s => s.type === 'photo');
+                if (photo) {
+                    entry.photoUrl = photo.url;
+                }
+            }
+        } catch (e) {
+            console.error('styleLayer 파싱 에러:', e);
+        }
+    }
+    return entry;
 };
 
 const getScoreColor = (score) => {
@@ -389,7 +406,7 @@ onMounted(() => {
     position: relative;
     border: 1px solid #F7F2EB;
     text-align: left;
-    padding: 0.5rem;
+    padding: 0;
     font-size: 1rem;
     background: #fff;
     box-sizing: border-box;
@@ -400,6 +417,7 @@ onMounted(() => {
     height: 121px;
     cursor: pointer;
     transition: background-color 0.2s;
+    overflow: hidden;
 }
 .calendar-cell:hover {
     background-color: #F7F2EB;
@@ -568,16 +586,60 @@ onMounted(() => {
     align-items: center;
     width: 100%;
     position: relative;
-    top: -2px;
+    z-index: 2;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.cell-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.cell-image {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.cell-image img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .title-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     display: block;
-    margin-top: 5px;
     font-family: 'Ownglyph PDH', sans-serif;
     font-size: 16px;
     color: #535353;
-    margin-left: 5px;
+    margin: 0;
+    padding: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 2;
 }
 
 .entry-container {
