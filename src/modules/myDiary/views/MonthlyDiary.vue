@@ -206,8 +206,8 @@ const diaryEntries = ref([]);
 
 const fetchMonthlyDiary = async (targetMonth, userId) => {
     try {
-        console.log('월간 일기 조회 요청:', `http://localhost:8080/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
-        const response = await axios.get(`http://localhost:8080/mydiary/monthly`, {
+        console.log('월간 일기 조회 요청:', `/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
+        const response = await axios.get(`/mydiary/monthly`, {
             params: {
                 targetMonth,
                 userId

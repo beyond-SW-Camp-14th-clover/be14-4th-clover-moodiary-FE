@@ -539,7 +539,7 @@ const fetchMoodlogContent = async () => {
     const userId = 1;
 
     try {
-        const response = await axios.get(`http://localhost:8080/mydiary/moodlog`, {
+        const response = await axios.get(`/mydiary/moodlog`, {
             params: {
                 targetMonth: targetMonth,
                 userId: userId
@@ -576,7 +576,7 @@ const saveMoodlog = async () => {
   };
 
   try {
-    const response = await axios.post('http://localhost:8080/mydiary/moodlog', requestData);
+    const response = await axios.post('/mydiary/moodlog', requestData);
     console.log('moodlog 저장 성공:', response.data);
   } catch (error) {
     console.error('moodlog 저장 중 오류 발생:', error);

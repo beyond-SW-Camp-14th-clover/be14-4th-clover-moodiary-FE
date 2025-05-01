@@ -303,7 +303,7 @@
 
       console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
 
-      const response = await axios.post('http://localhost:8080/mydiary/regist', diaryData);
+      const response = await axios.post('/mydiary/regist', diaryData);
 
       if (response.status >= 200 && response.status < 300) {
           console.log('✅ 일기 등록 성공:', response.data);
