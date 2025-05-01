@@ -1,13 +1,15 @@
+import axios from 'axios'
+axios.defaults.baseURL = 'http://localhost:8080' 
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './assets/styles/base.css'
 import './assets/styles/fonts.css'
-import axios from 'axios'
+
 import { useAuthStore } from '@/stores/auth'   
 
-axios.defaults.baseURL = 'http://localhost:8080' 
 
 const token = localStorage.getItem('token')
 const userJson = localStorage.getItem('user')   

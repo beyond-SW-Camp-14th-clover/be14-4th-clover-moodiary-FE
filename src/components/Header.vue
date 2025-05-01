@@ -30,12 +30,7 @@
         <!-- 로그인 후: 프로필 + 드롭다운 -->
         <template v-if="authStore.isLogin">
           <div class="profile-menu-wrapper" ref="profileMenu">
-            <img
-              src="@/assets/stickers/rabbit.png"
-              alt="profile"
-              class="profile-icon"
-              @click.stop="toggleProfile"
-            />
+            <img src="@/assets/stickers/rabbit.png" alt="profile" class="profile-icon" @click.stop="toggleProfile" />
             <div class="submenu">
               <router-link to="/app/mypage/info">내 정보</router-link>
               <router-link to="/app/mypage/pet">펫 관리</router-link>
@@ -77,7 +72,7 @@ onMounted(() => document.addEventListener('click', handleClickOutside))
 onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
 const router = useRouter()
-function goLogin()  { router.push('/login') }
+function goLogin() { router.push('/login') }
 function logout() {
   authStore.clear()
   localStorage.removeItem('token')
@@ -89,11 +84,14 @@ function logout() {
 <style scoped>
 .header-bg {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 80px;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 80px;
   background-color: var(--color-brown);
   z-index: 9999;
 }
+
 .header-inner {
   max-width: 1920px;
   margin: 0 auto;
@@ -108,79 +106,133 @@ function logout() {
 .logo {
   color: var(--color-beige);
   font-family: var(--font-pixel);
-  font-size: 2rem; font-weight: 800;
+  font-size: 2rem;
+  font-weight: 800;
   text-decoration: none;
   text-shadow: -1px -1px 0 #A17C59;
 }
 
 .nav-links {
-  display: flex; gap: 50px; align-items: center;
+  display: flex;
+  gap: 50px;
+  align-items: center;
 }
-.menu-wrapper { position: relative; }
+
+.menu-wrapper {
+  position: relative;
+}
+
 .menu-button {
   color: var(--color-beige);
-  font-size: 24px; font-family: var(--font-omyu);
+  font-size: 24px;
+  font-family: var(--font-omyu);
   cursor: pointer;
 }
+
 .submenu {
-  position: absolute; top: 36px; left: 0;
+  position: absolute;
+  top: 36px;
+  right: 8px;
   background-color: var(--color-beige);
   border: 2px solid var(--color-brown);
-  border-radius: 20px; padding: 12px 20px;
-  display: none; flex-direction: column; gap: 10px;
-  min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 20px;
+  padding: 12px 20px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
 .menu-wrapper:hover .submenu {
-  display: flex; animation: fadeIn 0.3s ease-in-out;
+  display: flex;
+  animation: fadeIn 0.3s ease-in-out;
 }
+
 .submenu a {
   color: var(--color-brown);
   font-family: var(--font-omyu);
-  font-size: 18px; text-decoration: none;
+  font-size: 18px;
+  text-decoration: none;
   transition: color 0.2s;
 }
-.submenu a:hover { color: var(--color-green); }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+
+.submenu a:hover {
+  color: var(--color-green);
 }
 
-.right-controls { display: flex; align-items: center; }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.right-controls {
+  display: flex;
+  align-items: center;
+}
 
 .btn {
-  all: unset; padding: 6px 14px; border-radius: 6px;
-  font-size: 14px; font-weight: 500; cursor: pointer;
+  all: unset;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
   text-align: center;
 }
+
 .login-btn {
   background-color: #A17C59;
   color: #fff;
 }
+
 .login-btn:hover {
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
-.profile-menu-wrapper { position: relative; }
+.profile-menu-wrapper {
+  position: relative;
+}
 
 .profile-menu-wrapper:hover .submenu {
-    display: flex; animation: fadeIn 0.3s ease-in-out;
+  display: flex;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .profile-icon {
-  width: 36px; height: 36px; border-radius: 50%;
-  object-fit: cover; cursor: pointer;
-}
-.profile-dropdown {
-  position: fixed; right: 0; top: 44px;
-  background: var(--color-beige); border-radius: 6px;
-  list-style: none; padding: 0; margin: 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-.profile-dropdown li {
-  padding: 8px 16px; color: var(--color-brown);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
   cursor: pointer;
 }
+
+.profile-dropdown {
+  position: fixed;
+  right: 0;
+  top: 44px;
+  background: var(--color-beige);
+  border-radius: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.profile-dropdown li {
+  padding: 8px 16px;
+  color: var(--color-brown);
+  cursor: pointer;
+}
+
 .profile-dropdown li:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
 }
 </style>
