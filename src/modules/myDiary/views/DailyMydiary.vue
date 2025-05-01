@@ -394,8 +394,7 @@ const fetchDiary = async () => {
 // 행동 추천 데이터를 가져오는 함수
 const fetchRecommendedActions = async () => {
     try {
-        const userId = 1; // 임시로 고정된 userId 사용
-        const response = await axios.get(`/action/recommend?userId=${userId}`)
+        const response = await axios.get(`/action/recommend`)
         
         const data = response.data
         console.log('행동 추천 데이터:', data)
