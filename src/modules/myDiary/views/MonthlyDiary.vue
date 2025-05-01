@@ -209,7 +209,7 @@ const diaryEntries = ref([]);
 
 const fetchMonthlyDiary = async (targetMonth, userId) => {
     try {
-        console.log('월간 일기 조회 요청:', `/mydiary/monthly?targetMonth=${targetMonth}&userId=${userId}`);
+        console.log('월간 일기 조회 요청:', `/mydiary/monthly`);
         const response = await axios.get(`/mydiary/monthly`, {
             params: {
                 targetMonth

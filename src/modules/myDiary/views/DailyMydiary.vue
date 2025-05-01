@@ -1089,6 +1089,24 @@ watch(selectedDate, () => {
             background-color: #fffce6;
             overflow: auto;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
+            max-height: 500px;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 4px;
+            }
+
+            &::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
         }
 
         .emotion-tag-header {
@@ -1145,7 +1163,6 @@ watch(selectedDate, () => {
             line-height: 34px;
             padding: 0 18px 12px 18px;
             min-height: 500px;
-            max-height: 500px;
             width: 100%;
             background: repeating-linear-gradient(to bottom, #fffce6 0px, #fffce6 33px, #d9c7aa 34px);
             background-size: 100% 34px;
@@ -1153,10 +1170,9 @@ watch(selectedDate, () => {
             box-sizing: border-box;
             border: none;
             white-space: pre-wrap;
-            overflow-y: auto;
-            overflow-x: auto;
             word-wrap: break-word;
             word-break: break-all;
+            overflow: visible;
         }
 
         .sticker-layer {
@@ -1166,6 +1182,7 @@ watch(selectedDate, () => {
             pointer-events: none;
             width: 100%;
             height: 100%;
+            z-index: 1;
         }
 
         .sticker-wrapper {

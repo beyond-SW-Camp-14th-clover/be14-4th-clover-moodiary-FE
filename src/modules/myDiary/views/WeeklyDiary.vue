@@ -1076,10 +1076,9 @@ const getStyleLayerImages = (diaryData) => {
 }
 
 .image-container {
-    width: 256px;
+    width: 254px;
     height: 511px;
     background-color: #F6F6F6;
-    margin: 0 auto;
     position: relative;
     z-index: 0;
 }
@@ -1091,7 +1090,7 @@ const getStyleLayerImages = (diaryData) => {
     align-items: center;
     justify-content: center;
     position: absolute;
-    left: 0;
+    left: 1px;
     top: 511px;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
@@ -1106,7 +1105,7 @@ const getStyleLayerImages = (diaryData) => {
     display: flex;
     align-items: center;
     position: absolute;
-    left: 50px;
+    left: 41px;
     top: 511px;
     font-family: 'Ownglyph PDH', sans-serif;
     font-weight: 400;
@@ -1120,25 +1119,24 @@ const getStyleLayerImages = (diaryData) => {
 }
 
 .image-bottom-content {
-    width: 256px;
-    height: 40px;
-    display: flex;
-    align-items: center;
+    width: 254px;
+    height: 60px;
     position: absolute;
-    left: 0;
+    left: 1px;
     top: 551px;
     font-family: 'Ownglyph PDH', sans-serif;
     font-weight: 400;
     font-size: 18px;
     color: #535353;
     z-index: 2;
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
     padding: 0 20px;
     box-sizing: border-box;
-    word-break: break-all;
-    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-height: 20px;
 }
 
 .diary-image {
