@@ -311,7 +311,7 @@
       if (response.status >= 200 && response.status < 300) {
           console.log('✅ 일기 등록 성공:', response.data);
         } else if (response.status === 409) {
-          alert('오늘 이미 일기를 등록하셨습니다.');
+          alert('오늘 이미 일기를 작성하셨습니다.');
         } else {
           console.error('⚠️ 예외 상태 코드:', response.status);
           throw new Error('서버 응답 오류');

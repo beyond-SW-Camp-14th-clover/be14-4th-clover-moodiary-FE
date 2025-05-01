@@ -422,12 +422,11 @@ onMounted(() => {
 .calendar-cell:hover {
     background-color: #F7F2EB;
 }
-.calendar-cell.empty {
-    background: none;
+.calendar-cell:not(.has-diary) {
     cursor: default;
 }
-.calendar-cell.empty:hover {
-    background: none;
+.calendar-cell:not(.has-diary):hover {
+    background-color: #fff;
 }
 .left-section {
     display: flex;
@@ -621,8 +620,9 @@ onMounted(() => {
 
 .title-text {
     position: absolute;
-    bottom: 0;
-    left: 0;
+    top: calc(50% + 5px);
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     display: block;
     font-family: 'Ownglyph PDH', sans-serif;
@@ -640,6 +640,12 @@ onMounted(() => {
     box-sizing: border-box;
     background-color: rgba(255, 255, 255, 0.8);
     z-index: 2;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.calendar-cell:hover .title-text {
+    background-color: rgba(247, 242, 235, 0.8);
 }
 
 .entry-container {
