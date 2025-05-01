@@ -1,9 +1,12 @@
 <template>
     <div class="my-page-inner">
         <h1>추천 설정</h1>
-        <div>
+        <div class="search-box">
             <input type="text" v-model="keyword"/>
-            <button @click="fetchItems">검색</button>
+            <div>
+                <button @click="fetchItems" style="margin:10px;">검색</button>
+                <button @click="initUserPref" style="margin:10px;">초기화</button>
+            </div>
         </div>
         <div>
             <!-- 목록을 2열 그리드로 표시 -->
@@ -38,6 +41,7 @@
 <script setup>
 import {onMounted, ref, computed} from 'vue'
 import { useAuthStore } from '@/stores/auth.js';
+import axios from 'axios';
 
 // 설명. 링크로 들어오는 경우에 대비해 로그인 여부 받아오기
 const store = useAuthStore();
@@ -73,27 +77,42 @@ const prevPage = () => {
 // 백엔드에서 목록 가져오기
 const fetchItems = async () => {
     try {
-        const response = await fetch(`http://localhost:8080/action/search?keyword=${keyword.value}`)
-        items.value = await response.json();
+        const response = await axios.get(`/action/search?keyword=${keyword.value}`)
+        items.value = response.data;
     } catch (error) {
         console.error('목록 불러오기 실패:', error)
     }
 }
 
+const initUserPref = async () => {
+    try {
+        const response = await axios.post(`/action/weight/init`, {
+            headers: {
+                'Authorization': `Bearer ${store.token}`,
+            }
+        });
+        if (response.status === 200) {
+            alert('성공적으로 초기화되었습니다.')
+        } else {
+            alert('초기화 실패')
+        }
+    } catch (error) {
+        console.error('초기화 요청 중 오류 발생')
+    }
+}
+
 // 선택 항목 백엔드로 전송
 const submitSelection = async () => {
+    console.log(JSON.stringify(selectedItems.value))
     try {
-        const response = await fetch(`http://localhost:8080/action/exclude`, {
-            method: 'POST',
+        const response = await axios.post(`/action/exclude`, JSON.stringify(selectedItems.value), {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${store.token}`,
-            },
-            body: JSON.stringify(selectedItems.value)
+                'Authorization': `Bearer ${store.token}`
+            }
         })
-        console.log(selectedItems.value);
 
-        if (response.ok) {
+        if (response.status === 200) {
             alert('성공적으로 전송되었습니다.')
         } else {
             alert('전송 실패')
@@ -141,6 +160,20 @@ onMounted(fetchItems)
         display: flex;
         flex-direction: column;
         padding: 20px 10%;
-        min-height: 100vh;
+    }
+
+    .search-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .search-box input {
+        padding: 12px 24px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        width: 80%;
+        font-family: var(--font-omyu);
     }
 </style>

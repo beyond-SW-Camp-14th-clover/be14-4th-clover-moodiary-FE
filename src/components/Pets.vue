@@ -26,12 +26,14 @@ const getPetImage = computed(() => {
 
 // 펫을 표시할지 여부를 결정하는 computed 속성
 const shouldShowPet = computed(() => {
-  const currentPath = route.path;
-  // mypage/pet 경로는 예외로 처리
-  if (currentPath === '/app/mypage/pet') {
-    return true;
-  }
-  return !currentPath.startsWith('/app/home') && !currentPath.startsWith('/app/mypage');
+
+  if (!authStore.isLogin) return false
+
+  if (!route.path.startsWith('/app')) return false
+
+  if (route.path === '/app/mypage/pet') return true
+  
+  return route.path !== '/app/home' && !route.path.startsWith('/app/mypage')
 })
 
 // 감정 점수에 따른 메시지 생성
