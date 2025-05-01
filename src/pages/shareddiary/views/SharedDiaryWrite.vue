@@ -78,6 +78,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
 
 import RegistCheck from '@/pages/shareddiary/components/RegistCheck.vue'
 
@@ -85,7 +86,8 @@ const route = useRoute()
 const router = useRouter()
 
 const roomId = Number(route.params.roomId)
-const loginUserId = 1
+const authStore = useAuthStore()
+const loginUserId = computed(() => authStore.user?.id)
 
 const title = ref('')
 const content = ref('')
@@ -224,7 +226,7 @@ const submitDiary = async () => {
     await axios.post('/shareddiary/create', {
       title: title.value,
       content: content.value,
-      userId: loginUserId,
+      userId: loginUserId.value,
       roomId: roomId,
       styleLayer: JSON.stringify(stickers.value)
     })

@@ -78,6 +78,7 @@
   import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import axios from 'axios'
+  import { useAuthStore } from '@/stores/auth'
   
   const route = useRoute()
   const router = useRouter()
@@ -85,7 +86,9 @@
   const roomId = route.params.roomId
   const diaryId = route.params.diaryId
   
-  const loginUserId = 1 // 현재 로그인 사용자 ID
+  
+  const authStore = useAuthStore()
+  const loginUserId = computed(() => authStore.user?.id)
   
   const title = ref('')
   const content = ref('')
@@ -225,9 +228,9 @@
     return
   }
   try {
-    await axios.patch(`/shareddiary/update`, {
+    await axios.put(`/shareddiary/update`, {
       diaryId: Number(diaryId),
-      userId: loginUserId,
+      userId: loginUserId.value,
       title: title.value,
       content: content.value,
       styleLayer: JSON.stringify(stickers.value)

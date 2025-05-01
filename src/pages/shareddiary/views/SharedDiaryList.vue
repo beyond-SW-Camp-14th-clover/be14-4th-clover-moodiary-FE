@@ -1,7 +1,6 @@
 <template>
   <div class="outer-wrapper">
     <div class="diary-container">
-      <!-- 상단: 방 번호 + 작성 버튼 -->
       <div class="top-bar">
         <p class="room-id">방 번호: {{ roomId }}</p>
         <button
@@ -11,15 +10,13 @@
         >✍️ 일기 작성</button>
       </div>
 
-      <!-- 가운데: 일기 리스트 -->
       <div class="diary-list">
         <div
           v-for="diary in diaries"
           :key="diary.id"
           class="diary-bubble"
-          :class="{ mine: diary.userId === loginUserId, theirs: diary.userId !== loginUserId }"
+          :class="bubbleClass(diary)"
           @click="goToDetail(diary.id)"
-          style="cursor: pointer;"
         >
           <div class="bubble-inner">
             <p class="title">{{ diary.title }}</p>
@@ -35,15 +32,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 const roomId = Number(route.params.roomId)
-const loginUserId = 1
+const authStore = useAuthStore()
 
+const loginUserId = computed(() => authStore.user?.id)
 const diaries = ref([])
 
 const formatDate = (isoString) => {
@@ -57,9 +56,8 @@ const formatDate = (isoString) => {
 }
 
 const canWrite = computed(() => {
-  if (diaries.value.length === 0) return true
-  const last = diaries.value[0]
-  return last.userId !== loginUserId
+  if (!loginUserId.value || diaries.value.length === 0) return true
+  return diaries.value[0].userId !== loginUserId.value
 })
 
 const writeDiary = () => {
@@ -74,14 +72,30 @@ const goToDetail = (diaryId) => {
   router.push({ name: 'SharedDiaryDetail', params: { roomId, diaryId } })
 }
 
-onMounted(async () => {
-  try {
-    const res = await axios.get('/shareddiary', { params: { roomId } })
-    diaries.value = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  } catch (e) {
-    console.error('일기 불러오기 실패:', e)
-  }
-})
+const bubbleClass = (diary) => {
+  console.log(`🟨 diary.userId=${diary.userId}, loginUserId=${loginUserId.value}`)
+  return diary.userId === loginUserId.value ? 'mine' : 'theirs'
+}
+
+// ✅ 로그인 유저 감지 후 fetch
+watch(
+  loginUserId,
+  async (id) => {
+    if (id) {
+      console.log('✅ 로그인 유저 ID:', id)
+      loginUserId.value = id  // ref에도 넣어줌
+
+      try {
+        const res = await axios.get('/shareddiary', { params: { roomId } })
+        diaries.value = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        console.log('📘 일기:', diaries.value.map(d => ({ id: d.id, userId: d.userId })))
+      } catch (e) {
+        console.error('❌ 일기 불러오기 실패:', e)
+      }
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
@@ -89,7 +103,6 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
 }
-
 .diary-container {
   display: flex;
   flex-direction: column;
@@ -97,7 +110,6 @@ onMounted(async () => {
   width: 100%;
   max-width: 720px;
 }
-
 .top-bar {
   width: 100%;
   display: flex;
@@ -106,13 +118,11 @@ onMounted(async () => {
   margin-bottom: 1rem;
   padding: 0 1rem;
 }
-
 .room-id {
   font-size: 1.4rem;
   font-weight: bold;
   color: #5d3e2f;
 }
-
 .write-btn {
   background-color: #6f9d6b;
   color: white;
@@ -132,7 +142,6 @@ onMounted(async () => {
 .write-btn:hover:enabled {
   background-color: #5a8755;
 }
-
 .diary-list {
   width: 100%;
   background-color: #fdfaf5;
@@ -143,12 +152,10 @@ onMounted(async () => {
   flex-direction: column;
   gap: 0.8rem;
 }
-
 .diary-bubble {
   max-width: 90%;
   padding: 1rem;
   border-radius: 18px;
-  background-color: #fffce6;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   word-break: break-word;
   min-height: 100px;
@@ -156,29 +163,24 @@ onMounted(async () => {
   flex-direction: column;
   justify-content: space-between;
 }
-
+.diary-bubble.mine {
+  align-self: flex-end;
+  background-color: #dcf8c6;
+}
+.diary-bubble.theirs {
+  align-self: flex-start;
+  background-color: #ffffff;
+}
 .bubble-inner {
   display: flex;
   flex-direction: column;
 }
-
-.mine {
-  margin-left: auto;
-  background-color: #dcf8c6;
-}
-
-.theirs {
-  margin-right: auto;
-  background-color: #ffffff;
-}
-
 .title {
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   line-height: 1.4;
 }
-
 .footer {
   margin-top: 0.5rem;
   font-size: 0.75rem;

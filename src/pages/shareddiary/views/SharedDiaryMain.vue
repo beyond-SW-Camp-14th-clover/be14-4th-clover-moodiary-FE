@@ -26,9 +26,11 @@
   import { ref, computed, onMounted } from 'vue'
   import axios from 'axios'
   import { useRouter } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth'
   
   const router = useRouter()
-  const loginUserId = 1 // 임시
+  const authStore = useAuthStore()
+  const loginUserId = computed(() => authStore.user?.id)
   
   const rooms = ref([])
   
@@ -46,7 +48,7 @@
   const createRoom = async () => {
     try {
       const res = await axios.post('http://localhost:8080/shareddiaryroom/create', {
-        userId1: loginUserId
+        userId1: loginUserId.value
       })
       const roomId = res.data.roomId
       alert(`방이 생성되었습니다! 방 번호: ${roomId}`)
@@ -67,7 +69,7 @@
     try {
       await axios.post('http://localhost:8080/shareddiaryroom/enter', {
         roomId,
-        userId: loginUserId
+        userId: loginUserId.value
       })
       alert('입장 완료!')
       router.push({ name: 'SharedDiaryList', params: { roomId } })
@@ -81,7 +83,7 @@
   const fetchRooms = async () => {
     try {
       const res = await axios.get('http://localhost:8080/shareddiaryroom', {
-        params: { userId: loginUserId }
+        params: { userId: loginUserId.value }
       })
       rooms.value = res.data
     } catch (err) {

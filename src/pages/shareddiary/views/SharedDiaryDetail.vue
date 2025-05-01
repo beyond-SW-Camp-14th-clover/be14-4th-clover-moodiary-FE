@@ -62,12 +62,14 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
 
-const diaryId = route.params.diaryId  // ✅ 문자열로 그대로 받아야 함
-const loginUserId = 1  // 로그인 유저 ID (예시)
+const diaryId = route.params.diaryId  
+const authStore = useAuthStore()  
+const loginUserId = computed(() => authStore.user?.id)
 
 const diary = ref(null)
 const stickers = ref([])
