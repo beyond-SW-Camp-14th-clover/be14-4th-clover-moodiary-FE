@@ -284,8 +284,7 @@ const fetchDiary = async () => {
         const dairyDate = `${year}-${month}-${day}`
         
         console.log('요청 날짜:', dairyDate)
-        const userId = 1; // 임시로 고정된 userId 사용
-        const response = await axios.get(`/mydiary/daily/${dairyDate}?userId=${userId}`)
+        const response = await axios.get(`/mydiary/daily/${dairyDate}`)
         
         const data = response.data
         console.log('일일 일기 데이터:', data)

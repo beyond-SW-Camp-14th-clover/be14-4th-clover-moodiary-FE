@@ -111,7 +111,6 @@
   const route = useRoute()
   const router = useRouter()
   const roomId = Number(route.params.roomId)
-  const loginUserId = 1
   
   const title = ref('')
   const content = ref('')
@@ -402,21 +401,28 @@
       const koreaTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
       const koreaISOString = koreaTime.toISOString().slice(0, 23);
 
+      const styleLayer = {
+        bg: "",
+        sticker: stickers.value
+      };
+
       const diaryData = {
         title: title.value,
         content: content.value,
+        styleLayer: JSON.stringify(styleLayer),
+        totalScore: 0,
         createdAt: koreaISOString,
-        isDeleted: 'N',
-        isConfirmed: isConfirmed.value ? 'Y' : 'N',
-        styleLayer: JSON.stringify({
-          bg: "",
-          sticker: stickers.value
-        }),
-        userId: loginUserId,
-        tags: hashtags.value
+        isConfirmed: isConfirmed.value ? 'Y' : 'N'
       };
 
-      console.log('백엔드로 전송되는 데이터:', JSON.stringify(diaryData, null, 2));
+      console.log('📝 일기 작성 데이터:', {
+        제목: title.value,
+        내용: content.value,
+        스타일레이어: styleLayer,
+        생성일시: koreaISOString,
+        확정여부: isConfirmed.value ? 'Y' : 'N',
+        해시태그: hashtags.value
+      });
 
       const response = await axios.post('/mydiary/regist', diaryData);
 

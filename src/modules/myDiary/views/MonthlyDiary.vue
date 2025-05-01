@@ -135,8 +135,7 @@ const changeMonth = (change) => {
     const year = newDate.getFullYear();
     const month = (newDate.getMonth() + 1).toString().padStart(2, '0');
     const targetMonth = `${year}-${month}`;
-    const userId = 1;
-    fetchMonthlyDiary(targetMonth, userId);
+    fetchMonthlyDiary(targetMonth);
 };
 
 const weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -207,7 +206,7 @@ const emotionScores = computed(() => {
 
 const diaryEntries = ref([]);
 
-const fetchMonthlyDiary = async (targetMonth, userId) => {
+const fetchMonthlyDiary = async (targetMonth) => {
     try {
         console.log('월간 일기 조회 요청:', `/mydiary/monthly`);
         const response = await axios.get(`/mydiary/monthly`, {
@@ -270,8 +269,7 @@ onMounted(() => {
     const year = selectedDate.value.getFullYear();
     const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
     const targetMonth = `${year}-${month}`;
-    const userId = 1; // 예시로 고정된 값 사용
-    fetchMonthlyDiary(targetMonth, userId);
+    fetchMonthlyDiary(targetMonth);
 });
 </script>
 

@@ -480,14 +480,12 @@ const fetchWeeklyData = async () => {
 
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
-    const userId = 1;
 
     try {
-        const response = await axios.get(`http://localhost:8080/mydiary/weekly`, {
+        const response = await axios.get(`/mydiary/weekly`, {
             params: {
-                startDate: startDateStr,
-                endDate: endDateStr,
-                userId: userId
+                startDate,
+                endDate
             }
         });
         
@@ -557,13 +555,11 @@ const fetchMoodlogContent = async () => {
     const year = selectedDate.value.getFullYear();
     const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
     const targetMonth = `${year}-${month}-01`;
-    const userId = 1;
 
     try {
         const response = await axios.get(`/mydiary/moodlog`, {
             params: {
-                targetMonth: targetMonth,
-                userId: userId
+                targetMonth
             }
         });
         moodlogContent.value = response.data.content || '';
@@ -588,10 +584,8 @@ const saveMoodlog = async () => {
   const year = selectedDate.value.getFullYear();
   const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
   const targetMonth = `${year}-${month}-01`;
-  const userId = 1;
 
   const requestData = {
-    userId,
     targetMonth,
     content: moodlogContent.value
   };
