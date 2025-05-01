@@ -51,14 +51,20 @@ async function loginUser() {
       email: email.value,
       password: password.value
     })
-    const token = res.data.token
 
-    // 1) 로컬스토리지에 저장
+    const token = res.data.token
+    const user = res.data.user 
+
+    if (!token || !user) {
+      alert('서버 응답에 사용자 정보가 없습니다.')
+      return
+    }
+
     localStorage.setItem('token', token)
-    // 2) axios 기본 헤더 설정
+    localStorage.setItem('user', JSON.stringify(user))  
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-    // 3) Pinia 스토어에 토큰 등록
     authStore.setToken(token)
+    authStore.setUser(user) 
 
     router.push('/app/home')
   } catch (err) {
@@ -81,7 +87,6 @@ async function submitReset() {
     alert('메일 전송 실패: ' + (err.response?.data?.message || err.message))
   }
 }
-
 </script>
 
 <style scoped>
