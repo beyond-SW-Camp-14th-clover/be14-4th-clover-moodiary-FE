@@ -1,10 +1,12 @@
 <template>
     <div class="my-page-inner">
         <h1>추천 설정</h1>
-        <div>
+        <div class="search-box">
             <input type="text" v-model="keyword"/>
-            <button @click="fetchItems">검색</button>
-            <button @click="initUserPref">초기화</button>
+            <div>
+                <button @click="fetchItems" style="margin:10px;">검색</button>
+                <button @click="initUserPref" style="margin:10px;">초기화</button>
+            </div>
         </div>
         <div>
             <!-- 목록을 2열 그리드로 표시 -->
@@ -89,7 +91,7 @@ const initUserPref = async () => {
                 'Authorization': `Bearer ${store.token}`,
             }
         });
-        if (response.statusText === 'OK') {
+        if (response.status === 200) {
             alert('성공적으로 초기화되었습니다.')
         } else {
             alert('초기화 실패')
@@ -159,15 +161,20 @@ onMounted(fetchItems)
         display: flex;
         flex-direction: column;
         padding: 20px 10%;
-        min-height: 100vh;
     }
 
-    input {
+    .search-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .search-box input {
         padding: 12px 24px;
         font-size: 16px;
         border: 2px solid #ccc;
         border-radius: 10px;
-        width: 70%;
+        width: 80%;
         font-family: var(--font-omyu);
     }
 </style>
