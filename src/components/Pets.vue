@@ -1,5 +1,5 @@
 <template>
-  <div class="pets-container" :class="{ 'pets-container--active': isActive }" @click="handleClick" @mouseover="handleHover">
+  <div v-if="shouldShowPet" class="pets-container" :class="{ 'pets-container--active': isActive }" @click="handleClick" @mouseover="handleHover">
     <img :src="getPetImage" alt="펫" class="pet-image" />
     <div class="pet-message" v-if="message">{{ message }}</div>
   </div>
@@ -9,8 +9,10 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import { useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
+const route = useRoute()
 const userName = computed(() => authStore.user?.name || '회원')
 
 const selectedPet = ref(1) // 기본값은 pet1
@@ -20,6 +22,16 @@ let messageInterval
 
 const getPetImage = computed(() => {
   return `/src/assets/pets/pet${selectedPet.value}.png`
+})
+
+// 펫을 표시할지 여부를 결정하는 computed 속성
+const shouldShowPet = computed(() => {
+  const currentPath = route.path;
+  // mypage/pet 경로는 예외로 처리
+  if (currentPath === '/app/mypage/pet') {
+    return true;
+  }
+  return !currentPath.startsWith('/app/home') && !currentPath.startsWith('/app/mypage');
 })
 
 // 감정 점수에 따른 메시지 생성
@@ -112,7 +124,18 @@ const fetchRecommendedActions = async () => {
   }
 }
 
-// B 기능: 클릭 시 표시되는 메시지
+const showDefaultMessage = () => {
+  message.value = `안녕하세요 ${userName.value}님! 최근 당신의 감정이 궁금하실 땐 저를 클릭해주세요`;
+  isActive.value = true;
+  setTimeout(() => {
+    isActive.value = false;
+
+    const randomDelay = Math.floor(Math.random() * 5000) + 5000;
+    setTimeout(showDefaultMessage, randomDelay);
+  }, 3000);
+}
+
+
 const showClickMessage = async () => {
   const recommendedAction = await fetchRecommendedActions();
   const emotionData = await fetchLatestDiaryEmotion();
@@ -130,7 +153,7 @@ const showClickMessage = async () => {
     } else if (maxScore === neutralScore) {
       messageTemplate = `기분이 평험한 날엔 ${recommendedAction}을(를) 해보신다면 어떨까요?`;
     } else {
-      messageTemplate = `기분이 좋지 않은 날엔 ${recommendedAction}을(를) 해보신다면 어떨까요?`;
+      messageTemplate = `기분이 좋지 않은 날엔 ${recommendedAction}을(를) 해보신다면 어떨까요? 기분이 한결 나아질 것 같아요`;
     }
     
     message.value = messageTemplate;
@@ -141,6 +164,9 @@ const showClickMessage = async () => {
   isActive.value = true;
   setTimeout(() => {
     isActive.value = false;
+    // 클릭 메시지가 끝난 후 기본 메시지 주기를 다시 시작
+    const randomDelay = Math.floor(Math.random() * 5000) + 5000;
+    setTimeout(showDefaultMessage, randomDelay);
   }, 3000);
 }
 
