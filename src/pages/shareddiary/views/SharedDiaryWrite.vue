@@ -213,7 +213,7 @@ const stickerOptions = [
   '/src/assets/stickers/img4_sticker_39.png',
   '/src/assets/stickers/img4_sticker_40.png',
   '/src/assets/stickers/img4_sticker_41.png',
-  '/src/assets/stickers/img4_sticker_42.png',
+  '/src/assets/stickers/img4_sticker_42.png'
 ]
 
 
