@@ -60,7 +60,9 @@ const routes = [
 
     { path: '/login', name: 'Login', component: LoginPage },
     { path: '/signup', name: 'SignUp', component: SignUp },
-    { path: '/findid', name: 'FindId', component: FindId }
+    { path: '/findid', name: 'FindId', component: FindId },
+    { path: '/reset-password', name: 'ResetPassword', component: () => import('@/modules/user/views/ResetPassword.vue') }
+    
 ]
 
 const router = createRouter({
