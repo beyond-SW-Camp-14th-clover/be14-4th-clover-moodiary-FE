@@ -32,6 +32,7 @@
           <div class="profile-menu-wrapper" ref="profileMenu">
             <img src="@/assets/stickers/rabbit.png" alt="profile" class="profile-icon" @click.stop="toggleProfile" />
             <div class="submenu">
+
               <router-link to="/app/mypage/info">내 정보</router-link>
               <router-link to="/app/mypage/pet">펫 관리</router-link>
               <router-link to="/app/mypage/recommend">추천 설정</router-link>
@@ -143,6 +144,12 @@ function logout() {
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
+
+.user {
+  position: absolute; top: 36px; left: -120px;
+}
+
 
 .menu-wrapper:hover .submenu {
   display: flex;
