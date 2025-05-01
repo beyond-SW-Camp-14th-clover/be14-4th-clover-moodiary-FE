@@ -1021,7 +1021,8 @@ const getStyleLayerImages = (diaryData) => {
     box-sizing: border-box;
     box-shadow: none;
     position: absolute;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, z-index 0.05s linear;
+    will-change: z-index;
 }
 
 .sunday {
