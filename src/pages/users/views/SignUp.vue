@@ -1,7 +1,9 @@
 <template>
     <div class="page-wrapper">
         <form ref="formRef" class="signup-form" @submit.prevent="submitForm">
-            <div class="logo"><router-link to="/">MOODI:ARY</router-link></div>
+            <div class="logo">
+                <router-link to="/">MOODI:ARY</router-link>
+            </div>
 
             <div class="form-contents">
                 <p><span>무디어리</span>에 오신 것을 환영합니다!</p>
@@ -57,7 +59,7 @@
                     <!-- 아이디 찾기 질문 -->
                     <div class="form-group">
                         <select v-model="selectedQuestion" required @change="validateQuestion"
-                            :class="{ 'input-error': questionError }" class="select-box">
+                            :class="{ 'input-error': questionError }">
                             <option value="" disabled>아이디 찾기 질문을 선택하세요</option>
                             <option v-for="question in securityQuestions" :key="question" :value="question">
                                 {{ question }}
@@ -80,22 +82,22 @@
             </button>
 
             <div class="login-link">
-                이미 계정이 있으신가요? <router-link to="/login" class="underline">로그인</router-link>
+                이미 계정이 있으신가요?
+                <router-link to="/login" class="underline">로그인</router-link>
             </div>
         </form>
     </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
-// 폼이 유효한지 계산하는 computed
-import { computed } from 'vue'
+import axios from 'axios'
 
 const router = useRouter()
-
 const formRef = ref(null)
 
+// form fields
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
@@ -104,15 +106,18 @@ const phone = ref('')
 const selectedQuestion = ref('')
 const securityAnswer = ref('')
 
+// errors
 const emailError = ref('')
 const passwordError = ref('')
 const confirmPasswordError = ref('')
 const phoneError = ref('')
 const questionError = ref('')
 
+// input types for visibility toggle
 const passwordInputType = ref('password')
 const confirmPasswordInputType = ref('password')
 
+// refs for cursor/focus control
 const emailRef = ref(null)
 const passwordRef = ref(null)
 const confirmPasswordRef = ref(null)
@@ -120,12 +125,14 @@ const nameRef = ref(null)
 const phoneRef = ref(null)
 const securityAnswerRef = ref(null)
 
+// password checklist
 const passwordChecks = ref({
     lowercaseAndNumber: false,
     specialChar: false,
-    lengthValid: false,
+    lengthValid: false
 })
 
+// security questions list
 const securityQuestions = [
     '당신의 어릴 적 별명은 무엇입니까?',
     '어머니의 성함은 무엇입니까?',
@@ -136,18 +143,14 @@ const securityQuestions = [
     '처음 근무했던 회사 이름은 무엇입니까?',
     '기억에 남는 선생님의 이름은 무엇입니까?',
     '인생에서 처음 본 영화는 무엇입니까?',
-    '나의 꿈의 직업은 무엇입니까?',
+    '나의 꿈의 직업은 무엇입니까?'
 ]
 
-// 다음 input으로 포커스 이동
-const handleEnter = (nextFieldRef) => {
-    nextTick(() => {
-        nextFieldRef?.value?.focus()
-    })
+// focus helper
+const handleEnter = nextFieldRef => {
+    nextTick(() => nextFieldRef?.value?.focus())
 }
-
-// ref 넘겨서 해당 input의 커서를 맨 뒤로 이동
-const moveCursorToEnd = (refEl) => {
+const moveCursorToEnd = refEl => {
     nextTick(() => {
         const input = refEl?.value
         if (input) {
@@ -157,184 +160,116 @@ const moveCursorToEnd = (refEl) => {
     })
 }
 
-// 이메일 입력
-const handleEmailInput = () => {
-    validateEmail()
-    moveCursorToEnd(emailRef)
+// validators & formatters
+const handleEmailInput = () => { validateEmail(); moveCursorToEnd(emailRef) }
+function validateEmail() {
+    const val = email.value.trim()
+    if (!val) return (emailError.value = '이메일을 입력해 주세요.')
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    emailError.value = re.test(val) ? '' : '올바른 이메일 형식이 아닙니다.'
 }
 
-// 이메일 검증
-const validateEmail = () => {
-    const value = email.value.trim()
-    if (value === '') {
-        emailError.value = '이메일을 입력해 주세요.'
-        return
-    }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    emailError.value = emailRegex.test(value) ? '' : '올바른 이메일 형식이 아닙니다.'
+const handlePasswordInput = () => { validatePassword(); moveCursorToEnd(passwordRef) }
+function validatePassword() {
+    const lowerNum = /^(?=.*[a-z])(?=.*\d)/.test(password.value)
+    const special = /[^A-Za-z0-9]/.test(password.value)
+    const lenValid = password.value.length >= 8 && password.value.length <= 16
+    passwordChecks.value = { lowercaseAndNumber: lowerNum, specialChar: special, lengthValid: lenValid }
+    passwordError.value = lowerNum && lenValid ? '' : '비밀번호 조건을 만족해야 합니다.'
 }
 
-// 비밀번호 입력
-const handlePasswordInput = () => {
-    validatePassword()
-    moveCursorToEnd(passwordRef)
+const handleConfirmPasswordInput = () => { validateConfirmPassword(); moveCursorToEnd(confirmPasswordRef) }
+function validateConfirmPassword() {
+    confirmPasswordError.value = password.value === confirmPassword.value ? '' : '비밀번호가 일치하지 않습니다.'
 }
 
-// 비밀번호 검증
-const validatePassword = () => {
-    const lowercaseAndNumberRegex = /^(?=.*[a-z])(?=.*\d)/
-    const specialCharRegex = /[^a-zA-Z0-9]/
-    const lengthValid = password.value.length >= 8 && password.value.length <= 16
+// show/hide password
+const showPassword = () => (passwordInputType.value = 'text')
+const hidePassword = () => (passwordInputType.value = 'password')
+const showConfirmPassword = () => (confirmPasswordInputType.value = 'text')
+const hideConfirmPassword = () => (confirmPasswordInputType.value = 'password')
 
-    passwordChecks.value.lowercaseAndNumber = lowercaseAndNumberRegex.test(password.value)
-    passwordChecks.value.specialChar = specialCharRegex.test(password.value)
-    passwordChecks.value.lengthValid = lengthValid
-
-    passwordError.value = (passwordChecks.value.lowercaseAndNumber && passwordChecks.value.lengthValid)
-        ? ''
-        : '비밀번호 조건을 만족해야 합니다.'
-}
-
-// 비밀번호 확인 입력
-const handleConfirmPasswordInput = () => {
-    validateConfirmPassword()
-    moveCursorToEnd(confirmPasswordRef)
-}
-
-// 비밀번호 확인 검증
-const validateConfirmPassword = () => {
-    confirmPasswordError.value = (password.value === confirmPassword.value)
-        ? ''
-        : '비밀번호가 일치하지 않습니다.'
-}
-
-// 비밀번호 input 포커스 시 커서 맨 뒤로
-const focusPasswordInput = () => {
-    nextTick(() => {
-        const input = passwordRef.value
-        if (input) {
-            input.type = 'text'
-            const len = input.value.length
-            input.setSelectionRange(len, len)
-            input.type = 'password'
-        }
-    })
-}
-
-// 비밀번호 확인 input 포커스 시 커서 맨 뒤로
-const focusConfirmPasswordInput = () => {
-    nextTick(() => {
-        const input = confirmPasswordRef.value
-        if (input) {
-            input.type = 'text'
-            const len = input.value.length
-            input.setSelectionRange(len, len)
-            input.type = 'password'
-        }
-    })
-}
-
-// 비밀번호 보기/숨기기
-const showPassword = () => { passwordInputType.value = 'text' }
-const hidePassword = () => { passwordInputType.value = 'password' }
-const showConfirmPassword = () => { confirmPasswordInputType.value = 'text' }
-const hideConfirmPassword = () => { confirmPasswordInputType.value = 'password' }
-
-// 휴대폰 번호 입력
-const handlePhoneInput = () => {
-    formatPhone()
-    validatePhone()
-    moveCursorToEnd(phoneRef)
-}
-
-// 휴대폰 번호 포맷
-const formatPhone = () => {
+const handlePhoneInput = () => { formatPhone(); validatePhone(); moveCursorToEnd(phoneRef) }
+function formatPhone() {
     let cleaned = phone.value.replace(/\D/g, '')
     if (cleaned.length > 11) cleaned = cleaned.slice(0, 11)
-
-    let formatted = ''
-    if (cleaned.length > 3 && cleaned.length <= 7) {
-        formatted = cleaned.replace(/(\d{3})(\d+)/, '$1-$2')
-    } else if (cleaned.length > 7) {
-        formatted = cleaned.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3')
-    } else {
-        formatted = cleaned
-    }
-
-    phone.value = formatted
+    if (cleaned.length > 7) phone.value = cleaned.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3')
+    else if (cleaned.length > 3) phone.value = cleaned.replace(/(\d{3})(\d+)/, '$1-$2')
+    else phone.value = cleaned
 }
-
-// 휴대폰 번호 검증 (순서: 010 시작 → 11자리)
-const validatePhone = () => {
-    const cleaned = phone.value.replace(/-/g, '')
-
-    if (!cleaned.startsWith('010')) {
-        phoneError.value = '휴대폰 번호는 010으로 시작해야 합니다.'
-        return
-    }
-    if (cleaned.length !== 11) {
-        phoneError.value = '휴대폰 번호는 11자리여야 합니다.'
-        return
-    }
-
+function validatePhone() {
+    const num = phone.value.replace(/-/g, '')
+    if (!num.startsWith('010')) return (phoneError.value = '휴대폰 번호는 010으로 시작해야 합니다.')
+    if (num.length !== 11) return (phoneError.value = '휴대폰 번호는 11자리여야 합니다.')
     phoneError.value = ''
 }
 
-// 아이디 질문 검증
-const validateQuestion = () => {
+function validateQuestion() {
     questionError.value = selectedQuestion.value ? '' : '아이디 찾기 질문을 선택해 주세요.'
 }
 
-// 폼 제출
-const submitForm = () => {
+// shake animation
+function triggerShake() {
+    const el = formRef.value
+    if (!el) return
+    el.classList.remove('shake')
+    void el.offsetWidth
+    el.classList.add('shake')
+}
+
+// 전체 form valid 상태
+const isFormValid = computed(() =>
+    email.value &&
+    password.value &&
+    confirmPassword.value &&
+    name.value &&
+    phone.value &&
+    selectedQuestion.value &&
+    securityAnswer.value &&
+    !emailError.value &&
+    !passwordError.value &&
+    !confirmPasswordError.value &&
+    !phoneError.value &&
+    !questionError.value
+)
+
+// submit handler
+async function submitForm() {
+    // 1) client-side validation
     validateEmail()
     validatePassword()
     validateConfirmPassword()
     validatePhone()
     validateQuestion()
-
     if (emailError.value || passwordError.value || confirmPasswordError.value || phoneError.value || questionError.value) {
         triggerShake()
         return
     }
 
-    alert('회원 가입이 완료되었습니다!')
-
-    email.value = ''
-    password.value = ''
-    confirmPassword.value = ''
-    name.value = ''
-    phone.value = ''
-    selectedQuestion.value = ''
-    securityAnswer.value = ''
-
-    router.push('/login')
-}
-
-
-const isFormValid = computed(() => {
-    return (
-        email.value &&
-        password.value &&
-        confirmPassword.value &&
-        name.value &&
-        phone.value &&
-        selectedQuestion.value &&
-        securityAnswer.value &&
-        !emailError.value &&
-        !passwordError.value &&
-        !confirmPasswordError.value &&
-        !phoneError.value &&
-        !questionError.value
-    )
-})
-
-// 폼 흔들림 효과
-const triggerShake = () => {
-    if (formRef.value) {
-        formRef.value.classList.remove('shake')
-        void formRef.value.offsetWidth
-        formRef.value.classList.add('shake')
+    // 2) 서버 호출
+    try {
+        await axios.post('/user/command/register', {
+            email: email.value,
+            password: password.value,
+            name: name.value,
+            // phoneNumber: phone.value.replace(/-/g, ''),
+            phoneNumber: phone.value,
+            registerQuestionsId: securityQuestions.indexOf(selectedQuestion.value) + 1,
+            answer: securityAnswer.value
+        })
+        alert('회원 가입이 완료되었습니다!')
+        // 3) 초기화 & redirect
+        email.value = ''
+        password.value = ''
+        confirmPassword.value = ''
+        name.value = ''
+        phone.value = ''
+        selectedQuestion.value = ''
+        securityAnswer.value = ''
+        router.push('/login')
+    } catch (err) {
+        console.error(err)
+        alert('회원가입 실패: ' + (err.response?.data?.message || err.message))
     }
 }
 </script>
