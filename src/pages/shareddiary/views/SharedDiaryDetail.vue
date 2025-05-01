@@ -20,20 +20,21 @@
             </div>
 
             <div class="sticker-layer">
-              <div
-                v-for="(sticker, i) in stickers"
-                :key="i"
-                class="sticker-wrapper"
-                :style="{
-                  left: sticker.x + 'px',
-                  top: sticker.y + 'px',
-                  width: sticker.width + 'px',
-                  height: sticker.height + 'px',
-                  zIndex: i
-                }"
-              >
-                <img :src="sticker.url" class="sticker" draggable="false" />
-              </div>
+              <template v-for="(sticker, i) in stickers" :key="i">
+                <div
+                  v-if="sticker.url"
+                  class="sticker-wrapper"
+                  :style="{
+                    left: sticker.x + 'px',
+                    top: sticker.y + 'px',
+                    width: sticker.width + 'px',
+                    height: sticker.height + 'px',
+                    zIndex: i
+                  }"
+                >
+                  <img :src="sticker.url" class="sticker" draggable="false" />
+                </div>
+              </template>
             </div>
           </div>
         </div>
