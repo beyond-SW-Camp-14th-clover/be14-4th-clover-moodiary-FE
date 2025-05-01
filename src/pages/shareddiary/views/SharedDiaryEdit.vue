@@ -18,7 +18,7 @@
           <div class="textarea-wrapper">
             <textarea
               v-model="content"
-              placeholder="오늘의 이야기를 쓰어주세요"
+              placeholder="오늘의 이야기를 써주세요"
               required
               class="notebook-textarea"
             ></textarea>
