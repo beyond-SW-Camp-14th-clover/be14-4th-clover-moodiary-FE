@@ -1,5 +1,5 @@
 <template>
-  <div v-if="shouldShowPet" class="pets-container" :class="{ 'pets-container--active': isActive }" @click="handleClick" @mouseover="handleHover">
+  <div v-if="shouldShowPet" class="pets-container" :class="{ 'pets-container--active': isActive }" @click="handleClick" @mouseover="handleHover" @mouseleave="handleMouseLeave">
     <img :src="getPetImage" alt="펫" class="pet-image" />
     <div class="pet-message" v-if="message">{{ message }}</div>
   </div>
@@ -18,6 +18,8 @@ const userName = computed(() => authStore.user?.name || '회원')
 const selectedPet = ref(1) // 기본값은 pet1
 const message = ref('')
 const isActive = ref(false)
+const isInteracting = ref(false)
+const isHovered = ref(false) // 호버 상태를 관리하는 변수 추가
 let messageInterval
 
 const getPetImage = computed(() => {
@@ -93,12 +95,19 @@ const fetchLatestDiaryEmotion = async () => {
 
 // 호버 이벤트 핸들러
 const handleHover = async () => {
+  isInteracting.value = true
+  isHovered.value = true
   const emotionData = await fetchLatestDiaryEmotion()
   message.value = getEmotionMessage(emotionData)
   isActive.value = true
-  setTimeout(() => {
+}
+
+// 마우스가 떠날 때의 이벤트 핸들러
+const handleMouseLeave = () => {
+  if (!isInteracting.value) {
     isActive.value = false
-  }, 3000)
+  }
+  isHovered.value = false
 }
 
 // 행동 추천을 가져오는 함수
@@ -125,6 +134,8 @@ const fetchRecommendedActions = async () => {
 }
 
 const showDefaultMessage = () => {
+  if (isInteracting.value || isHovered.value) return // 호버 중이거나 상호작용 중이면 메시지를 표시하지 않음
+  
   message.value = `안녕하세요 ${userName.value}님! 최근 당신의 감정이 궁금하실 땐 저를 클릭해주세요`;
   isActive.value = true;
   setTimeout(() => {
@@ -135,8 +146,8 @@ const showDefaultMessage = () => {
   }, 3000);
 }
 
-
 const showClickMessage = async () => {
+  isInteracting.value = true
   const recommendedAction = await fetchRecommendedActions();
   const emotionData = await fetchLatestDiaryEmotion();
   
@@ -163,7 +174,10 @@ const showClickMessage = async () => {
   
   isActive.value = true;
   setTimeout(() => {
-    isActive.value = false;
+    if (!isHovered.value) { // 호버 중이 아닐 때만 메시지를 숨김
+      isActive.value = false;
+    }
+    isInteracting.value = false
     // 클릭 메시지가 끝난 후 기본 메시지 주기를 다시 시작
     const randomDelay = Math.floor(Math.random() * 5000) + 5000;
     setTimeout(showDefaultMessage, randomDelay);
