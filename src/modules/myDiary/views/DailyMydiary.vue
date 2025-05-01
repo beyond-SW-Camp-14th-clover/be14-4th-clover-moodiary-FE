@@ -451,70 +451,58 @@ const confirmDiary = async () => {
             tags: diary.value.hashtags || []
         }
 
-        console.log('[전송 전] requestData:', requestData);
-        console.log('[전송 전] JSON.stringify(requestData):', JSON.stringify(requestData));
+        console.log('[일기 확정 요청 데이터]', requestData);
+        console.log('[일기 확정 요청 데이터 (JSON)]', JSON.stringify(requestData, null, 2));
 
         // 일기 확정 요청
         const updateResponse = await axios.put('/mydiary/update', requestData)
 
-        console.log('[응답 상태] updateResponse.status:', updateResponse.status);
+        console.log('[일기 확정 응답]', updateResponse.data);
 
         // 일기 확정 성공 후 감정 분석 요청
-        console.log('[감정 분석 요청 시작]');
+        console.log('[감정 분석 요청 데이터]', { content: diary.value.content });
         const analyzeResponse = await axios.post('/api/gpt/analyze', {
             content: diary.value.content
         })
 
-        console.log('[감정 분석 응답 상태]', analyzeResponse.status);
-        const analyzeData = analyzeResponse.data;
-        console.log('[감정 분석 결과 전체]', analyzeData);
-        console.log('[감정 분석 결과 diaryTitle]', analyzeData.diaryTitle);
-        console.log('[감정 분석 결과 emotion1]', analyzeData.emotion1);
-        console.log('[감정 분석 결과 emotion2]', analyzeData.emotion2);
-        console.log('[감정 분석 결과 emotion3]', analyzeData.emotion3);
-        console.log('[감정 분석 결과 점수들]', {
-            positiveScore: analyzeData.positiveScore,
-            neutralScore: analyzeData.neutralScore,
-            negativeScore: analyzeData.negativeScore,
-            totalScore: analyzeData.totalScore
-        });
+        console.log('[감정 분석 응답]', analyzeResponse.data);
 
         // 감정 분석 결과를 저장하는 API 호출
         const emotionData = {
-            positiveScore: Math.max(1, analyzeData.positiveScore || 0),
-            neutralScore: Math.max(1, analyzeData.neutralScore || 0),
-            negativeScore: Math.max(1, analyzeData.negativeScore || 0),
-            totalScore: Math.max(1, analyzeData.totalScore || 0),
-            emotionSummary1: analyzeData.emotion1 || '감정 요약이 없습니다',
-            emotionSummary2: analyzeData.emotion2 || '감정 요약이 없습니다',
-            emotionSummary3: analyzeData.emotion3 || '감정 요약이 없습니다',
-            myDiarySummary: analyzeData.diaryTitle || '추천 제목이 없습니다',
+            positiveScore: Math.max(1, analyzeResponse.data.positiveScore || 0),
+            neutralScore: Math.max(1, analyzeResponse.data.neutralScore || 0),
+            negativeScore: Math.max(1, analyzeResponse.data.negativeScore || 0),
+            totalScore: Math.max(1, analyzeResponse.data.totalScore || 0),
+            emotionSummary1: analyzeResponse.data.emotion1 || '감정 요약이 없습니다',
+            emotionSummary2: analyzeResponse.data.emotion2 || '감정 요약이 없습니다',
+            emotionSummary3: analyzeResponse.data.emotion3 || '감정 요약이 없습니다',
+            myDiarySummary: analyzeResponse.data.diaryTitle || '추천 제목이 없습니다',
             myDiaryId: diary.value.id
         };
 
-        console.log('[감정 분석 저장 요청 데이터 전체]', emotionData);
-        console.log('[감정 분석 저장 요청 myDiarySummary]', emotionData.myDiarySummary);
+        console.log('[감정 분석 저장 요청 데이터]', emotionData);
+        console.log('[감정 분석 저장 요청 데이터 (JSON)]', JSON.stringify(emotionData, null, 2));
 
         const emotionResponse = await axios.post('/mydiary/registEmotion', emotionData)
 
-        console.log('[감정 분석 저장 응답 상태]', emotionResponse.status);
         console.log('[감정 분석 저장 응답]', emotionResponse.data);
-
-        // 감정 분석 결과를 화면에 반영
-        myDiaryEmotion.value = {
-            ...myDiaryEmotion.value,
-            diarySummary: analyzeData.diaryTitle || '추천 제목이 없습니다',
-            emotionSummary1: analyzeData.emotion1 || '감정 요약이 없습니다',
-            emotionSummary2: analyzeData.emotion2 || '감정 요약이 없습니다',
-            emotionSummary3: analyzeData.emotion3 || '감정 요약이 없습니다',
-            positiveScore: Math.max(1, analyzeData.positiveScore || 0),
-            neutralScore: Math.max(1, analyzeData.neutralScore || 0),
-            negativeScore: Math.max(1, analyzeData.negativeScore || 0),
-            totalScore: Math.max(1, analyzeData.totalScore || 0)
-        };
 
         // 성공 시
         diary.value.isConfirmed = 'Y';
+        
+        // 감정 분석 결과를 UI에 반영
+        myDiaryEmotion.value = {
+            id: emotionResponse.data.id || null,
+            positiveScore: emotionData.positiveScore,
+            neutralScore: emotionData.neutralScore,
+            negativeScore: emotionData.negativeScore,
+            totalScore: emotionData.totalScore,
+            emotionSummary1: emotionData.emotionSummary1,
+            emotionSummary2: emotionData.emotionSummary2,
+            emotionSummary3: emotionData.emotionSummary3,
+            diarySummary: emotionData.myDiarySummary
+        };
+        
         console.log('[성공] 일기 확정 및 감정 분석 완료');
     } catch (error) {
         console.error('[예외 발생] 처리 중 오류 발생:', error);
@@ -586,7 +574,7 @@ const confirmEdit = async () => {
             ...diary.value, // 기존 데이터
             title: editedDiary.value.title,
             content: editedDiary.value.content,
-            createdAt: diary.value.createdAt.toISOString().slice(0, -1),
+            createdAt: new Date(diary.value.createdAt.getTime() - diary.value.createdAt.getTimezoneOffset() * 60000).toISOString().slice(0, -1),
             styleLayer: JSON.stringify(styleLayerData),
             tags: editedDiary.value.hashtags || [],
             isDeleted: diary.value.isDeleted,
