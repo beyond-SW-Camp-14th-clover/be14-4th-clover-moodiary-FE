@@ -335,18 +335,37 @@ const confirmDiary = () => {
 
 const submitDiary = async () => {
   try {
-    await axios.post('/shareddiary/create', {
+    const formData = new FormData()
+
+    // 1. styleLayer JSON으로 직렬화
+    const diaryData = {
       title: title.value,
       content: content.value,
-      userId: loginUserId.value,
+      userId: loginUserId.value,  // ⚠️ 백엔드에서 넣어주면 생략 가능
       roomId: roomId,
       styleLayer: JSON.stringify(stickers.value)
+    }
+
+    // 2. JSON을 Blob으로 만들어 FormData에 추가
+    formData.append("data", new Blob([JSON.stringify(diaryData)], { type: "application/json" }))
+
+    // 3. 이미지 파일이 존재한다면 함께 추가
+    const file = fileInput.value?.files[0]
+    if (file) {
+      formData.append("image", file)
+    }
+
+    // 4. multipart/form-data로 요청 보내기
+    await axios.post("/shareddiary/create", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
     })
-    alert('일기 등록 완료!')
-    router.push({ name: 'SharedDiaryList', params: { roomId } })
+
+    alert("일기 등록 완료!")
+    router.push({ name: "SharedDiaryList", params: { roomId } })
+
   } catch (error) {
-    console.error('등록 실패', error)
-    alert('등록 실패')
+    console.error("등록 실패", error)
+    alert("등록 실패")
   }
 }
 
