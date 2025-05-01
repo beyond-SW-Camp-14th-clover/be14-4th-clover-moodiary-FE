@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -83,7 +83,6 @@ watch(
   async (id) => {
     if (id) {
       console.log('✅ 로그인 유저 ID:', id)
-      loginUserId.value = id  // ref에도 넣어줌
 
       try {
         const res = await axios.get('/shareddiary', { params: { roomId } })
@@ -96,6 +95,10 @@ watch(
   },
   { immediate: true }
 )
+
+onMounted(() => {
+  console.log('authStore.user =', authStore.user)  // ✅ 콘솔에서 확인해보세요
+})
 </script>
 
 <style scoped>

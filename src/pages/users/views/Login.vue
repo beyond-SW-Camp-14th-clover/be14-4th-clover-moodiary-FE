@@ -46,25 +46,31 @@
   const authStore = useAuthStore()
   
   async function loginUser() {
-    try {
-      const res = await axios.post('/user/command/login', {
-        email: email.value,
-        password: password.value
-      })
-      const token = res.data.token
-  
-      // 1) 로컬스토리지에 저장
-      localStorage.setItem('token', token)
-      // 2) axios 기본 헤더 설정
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      // 3) Pinia 스토어에 토큰 등록
-      authStore.setToken(token)
-  
-      router.push('/app/home')
-    } catch (err) {
-      alert('로그인 실패: ' + (err.response?.data?.message || err.message))
+  try {
+    const res = await axios.post('/user/command/login', {
+      email: email.value,
+      password: password.value
+    })
+
+    const token = res.data.token
+    const user = res.data.user 
+
+    if (!token || !user) {
+      alert('서버 응답에 사용자 정보가 없습니다.')
+      return
     }
+
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))  
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    authStore.setToken(token)
+    authStore.setUser(user) 
+
+    router.push('/app/home')
+  } catch (err) {
+    alert('로그인 실패: ' + (err.response?.data?.message || err.message))
   }
+}
   
   function goToFindId() {
     router.push('/findid')
