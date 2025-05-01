@@ -5,7 +5,7 @@
 
       <nav class="nav-links">
         <div class="menu-wrapper">
-          <span class="menu-button">서랍 속 작은 일기장</span>
+          <span class="menu-button">My Diary</span>
           <div class="submenu">
             <router-link to="/app/registmydiary">일기 작성</router-link>
             <router-link to="/app/monthlydiary">월간 일기</router-link>
@@ -13,13 +13,13 @@
           </div>
         </div>
         <div class="menu-wrapper">
-          <span class="menu-button">알 수 없는 너의 비밀</span>
+          <span class="menu-button">Shared Diary</span>
           <div class="submenu">
             <router-link to="/app/shareddiary/room">우리 일기</router-link>
           </div>
         </div>
         <div class="menu-wrapper">
-          <span class="menu-button">내 맘속에 담아</span>
+          <span class="menu-button">My Emotion</span>
           <div class="submenu">
             <router-link to="/app">감정 분석</router-link>
           </div>
