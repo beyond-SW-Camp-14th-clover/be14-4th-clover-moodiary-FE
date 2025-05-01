@@ -47,7 +47,7 @@
   // ✅ Spring 서버로 공유 일기방 생성
   const createRoom = async () => {
     try {
-      const res = await axios.post('http://localhost:8080/shareddiaryroom/create', {
+      const res = await axios.post('/shareddiaryroom/create', {
         userId1: loginUserId.value
       })
       const roomId = res.data.roomId
@@ -67,7 +67,7 @@
     if (isNaN(roomId)) return alert('숫자만 입력하세요.')
   
     try {
-      await axios.post('http://localhost:8080/shareddiaryroom/enter', {
+      await axios.post('/shareddiaryroom/enter', {
         roomId,
         userId: loginUserId.value
       })
@@ -82,7 +82,7 @@
   // ✅ 페이지 진입 시 방 리스트 조회
   const fetchRooms = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/shareddiaryroom', {
+      const res = await axios.get('/shareddiaryroom', {
         params: { userId: loginUserId.value }
       })
       rooms.value = res.data
