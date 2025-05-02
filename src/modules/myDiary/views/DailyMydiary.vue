@@ -227,11 +227,13 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore'
+import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
 const dailyDiaryStore = useDailyDiaryStore()
+const authStore = useAuthStore()
 console.log('route params:', route.params)
 console.log('route path:', route.path)
 
@@ -402,7 +404,7 @@ const fetchDiary = async () => {
         const dairyDate = `${year}-${month}-${day}`
         
         console.log('요청 날짜:', dairyDate)
-        const userId = 1; // 임시로 고정된 userId 사용
+        const userId = authStore.userId
         const response = await axios.get(`/mydiary/daily/${dairyDate}?userId=${userId}`)
         
         const data = response.data

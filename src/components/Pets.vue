@@ -213,6 +213,32 @@ const fetchCurrentPet = async () => {
   }
 }
 
+const fetchPets = async () => {
+    try {
+        const userId = authStore.userId;
+        const response = await axios.get(`/pet/${userId}`);
+        pets.value = response.data;
+    } catch (error) {
+        console.error('펫 정보를 가져오는 중 오류가 발생했습니다:', error);
+    }
+};
+
+const addPet = async () => {
+    try {
+        const userId = authStore.userId;
+        const response = await axios.post('/pet', {
+            userId: userId,
+            name: newPetName.value,
+            type: newPetType.value
+        });
+        pets.value.push(response.data);
+        newPetName.value = '';
+        newPetType.value = '';
+    } catch (error) {
+        console.error('펫 추가 중 오류가 발생했습니다:', error);
+    }
+};
+
 onMounted(() => {
   fetchCurrentPet()
   showDefaultMessage()
