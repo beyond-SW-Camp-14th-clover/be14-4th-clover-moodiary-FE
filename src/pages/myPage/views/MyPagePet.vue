@@ -16,7 +16,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
 const emit = defineEmits(['select-pet', 'close'])
 
@@ -35,23 +36,43 @@ const nextPet = () => {
     currentPetIndex.value = currentPetIndex.value === totalPets ? 1 : currentPetIndex.value + 1
 }
 
-const selectPet = () => {
-    // Pets 컴포넌트의 changePet 함수 호출
-    const petsComponent = document.querySelector('.pets-container')
-    if (petsComponent && petsComponent.__vueParentComponent) {
-        const petsInstance = petsComponent.__vueParentComponent.exposed
-        if (petsInstance && petsInstance.changePet) {
-            petsInstance.changePet(currentPetIndex.value)
+const selectPet = async () => {
+    try {
+
+        await axios.post('/pets/update', {
+            petId: currentPetIndex.value
+        })
+
+        const petsComponent = document.querySelector('.pets-container')
+        if (petsComponent && petsComponent.__vueParentComponent) {
+            const petsInstance = petsComponent.__vueParentComponent.exposed
+            if (petsInstance && petsInstance.changePet) {
+                petsInstance.changePet(currentPetIndex.value)
+            }
         }
+        emit('select-pet', currentPetIndex.value)
+        emit('close')
+    } catch (error) {
+        console.error('펫 업데이트 중 오류가 발생했습니다:', error)
+        alert('펫 업데이트에 실패했습니다. 다시 시도해주세요.')
     }
-    emit('select-pet', currentPetIndex.value)
-    emit('close')
 }
 
 const cancelSelection = () => {
     currentPetIndex.value = 1
     emit('close')
 }
+
+onMounted(async () => {
+    try {
+        const response = await axios.get('/pets/current')
+        if (response.data && response.data.petId) {
+            currentPetIndex.value = response.data.petId
+        }
+    } catch (error) {
+        console.error('현재 펫 정보를 가져오는 중 오류가 발생했습니다:', error)
+    }
+})
 </script>
 
 <style scoped>
