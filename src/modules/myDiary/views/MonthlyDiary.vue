@@ -52,10 +52,10 @@
                                 </div>
                             </div>
                             <div v-if="cell.type === 'current' && getDiaryForDay(cell.day)" class="cell-content">
-                                <div v-if="getDiaryForDay(cell.day).photoUrl" class="cell-image">
+                                <div v-if="getDiaryForDay(cell.day).hasPhoto" class="cell-image">
                                     <img :src="getDiaryForDay(cell.day).photoUrl" alt="일기 사진" />
                                 </div>
-                                <span v-if="!getDiaryForDay(cell.day).photoUrl" class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
+                                <span v-if="!getDiaryForDay(cell.day).hasPhoto" class="title-text">{{ getDiaryForDay(cell.day).title }}</span>
                             </div>
                         </div>
                     </div>
@@ -234,16 +234,25 @@ const getDiaryForDay = (day) => {
                     const photo = parsedStyleLayer.sticker.find(s => s.type === 'photo');
                     if (photo) {
                         entry.photoUrl = photo.url;
+                        entry.hasPhoto = true; // 사진이 있는 경우 표시
+                    } else {
+                        entry.hasPhoto = false; // 사진이 없는 경우 표시
                     }
+                } else {
+                    entry.hasPhoto = false;
                 }
             } else {
                 // 그냥 URL string인 경우
                 entry.photoUrl = entry.styleLayer;
+                entry.hasPhoto = true;
             }
         } catch (e) {
             console.error('styleLayer 파싱 에러:', e);
-            entry.photoUrl = null; // fallback
+            entry.photoUrl = null;
+            entry.hasPhoto = false;
         }
+    } else if (entry) {
+        entry.hasPhoto = false;
     }
     return entry;
 };

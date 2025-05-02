@@ -211,12 +211,14 @@
         </div>
     </div>
 
-    <div v-if="showStickerModal" class="sticker-modal">
-        <div class="sticker-modal-inner">
-            <div class="sticker-option" v-for="src in stickerOptions" :key="src">
-                <img :src="src" @click="addSticker(src); showStickerModal = false" />
+    <div v-if="showStickerModal" class="sticker-modal-overlay" @click="showStickerModal = false">
+        <div class="sticker-modal" @click.stop>
+            <div class="sticker-modal-inner">
+                <div class="sticker-option" v-for="src in stickerOptions" :key="src">
+                    <img :src="src" @click="addSticker(src); showStickerModal = false" />
+                </div>
+                <button @click="showStickerModal = false" class="close-btn">닫기</button>
             </div>
-            <button @click="showStickerModal = false" class="close-btn">닫기</button>
         </div>
     </div>
 </template>
@@ -1460,16 +1462,26 @@ textarea.notebook-textarea {
     font-weight: 400;
 }
 
+.sticker-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
 .sticker-modal { 
-    position: fixed; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
+    position: relative;
     background-color: #fffce6; 
     border: 2px solid #d9c7aa; 
     border-radius: 12px; 
     padding: 2rem; 
-    z-index: 100; 
+    z-index: 1001;
 }
 
 .sticker-modal-inner { 
