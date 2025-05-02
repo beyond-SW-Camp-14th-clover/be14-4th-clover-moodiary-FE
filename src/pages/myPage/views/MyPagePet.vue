@@ -28,7 +28,7 @@
   const totalPets = 11
   
   const currentPetImage = computed(() => {
-    return new URL(`/src/assets/pets/pet${currentPetIndex.value}.png?ts=${imageTimestamp.value}`, import.meta.url).href
+    return `/src/assets/pets/pet${currentPetIndex.value}.png?ts=${imageTimestamp.value}`
   })
   
   const prevPet = () => {
@@ -43,26 +43,30 @@
   
   const selectPet = async () => {
     try {
+      console.log('펫 변경 시작:', currentPetIndex.value)
       const data = { id: currentPetIndex.value }
-      await axios.post('/pets/update', data, {
+      console.log('펫 업데이트 요청 데이터:', data)
+      
+      const updateResponse = await axios.post('/pets/update', data, {
         headers: { Authorization: `Bearer ${authStore.token}` }
       })
-  
-      await new Promise(resolve => setTimeout(resolve, 1500))
-  
-      const response = await axios.get('/pets/current', {
-        headers: { Authorization: `Bearer ${authStore.token}` }
-      })
-      if (response.data?.id) {
-        currentPetIndex.value = response.data.id
-        imageTimestamp.value = Date.now()
-      }
-  
+      console.log('펫 업데이트 응답:', updateResponse.data)
+
+      // 펫 변경 후 즉시 상태 업데이트
       emit('select-pet', currentPetIndex.value)
+      
+      // 모달 닫기
       emit('close')
+
+      // 페이지 새로고침
+      window.location.reload()
     } catch (error) {
       console.error('펫 업데이트 중 오류가 발생했습니다:', error)
-      alert('펫 업데이트에 실패했습니다. 다시 시도해주세요.')
+      console.error('오류 상세 정보:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      })
     }
   }
   

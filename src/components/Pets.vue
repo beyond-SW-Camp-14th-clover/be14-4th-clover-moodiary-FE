@@ -38,7 +38,7 @@ const petImages = {
 
 const petInfo = ref(null)
 const getPetImage = computed(() => {
-  const petId = petInfo.value?.petId ?? selectedPet.value
+  const petId = petInfo.value?.id ?? selectedPet.value
   return petImages[petId] || petImages[1]
 })
 
@@ -134,7 +134,8 @@ const handleClick = async () => {
 
 const changePet = (petNumber) => {
   if (petNumber >= 1 && petNumber <= 11) {
-    petInfo.value = { petId: petNumber }
+    console.log('펫 변경:', petNumber)
+    petInfo.value = { id: petNumber }
     selectedPet.value = petNumber
   }
 }
@@ -154,8 +155,6 @@ onMounted(() => {
   fetchCurrentPet()
   showDefaultMessage()
 })
-
-
 
 onUnmounted(() => {
   clearInterval(messageInterval)
