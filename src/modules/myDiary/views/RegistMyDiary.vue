@@ -107,11 +107,12 @@
   import axios from 'axios'
   import ConfirmCheck from '../components/ConfirmCheck.vue'
   import RegistCheck from '../components/RegistCheck.vue'
+  import { useAuthStore } from '@/stores/auth'
   
   const route = useRoute()
   const router = useRouter()
   const roomId = Number(route.params.roomId)
-  const loginUserId = 1
+  const authStore = useAuthStore()
   
   const title = ref('')
   const content = ref('')
@@ -422,7 +423,7 @@
         isDeleted: 'N',
         isConfirmed: isConfirmed.value ? 'Y' : 'N',
         styleLayer: styleLayer,
-        userId: loginUserId,
+        userId: authStore.userId,
         tags: hashtags.value
       };
       formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));

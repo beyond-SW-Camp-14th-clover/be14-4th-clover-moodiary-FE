@@ -279,12 +279,14 @@ import { useWeeklyDiaryStore } from '../../../stores/weeklyDiaryStore';
 import { useDailyDiaryStore } from '../../../stores/dailyDiaryStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth'
 
 const weeklyDiaryStore = useWeeklyDiaryStore();
 const dailyDiaryStore = useDailyDiaryStore();
 const router = useRouter();
 const selectedDate = ref(new Date());
 const selectedWeek = ref('1');
+const authStore = useAuthStore()
 const score = computed(() => {
     const validScores = weeklyData.value
         .filter(data => data?.totalScore !== undefined && data?.totalScore !== null)
@@ -480,7 +482,7 @@ const fetchWeeklyData = async () => {
 
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
-    const userId = 1;
+    const userId = authStore.userId;
 
     try {
         const response = await axios.get(`/mydiary/weekly`, {
@@ -557,7 +559,7 @@ const fetchMoodlogContent = async () => {
     const year = selectedDate.value.getFullYear();
     const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
     const targetMonth = `${year}-${month}-01`;
-    const userId = 1;
+    const userId = authStore.userId;
 
     try {
         const response = await axios.get(`/mydiary/moodlog`, {
@@ -588,7 +590,7 @@ const saveMoodlog = async () => {
   const year = selectedDate.value.getFullYear();
   const month = (selectedDate.value.getMonth() + 1).toString().padStart(2, '0');
   const targetMonth = `${year}-${month}-01`;
-  const userId = 1;
+  const userId = authStore.userId;
 
   const requestData = {
     userId,

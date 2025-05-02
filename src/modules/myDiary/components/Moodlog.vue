@@ -15,15 +15,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth'
 
 const moodlogContent = ref('');
+const authStore = useAuthStore()
 
 const saveMoodlog = async () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const targetMonth = `${year}-${month}-01`;
-    const userId = 1;
+    const userId = authStore.userId;
 
     const requestData = {
         userId: userId,

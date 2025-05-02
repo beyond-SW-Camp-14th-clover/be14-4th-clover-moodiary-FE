@@ -10,21 +10,50 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import { useRoute } from 'vue-router'
+import pet1 from '@/assets/pets/pet1.png'
+import pet2 from '@/assets/pets/pet2.png'
+import pet3 from '@/assets/pets/pet3.png'
+import pet4 from '@/assets/pets/pet4.png'
+import pet5 from '@/assets/pets/pet5.png'
+import pet6 from '@/assets/pets/pet6.png'
+import pet7 from '@/assets/pets/pet7.png'
+import pet8 from '@/assets/pets/pet8.png'
+import pet9 from '@/assets/pets/pet9.png'
+import pet10 from '@/assets/pets/pet10.png'
+import pet11 from '@/assets/pets/pet11.png'
 
 const authStore = useAuthStore()
 const route = useRoute()
 const userName = computed(() => authStore.user?.name || '회원')
 
-const selectedPet = ref(1) // 기본값은 pet1
+const selectedPet = ref(1)
 const message = ref('')
 const isActive = ref(false)
 let messageInterval
 
+const petImages = {
+  1: pet1,
+  2: pet2,
+  3: pet3,
+  4: pet4,
+  5: pet5,
+  6: pet6,
+  7: pet7,
+  8: pet8,
+  9: pet9,
+  10: pet10,
+  11: pet11
+}
+
 const getPetImage = computed(() => {
-  return `/src/assets/pets/pet${selectedPet.value}.png`
+  if (petInfo.value?.petId) {
+    return petImages[petInfo.value.petId] || petImages[selectedPet.value]
+  }
+  return petImages[selectedPet.value]
 })
 
-// 펫을 표시할지 여부를 결정하는 computed 속성
+const petInfo = ref(null)
+
 const shouldShowPet = computed(() => {
 
   if (!authStore.isLogin) return false
@@ -36,13 +65,11 @@ const shouldShowPet = computed(() => {
   return route.path !== '/app/home' && !route.path.startsWith('/app/mypage')
 })
 
-// 감정 점수에 따른 메시지 생성
 const getEmotionMessage = (emotionData) => {
   if (!emotionData) return '아직 일기를 작성하지 않으셨네요!'
   
   const { positiveScore, neutralScore, negativeScore } = emotionData
-  
-  // 가장 높은 점수를 가진 감정을 찾음
+ 
   const maxScore = Math.max(positiveScore, neutralScore, negativeScore)
   
   if (maxScore === positiveScore) {
@@ -54,26 +81,24 @@ const getEmotionMessage = (emotionData) => {
   }
 }
 
-// 가장 최근 일기의 감정 점수를 가져오는 함수
+
 const fetchLatestDiaryEmotion = async () => {
   try {
-    // 오늘 날짜를 YYYY-MM-DD 형식으로 변환
     const today = new Date()
     const year = today.getFullYear()
     const month = String(today.getMonth() + 1).padStart(2, '0')
     const day = String(today.getDate()).padStart(2, '0')
     const todayStr = `${year}-${month}-${day}`
     
-    // 오늘 날짜부터 과거로 검색하면서 일기를 찾음
     let currentDate = new Date(today)
     let foundDiary = null
     
-    // 최대 7일 전까지 검색
+
     for (let i = 0; i < 7; i++) {
       const dateStr = currentDate.toISOString().split('T')[0]
       const response = await axios.get(`/mydiary/daily/${dateStr}`, {
         params: {
-          userId: 1 // 임시로 고정된 userId 사용
+          userId: 1 
         }
       })
       
@@ -82,7 +107,6 @@ const fetchLatestDiaryEmotion = async () => {
         break
       }
       
-      // 하루 전으로 이동
       currentDate.setDate(currentDate.getDate() - 1)
     }
     
@@ -93,7 +117,6 @@ const fetchLatestDiaryEmotion = async () => {
   }
 }
 
-// 호버 이벤트 핸들러
 const handleHover = async () => {
   const emotionData = await fetchLatestDiaryEmotion()
   message.value = getEmotionMessage(emotionData)
@@ -103,10 +126,9 @@ const handleHover = async () => {
   }, 3000)
 }
 
-// 행동 추천을 가져오는 함수
 const fetchRecommendedActions = async () => {
   try {
-    const userId = 1; // 임시로 고정된 userId 사용
+    const userId = 1;
     const response = await axios.get(`/action/recommend`, {
       params: {
         userId: userId
@@ -114,9 +136,9 @@ const fetchRecommendedActions = async () => {
     });
     
     const data = response.data;
-    console.log('추천 행동 데이터:', data); // 디버깅을 위한 로그
+    console.log('추천 행동 데이터:', data);
     if (data && data.length > 0) {
-      // 첫 번째 추천 행동의 content 속성을 반환
+
       return data[0].content || data[0].action || data[0].recommendation || data[0];
     }
     return null;
@@ -166,7 +188,7 @@ const showClickMessage = async () => {
   isActive.value = true;
   setTimeout(() => {
     isActive.value = false;
-    // 클릭 메시지가 끝난 후 기본 메시지 주기를 다시 시작
+
     const randomDelay = Math.floor(Math.random() * 5000) + 5000;
     setTimeout(showDefaultMessage, randomDelay);
   }, 3000);
@@ -176,14 +198,49 @@ const handleClick = async () => {
   await showClickMessage();
 }
 
-// 펫 이미지 변경 함수
 const changePet = (petNumber) => {
   if (petNumber >= 1 && petNumber <= 11) {
     selectedPet.value = petNumber
   }
 }
 
+const fetchCurrentPet = async () => {
+  try {
+    const response = await axios.get('/pets/current')
+    petInfo.value = response.data
+  } catch (error) {
+    console.error('펫 정보를 가져오는데 실패했습니다:', error)
+  }
+}
+
+const fetchPets = async () => {
+    try {
+        const userId = authStore.userId;
+        const response = await axios.get(`/pet/${userId}`);
+        pets.value = response.data;
+    } catch (error) {
+        console.error('펫 정보를 가져오는 중 오류가 발생했습니다:', error);
+    }
+};
+
+const addPet = async () => {
+    try {
+        const userId = authStore.userId;
+        const response = await axios.post('/pet', {
+            userId: userId,
+            name: newPetName.value,
+            type: newPetType.value
+        });
+        pets.value.push(response.data);
+        newPetName.value = '';
+        newPetType.value = '';
+    } catch (error) {
+        console.error('펫 추가 중 오류가 발생했습니다:', error);
+    }
+};
+
 onMounted(() => {
+  fetchCurrentPet()
   showDefaultMessage()
 })
 
@@ -191,7 +248,6 @@ onUnmounted(() => {
   clearInterval(messageInterval)
 })
 
-// 외부에서 펫을 변경할 수 있도록 함수를 노출
 defineExpose({
   changePet
 })
